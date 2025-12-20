@@ -9,10 +9,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-/**
- * Controller for Admin Dashboard UI.
- * Handles user interactions and delegates business logic to Service layer.
- */
 @Component
 public class AdminDashboardController {
 
@@ -67,79 +63,4 @@ public class AdminDashboardController {
     @FXML
     private Label activeEnrollmentsLabel;
 
-    @FXML
-    private void handleLogout() {
-        try {
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            stage.close();
-            // TODO: Login ekranına geri dön
-        } catch (Exception e) {
-            System.err.println("Error during logout: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void handleUsersManagement() {
-        if (contentTitleLabel != null) {
-            contentTitleLabel.setText("Users Management");
-        }
-        // TODO: Kullanıcıları tabloya yükle
-    }
-
-    @FXML
-    private void handleCoursesManagement() {
-        if (contentTitleLabel != null) {
-            contentTitleLabel.setText("Courses Management");
-        }
-        // TODO: Kursları tabloya yükle
-    }
-
-    @FXML
-    private void handleEnrollments() {
-        if (contentTitleLabel != null) {
-            contentTitleLabel.setText("Enrollments");
-        }
-        // TODO: Kayıtları tabloya yükle
-    }
-
-    @FXML
-    private void handleAttendanceReports() {
-        if (contentTitleLabel != null) {
-            contentTitleLabel.setText("Attendance Reports");
-        }
-        // TODO: Devam raporlarını göster
-    }
-
-    @FXML
-    private void handleStatistics() {
-        if (contentTitleLabel != null) {
-            contentTitleLabel.setText("Statistics");
-        }
-        // TODO: İstatistikleri göster
-    }
-
-    @FXML
-    private void handleAddUser() {
-        // TODO: Kullanıcı ekleme dialogu aç
-        System.out.println("Add User clicked");
-    }
-
-    @FXML
-    private void handleAddCourse() {
-        // TODO: Kurs ekleme dialogu aç
-        System.out.println("Add Course clicked");
-    }
-
-    @FXML
-    private void handleRefresh() {
-        // TODO: Mevcut verileri yenile
-        System.out.println("Refresh clicked");
-    }
-
-    @FXML
-    private void handleSearch() {
-        String searchText = searchField != null ? searchField.getText() : "";
-        // TODO: Arama işlemini gerçekleştir
-        System.out.println("Search: " + searchText);
-    }
 }
