@@ -1,13 +1,59 @@
 package org.example.coursetrackingautomation.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "grades")
-@Data
-public class Grade {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class Grade extends BaseEntity {
+    public static final int SCORE_PRECISION = 10;
+    public static final int SCORE_SCALE = 2;
+    public static final int MAX_LETTER_GRADE_LENGTH = 20;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enrollment_id", nullable = false, unique = true)
+    private Enrollment enrollment;
+
+    @Column(name = "midterm_score", precision = SCORE_PRECISION, scale = SCORE_SCALE)
+    private BigDecimal midtermScore;
+
+    @Column(name = "final_score", precision = SCORE_PRECISION, scale = SCORE_SCALE)
+    private BigDecimal finalScore;
+
+    @Column(name = "makeup_score", precision = SCORE_PRECISION, scale = SCORE_SCALE)
+    private BigDecimal makeupScore;
+
+    @Column(name = "average_score", precision = SCORE_PRECISION, scale = SCORE_SCALE)
+    private BigDecimal averageScore;
+
+    @Column(name = "letter_grade", length = MAX_LETTER_GRADE_LENGTH)
+    private String letterGrade;
+
+    @Column(name = "is_passed", nullable = false)
+    private boolean passed;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }
