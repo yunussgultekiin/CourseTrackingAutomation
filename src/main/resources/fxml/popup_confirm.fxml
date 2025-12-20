@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      alignment="CENTER" spacing="20.0"
+      style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 30px;"
+      prefWidth="400.0" prefHeight="250.0">
+    
+    <padding>
+        <Insets top="30.0" right="30.0" bottom="30.0" left="30.0"/>
+    </padding>
+
+    <!-- Warning Icon -->
+    <Label text="⚠" 
+           style="-fx-font-size: 48px; -fx-text-fill: #f39c12; -fx-font-weight: bold;">
+        <font>
+            <Font name="System Bold" size="48.0"/>
+        </font>
+    </Label>
+
+    <!-- Confirmation Title -->
+    <Label fx:id="confirmTitleLabel" text="Confirm Action" 
+           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;">
+        <font>
+            <Font name="System Bold" size="20.0"/>
+        </font>
+    </Label>
+
+    <!-- Confirmation Message -->
+    <Label fx:id="confirmMessageLabel" text="Are you sure you want to proceed?" 
+           style="-fx-font-size: 14px; -fx-text-fill: #666; -fx-wrap-text: true;"
+           textAlignment="CENTER" wrapText="true"/>
+
+    <!-- Buttons -->
+    <HBox spacing="15.0" alignment="CENTER">
+        <Button fx:id="cancelButton" text="Cancel" 
+                onAction="#handleCancel"
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
+                cancelButton="true"/>
+        <Button fx:id="confirmButton" text="Confirm" 
+                onAction="#handleConfirm"
+                style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
+                defaultButton="true"/>
+    </HBox>
+
+</VBox>
+
