@@ -1,13 +1,61 @@
 package org.example.coursetrackingautomation.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "courses")
-@Data
-public class Course {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class Course extends BaseEntity {
+    public static final int MAX_CODE_LENGTH = 50;
+    public static final int MAX_NAME_LENGTH = 200;
+    public static final int MAX_TERM_LENGTH = 100;
+
+    @Column(nullable = false, unique = true, length = MAX_CODE_LENGTH)
+    private String code;
+
+    @Column(name = "name", nullable = false, length = MAX_NAME_LENGTH)
+    private String name;
+
+    @Column(name = "credit", nullable = false)
+    private Integer credit;
+
+    @Column(name = "quota", nullable = false)
+    private Integer quota;
+
+    @Column(name = "term", nullable = false, length = MAX_TERM_LENGTH)
+    private String term;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean active;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instructor_id", nullable = false)
+    private User instructor;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
+    private Set<Enrollment> enrollments = new HashSet<>();
 }
