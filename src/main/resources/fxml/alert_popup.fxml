@@ -15,34 +15,44 @@
         <Insets top="30.0" right="30.0" bottom="30.0" left="30.0"/>
     </padding>
 
-    <!-- Warning Icon -->
-    <Label text="⚠" 
-           style="-fx-font-size: 48px; -fx-text-fill: #f39c12; -fx-font-weight: bold;">
+    <!-- Dynamic Icon (Success/Error/Confirm) -->
+    <Label fx:id="iconLabel" text="✓" 
+           style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #27ae60;">
         <font>
             <Font name="System Bold" size="48.0"/>
         </font>
     </Label>
 
-    <!-- Confirmation Title -->
-    <Label fx:id="confirmTitleLabel" text="Confirm Action" 
+    <!-- Dynamic Title -->
+    <Label fx:id="titleLabel" text="Başlık" 
            style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;">
         <font>
             <Font name="System Bold" size="20.0"/>
         </font>
     </Label>
 
-    <!-- Confirmation Message -->
-    <Label fx:id="confirmMessageLabel" text="Are you sure you want to proceed?" 
+    <!-- Dynamic Message -->
+    <Label fx:id="messageLabel" text="Mesaj" 
            style="-fx-font-size: 14px; -fx-text-fill: #666; -fx-wrap-text: true;"
-           textAlignment="CENTER" wrapText="true"/>
+           textAlignment="CENTER" wrapText="true"
+           maxWidth="350.0"/>
 
-    <!-- Buttons -->
-    <HBox spacing="15.0" alignment="CENTER">
-        <Button fx:id="cancelButton" text="Cancel" 
+    <!-- Buttons Container -->
+    <HBox fx:id="buttonsContainer" spacing="15.0" alignment="CENTER">
+        <!-- OK Button (for Success/Error) -->
+        <Button fx:id="okButton" text="Tamam" 
+                onAction="#handleOk"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 30px; -fx-cursor: hand; -fx-font-weight: bold;"
+                defaultButton="true"/>
+        
+        <!-- Cancel Button (for Confirm) -->
+        <Button fx:id="cancelButton" text="İptal" 
                 onAction="#handleCancel"
                 style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
                 cancelButton="true"/>
-        <Button fx:id="confirmButton" text="Confirm" 
+        
+        <!-- Confirm Button (for Confirm) -->
+        <Button fx:id="confirmButton" text="Onayla" 
                 onAction="#handleConfirm"
                 style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
                 defaultButton="true"/>

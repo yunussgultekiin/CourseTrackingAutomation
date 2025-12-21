@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="20.0"
+      style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 30px;"
+      prefWidth="500.0" prefHeight="600.0">
+    
+    <padding>
+        <Insets top="30.0" right="30.0" bottom="30.0" left="30.0"/>
+    </padding>
+
+    <!-- Form Title -->
+    <Label text="Ders Ekle" 
+           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #667eea;">
+        <font>
+            <Font name="System Bold" size="24.0"/>
+        </font>
+    </Label>
+    
+    <Separator/>
+
+    <!-- Course Code -->
+    <VBox spacing="5.0">
+        <Label text="Ders Kodu *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="courseCodeField" promptText="Örn: CS101" 
+                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Course Name -->
+    <VBox spacing="5.0">
+        <Label text="Ders Adı *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="courseNameField" promptText="Örn: Programlama Temelleri" 
+                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Description -->
+    <VBox spacing="5.0">
+        <Label text="Açıklama" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextArea fx:id="descriptionField" promptText="Ders açıklaması..." 
+                  wrapText="true" prefRowCount="4"
+                  style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Start Date -->
+    <VBox spacing="5.0">
+        <Label text="Başlangıç Tarihi *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <DatePicker fx:id="startDatePicker" 
+                    style="-fx-background-radius: 5; -fx-padding: 5px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- End Date -->
+    <VBox spacing="5.0">
+        <Label text="Bitiş Tarihi *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <DatePicker fx:id="endDatePicker" 
+                    style="-fx-background-radius: 5; -fx-padding: 5px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Credits -->
+    <VBox spacing="5.0">
+        <Label text="Kredi *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="creditsField" promptText="Örn: 3" 
+                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Capacity -->
+    <VBox spacing="5.0">
+        <Label text="Kapasite *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="capacityField" promptText="Örn: 30" 
+                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <!-- Buttons -->
+    <HBox spacing="15.0" alignment="CENTER_RIGHT">
+        <Button fx:id="cancelButton" text="İptal" 
+                onAction="#handleCancel"
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
+                cancelButton="true"/>
+        <Button fx:id="saveButton" text="Kaydet" 
+                onAction="#handleSave"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
+                defaultButton="true"/>
+    </HBox>
+
+</VBox>
+

@@ -66,7 +66,7 @@
             <Separator/>
             <Button fx:id="logoutButton" text="Logout" 
                     onAction="#handleLogout"
-                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 12px; -fx-cursor: hand; -fx-font-weight: bold;"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 12px; -fx-cursor: hand; -fx-font-weight: bold; -fx-margin-top: 10px;"
                     prefWidth="200.0"/>
         </VBox>
     </left>
