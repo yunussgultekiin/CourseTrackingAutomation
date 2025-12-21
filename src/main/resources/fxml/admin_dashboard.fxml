@@ -25,9 +25,9 @@
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="welcomeLabel" text="Welcome, Admin" 
                        style="-fx-font-size: 14px; -fx-text-fill: white;"/>
-                <Button fx:id="logoutButton" text="Logout" 
-                        onAction="#handleLogout"
-                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8px 15px; -fx-cursor: hand;"/>
+                <Button fx:id="profileButton" text="Profilim" 
+                        onAction="#handleProfile"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8px 15px; -fx-cursor: hand;"/>
             </HBox>
         </VBox>
     </top>
@@ -61,6 +61,12 @@
             <Button fx:id="statisticsButton" text="Statistics" 
                     onAction="#handleStatistics"
                     style="-fx-background-color: transparent; -fx-text-fill: #333; -fx-alignment: center-left; -fx-padding: 12px; -fx-cursor: hand; -fx-background-radius: 5;"
+                    prefWidth="200.0"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Separator/>
+            <Button fx:id="logoutButton" text="Logout" 
+                    onAction="#handleLogout"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 12px; -fx-cursor: hand; -fx-font-weight: bold;"
                     prefWidth="200.0"/>
         </VBox>
     </left>
