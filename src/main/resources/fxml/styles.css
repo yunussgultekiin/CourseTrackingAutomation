@@ -1,0 +1,16 @@
+/* styles.css */
+.button-logout {
+    -fx-background-color: #d9534f;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.button-logout:hover {
+    -fx-background-color: #c9302c;
+}
+
+.critical-attendance {
+    -fx-background-color: #ffcccc;
+    -fx-text-fill: red;
+    -fx-font-weight: bold;
+}
