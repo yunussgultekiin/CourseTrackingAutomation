@@ -5,9 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.coursetrackingautomation.entity.Course;
 import org.example.coursetrackingautomation.entity.Enrollment;
 import org.example.coursetrackingautomation.entity.User;
-import org.example.coursetrackingautomation.exception.CourseNotFoundException;
-import org.example.coursetrackingautomation.exception.DuplicateEnrollmentException;
-import org.example.coursetrackingautomation.exception.QuotaExceededException;
 import org.example.coursetrackingautomation.repository.CourseRepository;
 import org.example.coursetrackingautomation.repository.EnrollmentRepository;
 import org.example.coursetrackingautomation.repository.UserRepository;
@@ -47,8 +44,7 @@ public class EnrollmentService {
      * @param studentId Öğrenci ID
      * @param courseId Ders ID
      * @return Oluşturulan enrollment
-     * @throws QuotaExceededException Kontenjan doluysa
-     * @throws DuplicateEnrollmentException Öğrenci dersi zaten aldıysa
+     * @throws RuntimeException Kontenjan doluysa veya öğrenci dersi zaten aldıysa
      */
     @Transactional
     public Enrollment enrollStudent(Long studentId, Long courseId) {
@@ -59,7 +55,7 @@ public class EnrollmentService {
             .orElseThrow(() -> new IllegalArgumentException("Öğrenci bulunamadı: " + studentId));
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
         
         // Ders aktif mi kontrol et
         if (!course.isActive()) {
@@ -93,7 +89,7 @@ public class EnrollmentService {
      * Kontenjan kontrolü yapar
      * 
      * @param course Kontrol edilecek ders
-     * @throws QuotaExceededException Kontenjan doluysa
+     * @throws RuntimeException Kontenjan doluysa
      */
     @Transactional(readOnly = true)
     public void validateQuota(Course course) {
@@ -109,7 +105,7 @@ public class EnrollmentService {
                 "Kontenjan dolu! Ders: %s, Mevcut kayıt: %d, Kontenjan: %d",
                 course.getCode(), currentEnrollments, course.getQuota());
             log.warn(message);
-            throw new QuotaExceededException(message);
+            throw new RuntimeException(message);
         }
         
         log.debug("Quota check passed for course: {}, Current: {}, Quota: {}", 
@@ -121,7 +117,7 @@ public class EnrollmentService {
      * 
      * @param student Kontrol edilecek öğrenci
      * @param course Kontrol edilecek ders
-     * @throws DuplicateEnrollmentException Öğrenci dersi zaten aldıysa
+     * @throws RuntimeException Öğrenci dersi zaten aldıysa
      */
     @Transactional(readOnly = true)
     public void validateDuplicateEnrollment(User student, Course course) {
@@ -137,7 +133,7 @@ public class EnrollmentService {
                 "Öğrenci (%s) bu dersi (%s) zaten almış durumda",
                 student.getUsername(), course.getCode());
             log.warn(message);
-            throw new DuplicateEnrollmentException(message);
+            throw new RuntimeException(message);
         }
         
         log.debug("Duplicate enrollment check passed for student: {}, course: {}", 
@@ -157,7 +153,7 @@ public class EnrollmentService {
             .orElseThrow(() -> new IllegalArgumentException("Öğrenci bulunamadı: " + studentId));
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
         
         List<Enrollment> allEnrollments = enrollmentRepository.findAll();
         return allEnrollments.stream()
@@ -181,7 +177,7 @@ public class EnrollmentService {
             .orElseThrow(() -> new IllegalArgumentException("Öğrenci bulunamadı: " + studentId));
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
         
         // Öğrencinin bu derse kaydını bul
         List<Enrollment> allEnrollments = enrollmentRepository.findAll();
@@ -206,7 +202,7 @@ public class EnrollmentService {
     @Transactional(readOnly = true)
     public List<Enrollment> getActiveEnrollmentsByCourse(Long courseId) {
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
         
         List<Enrollment> allEnrollments = enrollmentRepository.findAll();
         return allEnrollments.stream()
