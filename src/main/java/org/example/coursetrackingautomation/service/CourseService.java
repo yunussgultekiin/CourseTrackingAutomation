@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.entity.Course;
 import org.example.coursetrackingautomation.entity.Enrollment;
+import org.example.coursetrackingautomation.exception.CourseNotFoundException;
+import org.example.coursetrackingautomation.mapper.CourseMapper;
 import org.example.coursetrackingautomation.repository.CourseRepository;
 import org.example.coursetrackingautomation.repository.EnrollmentRepository;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class CourseService {
     
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseMapper courseMapper;
     
     // Aktif enrollment durumları
     private static final List<String> ACTIVE_ENROLLMENT_STATUSES = 
@@ -91,7 +94,7 @@ public class CourseService {
         }
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + courseId));
         
         // Mevcut aktif kayıt sayısını kontrol et
         long currentEnrollments = getCurrentEnrollmentCount(course);
@@ -120,7 +123,7 @@ public class CourseService {
         log.info("Deactivating course ID: {}", courseId);
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + courseId));
         
         if (!course.isActive()) {
             log.warn("Course ID: {} is already deactivated", courseId);
@@ -159,7 +162,7 @@ public class CourseService {
     @Transactional(readOnly = true)
     public Course getCourseById(Long courseId) {
         return courseRepository.findById(courseId)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + courseId));
     }
     
     /**
@@ -168,7 +171,7 @@ public class CourseService {
     @Transactional(readOnly = true)
     public Course getCourseByCode(String code) {
         return courseRepository.findByCode(code)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + code));
+            .orElseThrow(() -> new CourseNotFoundException("Ders bulunamadı: " + code));
     }
     
     /**
@@ -205,42 +208,7 @@ public class CourseService {
         return currentEnrollments >= course.getQuota();
     }
     
-    // ========== DTO DÖNÜŞÜM METODLARI (Mapper işlevselliği) ==========
-    
-    /**
-     * Course entity'sini CourseDTO'ya dönüştürür (Mapper işlevi)
-     */
-    private CourseDTO toDTO(Course course, Long currentEnrollmentCount) {
-        if (course == null) {
-            return null;
-        }
-        
-        CourseDTO.CourseDTOBuilder builder = CourseDTO.builder()
-            .id(course.getId())
-            .code(course.getCode())
-            .name(course.getName())
-            .credit(course.getCredit())
-            .quota(course.getQuota())
-            .term(course.getTerm())
-            .active(course.isActive());
-        
-        // Instructor bilgileri
-        if (course.getInstructor() != null) {
-            builder.instructorId(course.getInstructor().getId())
-                   .instructorName(course.getInstructor().getFirstName() + " " + 
-                                  course.getInstructor().getLastName());
-        }
-        
-        // İstatistikler
-        if (currentEnrollmentCount != null) {
-            builder.currentEnrollmentCount(currentEnrollmentCount);
-            if (course.getQuota() != null) {
-                builder.availableQuota((long) course.getQuota() - currentEnrollmentCount);
-            }
-        }
-        
-        return builder.build();
-    }
+    // ========== DTO DÖNÜŞÜM METODLARI ==========
     
     /**
      * Course entity'sini CourseDTO'ya dönüştürür
@@ -249,7 +217,7 @@ public class CourseService {
     public CourseDTO getCourseDTOById(Long courseId) {
         Course course = getCourseById(courseId);
         long currentEnrollments = getCurrentEnrollmentCount(courseId);
-        return toDTO(course, currentEnrollments);
+        return courseMapper.toDTO(course, currentEnrollments);
     }
     
     /**
@@ -259,7 +227,7 @@ public class CourseService {
     public CourseDTO getCourseDTOByCode(String code) {
         Course course = getCourseByCode(code);
         long currentEnrollments = getCurrentEnrollmentCount(course.getId());
-        return toDTO(course, currentEnrollments);
+        return courseMapper.toDTO(course, currentEnrollments);
     }
     
     /**
@@ -274,7 +242,7 @@ public class CourseService {
         return courses.stream()
             .map(course -> {
                 long currentEnrollments = getCurrentEnrollmentCount(course);
-                return toDTO(course, currentEnrollments);
+                return courseMapper.toDTO(course, currentEnrollments);
             })
             .collect(Collectors.toList());
     }
@@ -289,7 +257,7 @@ public class CourseService {
         return courses.stream()
             .map(course -> {
                 long currentEnrollments = getCurrentEnrollmentCount(course);
-                return toDTO(course, currentEnrollments);
+                return courseMapper.toDTO(course, currentEnrollments);
             })
             .collect(Collectors.toList());
     }
