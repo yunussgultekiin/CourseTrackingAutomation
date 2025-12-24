@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class GradeService {
 
-    // 1. Ortalama Hesaplama Mantığı (Vize %40 + Final %60)
     public Double calculateAverage(Double midterm, Double finalScore) {
         if (midterm == null) midterm = 0.0;
         if (finalScore == null) finalScore = 0.0;
@@ -13,7 +12,6 @@ public class GradeService {
         return (midterm * 0.4) + (finalScore * 0.6);
     }
 
-    // 2. Harf Notu Belirleme Mantığı
     public String determineLetterGrade(Double average) {
         if (average == null) return "FF";
         
@@ -28,9 +26,7 @@ public class GradeService {
         else return "FF";
     }
 
-    // 3. Geçti/Kaldı Kontrolü
     public boolean isPassed(String letterGrade) {
-        // FF veya FD ise kaldı, diğer durumlarda geçti sayılır.
         return !letterGrade.equals("FF") && !letterGrade.equals("FD");
     }
 }

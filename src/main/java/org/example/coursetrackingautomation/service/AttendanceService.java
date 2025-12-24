@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class AttendanceService {
 
-    // Devamsızlık Sınırı: %20
     private static final double CRITICAL_PERCENTAGE = 0.20;
 
     /**
@@ -19,7 +18,6 @@ public class AttendanceService {
         
         double absentRatio = (double) currentAbsentHours / totalCourseHours;
         
-        // Eğer oran %20 veya daha fazlaysa KRİTİK'tir.
         return absentRatio >= CRITICAL_PERCENTAGE;
     }
 }
