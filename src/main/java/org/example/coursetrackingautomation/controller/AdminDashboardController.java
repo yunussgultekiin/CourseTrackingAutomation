@@ -2,21 +2,24 @@ package org.example.coursetrackingautomation.controller;
 
 import java.util.List;
 import java.util.Optional;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.coursetrackingautomation.config.UserSession;
+import org.example.coursetrackingautomation.dto.AdminAttendanceRowDTO;
+import org.example.coursetrackingautomation.dto.AdminEnrollmentRowDTO;
+import org.example.coursetrackingautomation.dto.AdminKeyValueRowDTO;
+import org.example.coursetrackingautomation.dto.AdminUserRowDTO;
 import org.example.coursetrackingautomation.dto.CourseDTO;
-import org.example.coursetrackingautomation.entity.User;
-import org.example.coursetrackingautomation.repository.CourseRepository;
-import org.example.coursetrackingautomation.repository.EnrollmentRepository;
-import org.example.coursetrackingautomation.repository.UserRepository;
+import org.example.coursetrackingautomation.entity.Role;
+import org.example.coursetrackingautomation.service.AdminDashboardService;
 import org.example.coursetrackingautomation.service.CourseService;
-import org.example.coursetrackingautomation.service.EnrollmentService;
-import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.util.AlertUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-
+import org.example.coursetrackingautomation.ui.SceneNavigator;
+import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -34,35 +37,25 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.example.coursetrackingautomation.ui.UiConstants;
+import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class AdminDashboardController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    @Autowired
-    private CourseRepository courseRepository;
+    private final AdminDashboardService adminDashboardService;
+    private final CourseService courseService;
+    private final AlertUtil alertUtil;
+    private final ApplicationContext applicationContext;
+    private final SceneNavigator sceneNavigator;
+    private final UserSession userSession;
+    private final UiExceptionHandler uiExceptionHandler;
 
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private CourseService courseService;
-
-    @Autowired
-    private EnrollmentService enrollmentService;
-
-    @Autowired
-    private AlertUtil alertUtil;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    private String currentView = "users"; // "users", "courses", "enrollments"
+    private String currentView = "users"; 
 
     @FXML
     private Label welcomeLabel;
@@ -95,6 +88,9 @@ public class AdminDashboardController {
     private Button addCourseButton;
 
     @FXML
+    private Button enrollStudentButton;
+
+    @FXML
     private Button refreshButton;
 
     @FXML
@@ -121,169 +117,303 @@ public class AdminDashboardController {
 
     @FXML
     public void initialize() {
-        // Initialize dashboard data
-        updateStatistics();
-    }
-
-    /**
-     * Yunus'un yazdığı performLogout işlemi
-     */
-    public void performLogout() {
         try {
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
-            loader.setControllerFactory(applicationContext::getBean);
-            Parent root = loader.load();
-            Scene scene = new Scene(root, 800, 600);
-            stage.setScene(scene);
-            stage.centerOnScreen();
+            userSession.getCurrentUser().ifPresent(u -> welcomeLabel.setText("Hoş geldiniz, " + u.fullName()));
+            updateStatistics();
+
+            // Live search: filter as user types; reset view automatically when cleared.
+            searchField.textProperty().addListener((obs, oldValue, newValue) -> handleSearch());
+
+            handleUsersManagement();
         } catch (Exception e) {
-            alertUtil.showErrorAlert("Çıkış yapılırken bir hata oluştu: " + e.getMessage());
+            uiExceptionHandler.handle(e);
         }
     }
 
     @FXML
     public void handleLogout() {
-        performLogout();
+        try {
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            sceneNavigator.performLogout(stage);
+        } catch (Exception e) {
+            uiExceptionHandler.handle(e);
+        }
     }
 
     @FXML
     public void handleProfile() {
-        alertUtil.showInformationAlert("Profilim", "Profil bilgileri yakında eklenecek.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/profile_popup.fxml"));
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
+
+            Stage dialog = new Stage();
+            dialog.setTitle("Profilim");
+            dialog.initOwner(profileButton.getScene().getWindow());
+            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            dialog.setScene(new Scene(root));
+            dialog.setResizable(false);
+            dialog.sizeToScene();
+            dialog.centerOnScreen();
+            dialog.showAndWait();
+        } catch (Exception e) {
+            uiExceptionHandler.handle(e);
+        }
     }
 
     @FXML
     public void handleAddUser() {
-        alertUtil.showInformationAlert("Kullanıcı Ekle", "Kullanıcı ekleme formu yakında eklenecek.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(UiConstants.FXML_ADD_USER_FORM));
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
+
+            Stage dialog = new Stage();
+            dialog.setTitle(UiConstants.WINDOW_TITLE_ADD_USER);
+            dialog.initOwner(addUserButton.getScene().getWindow());
+            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            dialog.setScene(new Scene(root));
+            dialog.setResizable(false);
+            dialog.sizeToScene();
+            dialog.centerOnScreen();
+            dialog.showAndWait();
+
+            refreshCurrentView();
+            updateStatistics();
+        } catch (Exception e) {
+            uiExceptionHandler.handle(e);
+        }
     }
 
     @FXML
     public void handleAddCourse() {
-        alertUtil.showInformationAlert("Ders Ekle", "Ders ekleme formu yakında eklenecek.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(UiConstants.FXML_ADD_COURSE_FORM));
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
+
+            Stage dialog = new Stage();
+            dialog.setTitle(UiConstants.WINDOW_TITLE_ADD_COURSE);
+            dialog.initOwner(addCourseButton.getScene().getWindow());
+            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            dialog.setScene(new Scene(root));
+            dialog.setResizable(false);
+            dialog.sizeToScene();
+            dialog.centerOnScreen();
+            dialog.showAndWait();
+
+            refreshCurrentView();
+            updateStatistics();
+        } catch (Exception e) {
+            uiExceptionHandler.handle(e);
+        }
     }
 
     @FXML
     public void handleUsersManagement() {
         currentView = "users";
-        contentTitleLabel.setText("Users Management");
+        contentTitleLabel.setText("Kullanıcı Yönetimi");
         loadUsersIntoTable();
     }
 
     @FXML
     public void handleCoursesManagement() {
         currentView = "courses";
-        contentTitleLabel.setText("Courses Management");
+        contentTitleLabel.setText("Ders Yönetimi");
         loadCoursesIntoTable();
     }
 
     @FXML
     public void handleEnrollments() {
         currentView = "enrollments";
-        contentTitleLabel.setText("Enrollments");
+        contentTitleLabel.setText("Kayıtlar");
         loadEnrollmentsIntoTable();
     }
 
     @FXML
     public void handleAttendanceReports() {
-        contentTitleLabel.setText("Attendance Reports");
-        // TODO: Load attendance reports
+        currentView = "attendance";
+        contentTitleLabel.setText("Yoklama Raporları");
+        loadAttendanceIntoTable();
     }
 
     @FXML
     public void handleStatistics() {
-        contentTitleLabel.setText("Statistics");
-        // TODO: Show statistics
+        currentView = "statistics";
+        contentTitleLabel.setText("İstatistikler");
+        loadStatisticsIntoTable();
+    }
+
+    @FXML
+    public void handleOpenEnrollStudent() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(UiConstants.FXML_ADMIN_ENROLL_STUDENT_FORM));
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
+
+            Stage dialog = new Stage();
+            dialog.setTitle(UiConstants.WINDOW_TITLE_ADMIN_ENROLL_STUDENT);
+            dialog.initOwner(enrollStudentButton.getScene().getWindow());
+            dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            dialog.setScene(new Scene(root));
+            dialog.setResizable(false);
+            dialog.sizeToScene();
+            dialog.centerOnScreen();
+            dialog.showAndWait();
+
+            refreshCurrentView();
+            updateStatistics();
+        } catch (Exception e) {
+            uiExceptionHandler.handle(e);
+        }
     }
 
     @FXML
     public void handleRefresh() {
+        refreshCurrentView();
         updateStatistics();
-        alertUtil.showInformationAlert("Yenilendi", "Veriler yenilendi.");
     }
 
     @FXML
     public void handleSearch() {
-        String searchTerm = searchField.getText();
-        // TODO: Implement search functionality
-        alertUtil.showInformationAlert("Arama", "Arama özelliği yakında eklenecek.");
+        try {
+            String needle = normalize(searchField.getText());
+            if (needle.isBlank()) {
+                refreshCurrentView();
+                return;
+            }
+
+            switch (currentView) {
+                case "users" -> {
+                    List<AdminUserRowDTO> users = adminDashboardService.getAllUserRows();
+                    List<AdminUserRowDTO> filtered = users.stream()
+                        .filter(u -> normalize(u.username()).contains(needle)
+                            || normalize(u.firstName()).contains(needle)
+                            || normalize(u.lastName()).contains(needle)
+                            || normalize(u.email()).contains(needle)
+                            || normalize(u.role() == null ? "" : u.role().name()).contains(needle))
+                        .toList();
+                    loadUsersIntoTable(filtered);
+                }
+                case "courses" -> {
+                    List<CourseDTO> courses = courseService.getAllCourseDTOs();
+                    List<CourseDTO> filtered = courses.stream()
+                        .filter(c -> normalize(c.getCode()).contains(needle)
+                            || normalize(c.getName()).contains(needle)
+                            || normalize(c.getInstructorName()).contains(needle))
+                        .toList();
+                    loadCoursesIntoTable(filtered);
+                }
+                case "enrollments" -> {
+                    List<AdminEnrollmentRowDTO> enrollments = adminDashboardService.getAllEnrollmentRows();
+                    List<AdminEnrollmentRowDTO> filtered = enrollments.stream()
+                        .filter(e -> normalize(e.studentName()).contains(needle)
+                            || normalize(e.courseDisplay()).contains(needle)
+                            || normalize(e.status()).contains(needle)
+                            || normalize(e.enrollmentDate() == null ? "" : e.enrollmentDate().toString()).contains(needle))
+                        .toList();
+                    loadEnrollmentsIntoTable(filtered);
+                }
+                case "attendance" -> {
+                    List<AdminAttendanceRowDTO> rows = adminDashboardService.getAllAttendanceRows();
+                    List<AdminAttendanceRowDTO> filtered = rows.stream()
+                        .filter(r -> normalize(r.studentName()).contains(needle)
+                            || normalize(r.courseDisplay()).contains(needle)
+                            || normalize(r.date() == null ? "" : r.date().toString()).contains(needle)
+                            || normalize(r.weekNumber() == null ? "" : String.valueOf(r.weekNumber())).contains(needle)
+                            || normalize(r.present() == null ? "" : String.valueOf(r.present())).contains(needle))
+                        .toList();
+                    loadAttendanceIntoTable(filtered);
+                }
+                case "statistics" -> loadStatisticsIntoTable();
+                default -> refreshCurrentView();
+            }
+        } catch (Exception e) {
+            uiExceptionHandler.handle(e);
+        }
+    }
+
+    private static String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 
     private void updateStatistics() {
         try {
-            long totalUsers = userRepository.count();
-            long totalCourses = courseRepository.count();
-            long activeEnrollments = enrollmentRepository.findAll().stream()
-                .filter(e -> e.getStatus() != null && 
-                    (e.getStatus().equals("ACTIVE") || 
-                     e.getStatus().equals("ENROLLED") || 
-                     e.getStatus().equals("REGISTERED")))
-                .count();
-
-            totalUsersLabel.setText(String.valueOf(totalUsers));
-            totalCoursesLabel.setText(String.valueOf(totalCourses));
-            activeEnrollmentsLabel.setText(String.valueOf(activeEnrollments));
+            var stats = adminDashboardService.getStatistics();
+            totalUsersLabel.setText(String.valueOf(stats.totalUsers()));
+            totalCoursesLabel.setText(String.valueOf(stats.totalCourses()));
+            activeEnrollmentsLabel.setText(String.valueOf(stats.activeEnrollments()));
         } catch (Exception e) {
-            alertUtil.showErrorAlert("İstatistikler güncellenirken hata: " + e.getMessage());
+            log.error("Failed to update statistics", e);
+            alertUtil.showErrorAlert("İstatistik güncellenemedi", e.getMessage());
         }
     }
 
-    /**
-     * Kullanıcıları tabloya yükler
-     */
     private void loadUsersIntoTable() {
+        loadUsersIntoTable(adminDashboardService.getAllUserRows());
+    }
+
+    private void loadUsersIntoTable(List<AdminUserRowDTO> users) {
         try {
             dataTableView.getColumns().clear();
             dataTableView.getItems().clear();
 
-            // Kullanıcıları getir
-            List<User> users = userRepository.findAll();
-            ObservableList<User> userList = FXCollections.observableArrayList(users);
+            ObservableList<AdminUserRowDTO> userList = FXCollections.observableArrayList(
+                users == null ? List.of() : users
+            );
 
-            // Kolonları oluştur
-            TableColumn<User, String> idCol = new TableColumn<>("ID");
-            idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+            TableColumn<AdminUserRowDTO, Long> idCol = new TableColumn<>("ID");
+            idCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().id()));
 
-            TableColumn<User, String> usernameCol = new TableColumn<>("Kullanıcı Adı");
-            usernameCol.setCellValueFactory(new PropertyValueFactory<>("username"));
+            TableColumn<AdminUserRowDTO, String> usernameCol = new TableColumn<>("Kullanıcı Adı");
+            usernameCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().username())));
 
-            TableColumn<User, String> firstNameCol = new TableColumn<>("Ad");
-            firstNameCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+            TableColumn<AdminUserRowDTO, String> firstNameCol = new TableColumn<>("Ad");
+            firstNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().firstName())));
 
-            TableColumn<User, String> lastNameCol = new TableColumn<>("Soyad");
-            lastNameCol.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+            TableColumn<AdminUserRowDTO, String> lastNameCol = new TableColumn<>("Soyad");
+            lastNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().lastName())));
 
-            TableColumn<User, String> roleCol = new TableColumn<>("Rol");
-            roleCol.setCellValueFactory(new PropertyValueFactory<>("role"));
+            TableColumn<AdminUserRowDTO, String> roleCol = new TableColumn<>("Rol");
+            roleCol.setCellValueFactory(cellData -> {
+                Role role = cellData.getValue().role();
+                if (role == null) {
+                    return new SimpleStringProperty("");
+                }
+                String roleText = switch (role) {
+                    case ADMIN -> "Yönetici";
+                    case INSTRUCTOR -> "Akademisyen";
+                    case STUDENT -> "Öğrenci";
+                };
+                return new SimpleStringProperty(roleText);
+            });
 
-            TableColumn<User, String> emailCol = new TableColumn<>("E-posta");
-            emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+            TableColumn<AdminUserRowDTO, String> emailCol = new TableColumn<>("E-posta");
+            emailCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().email())));
 
-            // İşlemler kolonu (Düzenle ve Sil)
-            TableColumn<User, String> actionsCol = new TableColumn<>("İşlemler");
+            TableColumn<AdminUserRowDTO, String> actionsCol = new TableColumn<>("İşlemler");
             actionsCol.setCellFactory(createActionCellFactory("user"));
 
             @SuppressWarnings("unchecked")
-            TableView<User> userTableView = (TableView<User>) dataTableView;
+            TableView<AdminUserRowDTO> userTableView = (TableView<AdminUserRowDTO>) dataTableView;
             userTableView.getColumns().addAll(idCol, usernameCol, firstNameCol, lastNameCol, roleCol, emailCol, actionsCol);
             userTableView.setItems(userList);
         } catch (Exception e) {
-            alertUtil.showErrorAlert("Kullanıcılar yüklenirken hata: " + e.getMessage());
+            alertUtil.showErrorAlert("Kullanıcılar yüklenemedi", e.getMessage());
         }
     }
 
-    /**
-     * Dersleri tabloya yükler
-     */
     private void loadCoursesIntoTable() {
+        loadCoursesIntoTable(courseService.getAllCourseDTOs());
+    }
+
+    private void loadCoursesIntoTable(List<CourseDTO> courses) {
         try {
             dataTableView.getColumns().clear();
             dataTableView.getItems().clear();
 
-            // Dersleri getir (CourseService kullanarak)
-            List<CourseDTO> courses = courseService.getAllCourseDTOs();
-            ObservableList<CourseDTO> courseList = FXCollections.observableArrayList(courses);
+            ObservableList<CourseDTO> courseList = FXCollections.observableArrayList(courses == null ? List.of() : courses);
 
-            // Kolonları oluştur
             TableColumn<CourseDTO, String> idCol = new TableColumn<>("ID");
             idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
 
@@ -296,17 +426,16 @@ public class AdminDashboardController {
             TableColumn<CourseDTO, String> creditCol = new TableColumn<>("Kredi");
             creditCol.setCellValueFactory(new PropertyValueFactory<>("credit"));
 
-            TableColumn<CourseDTO, String> quotaCol = new TableColumn<>("Kontenjan");
+            TableColumn<CourseDTO, String> quotaCol = new TableColumn<>("Kota");
             quotaCol.setCellValueFactory(new PropertyValueFactory<>("quota"));
 
-            TableColumn<CourseDTO, String> instructorCol = new TableColumn<>("Öğretim Üyesi");
+            TableColumn<CourseDTO, String> instructorCol = new TableColumn<>("Akademisyen");
             instructorCol.setCellValueFactory(new PropertyValueFactory<>("instructorName"));
 
             TableColumn<CourseDTO, String> activeCol = new TableColumn<>("Aktif");
             activeCol.setCellValueFactory(cellData -> 
                 new SimpleStringProperty(cellData.getValue().getActive() != null && cellData.getValue().getActive() ? "Evet" : "Hayır"));
 
-            // İşlemler kolonu (Düzenle ve Sil)
             TableColumn<CourseDTO, String> actionsCol = new TableColumn<>("İşlemler");
             actionsCol.setCellFactory(createActionCellFactory("course"));
 
@@ -315,63 +444,124 @@ public class AdminDashboardController {
             courseTableView.getColumns().addAll(idCol, codeCol, nameCol, creditCol, quotaCol, instructorCol, activeCol, actionsCol);
             courseTableView.setItems(courseList);
         } catch (Exception e) {
-            alertUtil.showErrorAlert("Dersler yüklenirken hata: " + e.getMessage());
+            alertUtil.showErrorAlert("Dersler yüklenemedi", e.getMessage());
         }
     }
 
-    /**
-     * Kayıtları tabloya yükler
-     */
     private void loadEnrollmentsIntoTable() {
+        loadEnrollmentsIntoTable(adminDashboardService.getAllEnrollmentRows());
+    }
+
+    private void loadEnrollmentsIntoTable(List<AdminEnrollmentRowDTO> enrollments) {
         try {
             dataTableView.getColumns().clear();
             dataTableView.getItems().clear();
 
-            // Kayıtları getir
-            List<org.example.coursetrackingautomation.entity.Enrollment> enrollments = enrollmentRepository.findAll();
-            ObservableList<org.example.coursetrackingautomation.entity.Enrollment> enrollmentList = 
-                FXCollections.observableArrayList(enrollments);
+            ObservableList<AdminEnrollmentRowDTO> enrollmentList = FXCollections.observableArrayList(
+                enrollments == null ? List.of() : enrollments
+            );
 
-            // Kolonları oluştur
-            TableColumn<org.example.coursetrackingautomation.entity.Enrollment, String> idCol = new TableColumn<>("ID");
-            idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+            TableColumn<AdminEnrollmentRowDTO, Long> idCol = new TableColumn<>("ID");
+            idCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().id()));
 
-            TableColumn<org.example.coursetrackingautomation.entity.Enrollment, String> studentCol = new TableColumn<>("Öğrenci");
-            studentCol.setCellValueFactory(cellData -> {
-                User student = cellData.getValue().getStudent();
-                return new SimpleStringProperty(student != null ? 
-                    student.getFirstName() + " " + student.getLastName() : "");
+            TableColumn<AdminEnrollmentRowDTO, String> studentCol = new TableColumn<>("Öğrenci");
+            studentCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().studentName())));
+
+            TableColumn<AdminEnrollmentRowDTO, String> courseCol = new TableColumn<>("Ders");
+            courseCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().courseDisplay())));
+
+            TableColumn<AdminEnrollmentRowDTO, String> statusCol = new TableColumn<>("Durum");
+            statusCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().status())));
+
+            TableColumn<AdminEnrollmentRowDTO, String> dateCol = new TableColumn<>("Kayıt Tarihi");
+            dateCol.setCellValueFactory(cellData -> {
+                var dateTime = cellData.getValue().enrollmentDate();
+                return new SimpleStringProperty(dateTime == null ? "" : DATE_TIME_FORMATTER.format(dateTime));
             });
 
-            TableColumn<org.example.coursetrackingautomation.entity.Enrollment, String> courseCol = new TableColumn<>("Ders");
-            courseCol.setCellValueFactory(cellData -> {
-                org.example.coursetrackingautomation.entity.Course course = cellData.getValue().getCourse();
-                return new SimpleStringProperty(course != null ? course.getCode() + " - " + course.getName() : "");
-            });
-
-            TableColumn<org.example.coursetrackingautomation.entity.Enrollment, String> statusCol = new TableColumn<>("Durum");
-            statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-            TableColumn<org.example.coursetrackingautomation.entity.Enrollment, String> dateCol = new TableColumn<>("Kayıt Tarihi");
-            dateCol.setCellValueFactory(new PropertyValueFactory<>("enrollmentDate"));
-
-            // İşlemler kolonu (Düzenle ve Sil)
-            TableColumn<org.example.coursetrackingautomation.entity.Enrollment, String> actionsCol = new TableColumn<>("İşlemler");
+            TableColumn<AdminEnrollmentRowDTO, String> actionsCol = new TableColumn<>("İşlemler");
             actionsCol.setCellFactory(createActionCellFactory("enrollment"));
 
             @SuppressWarnings("unchecked")
-            TableView<org.example.coursetrackingautomation.entity.Enrollment> enrollmentTableView = 
-                (TableView<org.example.coursetrackingautomation.entity.Enrollment>) dataTableView;
+            TableView<AdminEnrollmentRowDTO> enrollmentTableView = (TableView<AdminEnrollmentRowDTO>) dataTableView;
             enrollmentTableView.getColumns().addAll(idCol, studentCol, courseCol, statusCol, dateCol, actionsCol);
             enrollmentTableView.setItems(enrollmentList);
         } catch (Exception e) {
-            alertUtil.showErrorAlert("Kayıtlar yüklenirken hata: " + e.getMessage());
+            alertUtil.showErrorAlert("Kayıtlar yüklenemedi", e.getMessage());
         }
     }
 
-    /**
-     * Düzenle ve Sil butonlarını içeren hücre fabrikası oluşturur
-     */
+    private void loadAttendanceIntoTable() {
+        loadAttendanceIntoTable(adminDashboardService.getAllAttendanceRows());
+    }
+
+    private void loadAttendanceIntoTable(List<AdminAttendanceRowDTO> rows) {
+        try {
+            dataTableView.getColumns().clear();
+            dataTableView.getItems().clear();
+
+            ObservableList<AdminAttendanceRowDTO> list = FXCollections.observableArrayList(rows == null ? List.of() : rows);
+
+            TableColumn<AdminAttendanceRowDTO, Long> idCol = new TableColumn<>("ID");
+            idCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().id()));
+
+            TableColumn<AdminAttendanceRowDTO, String> studentCol = new TableColumn<>("Öğrenci");
+            studentCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().studentName())));
+
+            TableColumn<AdminAttendanceRowDTO, String> courseCol = new TableColumn<>("Ders");
+            courseCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().courseDisplay())));
+
+            TableColumn<AdminAttendanceRowDTO, Integer> weekCol = new TableColumn<>("Hafta");
+            weekCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().weekNumber()));
+
+            TableColumn<AdminAttendanceRowDTO, String> presentCol = new TableColumn<>("Katılım");
+            presentCol.setCellValueFactory(cellData -> {
+                Boolean present = cellData.getValue().present();
+                return new SimpleStringProperty(present == null ? "" : (present ? "Var" : "Yok"));
+            });
+
+            TableColumn<AdminAttendanceRowDTO, String> dateCol = new TableColumn<>("Tarih");
+            dateCol.setCellValueFactory(cellData -> {
+                var date = cellData.getValue().date();
+                return new SimpleStringProperty(date == null ? "" : date.toString());
+            });
+
+            @SuppressWarnings("unchecked")
+            TableView<AdminAttendanceRowDTO> tableView = (TableView<AdminAttendanceRowDTO>) dataTableView;
+            tableView.getColumns().addAll(idCol, studentCol, courseCol, weekCol, presentCol, dateCol);
+            tableView.setItems(list);
+        } catch (Exception e) {
+            alertUtil.showErrorAlert("Yoklama raporları yüklenemedi", e.getMessage());
+        }
+    }
+
+    private void loadStatisticsIntoTable() {
+        try {
+            dataTableView.getColumns().clear();
+            dataTableView.getItems().clear();
+
+            var stats = adminDashboardService.getStatistics();
+            ObservableList<AdminKeyValueRowDTO> list = FXCollections.observableArrayList(
+                new AdminKeyValueRowDTO("Toplam kullanıcı", String.valueOf(stats.totalUsers())),
+                new AdminKeyValueRowDTO("Toplam ders", String.valueOf(stats.totalCourses())),
+                new AdminKeyValueRowDTO("Aktif kayıt", String.valueOf(stats.activeEnrollments()))
+            );
+
+            TableColumn<AdminKeyValueRowDTO, String> keyCol = new TableColumn<>("Metrik");
+            keyCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().key())));
+
+            TableColumn<AdminKeyValueRowDTO, String> valueCol = new TableColumn<>("Değer");
+            valueCol.setCellValueFactory(cellData -> new SimpleStringProperty(nullToEmpty(cellData.getValue().value())));
+
+            @SuppressWarnings("unchecked")
+            TableView<AdminKeyValueRowDTO> tableView = (TableView<AdminKeyValueRowDTO>) dataTableView;
+            tableView.getColumns().addAll(keyCol, valueCol);
+            tableView.setItems(list);
+        } catch (Exception e) {
+            alertUtil.showErrorAlert("İstatistikler yüklenemedi", e.getMessage());
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private <T> Callback<TableColumn<T, String>, TableCell<T, String>> createActionCellFactory(String type) {
         return column -> new TableCell<T, String>() {
@@ -407,88 +597,130 @@ public class AdminDashboardController {
         };
     }
 
-    /**
-     * Düzenle işlemi
-     */
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
+    }
+
     @SuppressWarnings("unchecked")
     private <T> void handleEdit(T item, String type) {
         try {
             if ("user".equals(type)) {
-                User user = (User) item;
-                alertUtil.showInformationAlert("Düzenle", 
-                    "Kullanıcı düzenleme formu: " + user.getUsername() + "\n(Bu özellik yakında eklenecek)");
+                AdminUserRowDTO user = (AdminUserRowDTO) item;
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(UiConstants.FXML_EDIT_USER_FORM));
+                loader.setControllerFactory(applicationContext::getBean);
+                Parent root = loader.load();
+
+                EditUserFormController controller = loader.getController();
+                controller.setUserId(user.id());
+
+                Stage dialog = new Stage();
+                dialog.setTitle(UiConstants.WINDOW_TITLE_EDIT_USER);
+                dialog.initOwner(dataTableView.getScene().getWindow());
+                dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                dialog.setScene(new Scene(root));
+                dialog.setResizable(false);
+                dialog.sizeToScene();
+                dialog.centerOnScreen();
+                dialog.showAndWait();
+
+                refreshCurrentView();
+                updateStatistics();
             } else if ("course".equals(type)) {
                 CourseDTO course = (CourseDTO) item;
-                alertUtil.showInformationAlert("Düzenle", 
-                    "Ders düzenleme formu: " + course.getCode() + " - " + course.getName() + "\n(Bu özellik yakında eklenecek)");
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(UiConstants.FXML_EDIT_COURSE_FORM));
+                loader.setControllerFactory(applicationContext::getBean);
+                Parent root = loader.load();
+
+                EditCourseFormController controller = loader.getController();
+                controller.setCourseId(course.getId());
+
+                Stage dialog = new Stage();
+                dialog.setTitle(UiConstants.WINDOW_TITLE_EDIT_COURSE);
+                dialog.initOwner(dataTableView.getScene().getWindow());
+                dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                dialog.setScene(new Scene(root));
+                dialog.setResizable(false);
+                dialog.sizeToScene();
+                dialog.centerOnScreen();
+                dialog.showAndWait();
+
+                refreshCurrentView();
+                updateStatistics();
             } else if ("enrollment".equals(type)) {
-                org.example.coursetrackingautomation.entity.Enrollment enrollment = 
-                    (org.example.coursetrackingautomation.entity.Enrollment) item;
-                alertUtil.showInformationAlert("Düzenle", 
-                    "Kayıt düzenleme formu: ID " + enrollment.getId() + "\n(Bu özellik yakında eklenecek)");
+                AdminEnrollmentRowDTO enrollment = (AdminEnrollmentRowDTO) item;
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(UiConstants.FXML_EDIT_ENROLLMENT_FORM));
+                loader.setControllerFactory(applicationContext::getBean);
+                Parent root = loader.load();
+
+                EditEnrollmentFormController controller = loader.getController();
+                controller.setEnrollmentId(enrollment.id());
+
+                Stage dialog = new Stage();
+                dialog.setTitle(UiConstants.WINDOW_TITLE_EDIT_ENROLLMENT);
+                dialog.initOwner(dataTableView.getScene().getWindow());
+                dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                dialog.setScene(new Scene(root));
+                dialog.setResizable(false);
+                dialog.sizeToScene();
+                dialog.centerOnScreen();
+                dialog.showAndWait();
+
+                refreshCurrentView();
+                updateStatistics();
             }
         } catch (Exception e) {
-            alertUtil.showErrorAlert("Düzenleme işlemi sırasında hata: " + e.getMessage());
+            alertUtil.showErrorAlert("Düzenleme başarısız", e.getMessage());
         }
     }
 
-    /**
-     * Silme işlemi - "Emin misiniz?" uyarısı ile
-     */
     @SuppressWarnings("unchecked")
     private <T> void handleDelete(T item, String type) {
         try {
-            // Onay dialogu göster
             Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Silme Onayı");
             confirmAlert.setHeaderText("Emin misiniz?");
             
             String contentText = "";
             if ("user".equals(type)) {
-                User user = (User) item;
-                contentText = "Kullanıcı '" + user.getUsername() + "' silinecek. Emin misiniz?";
+                AdminUserRowDTO user = (AdminUserRowDTO) item;
+                contentText = "'" + user.username() + "' kullanıcısı silinecek. Devam edilsin mi?";
             } else if ("course".equals(type)) {
                 CourseDTO course = (CourseDTO) item;
-                contentText = "Ders '" + course.getCode() + " - " + course.getName() + "' silinecek. Emin misiniz?";
+                contentText = "'" + course.getCode() + " - " + course.getName() + "' dersi pasif yapılacak. Devam edilsin mi?";
             } else if ("enrollment".equals(type)) {
-                org.example.coursetrackingautomation.entity.Enrollment enrollment = 
-                    (org.example.coursetrackingautomation.entity.Enrollment) item;
-                contentText = "Kayıt (ID: " + enrollment.getId() + ") silinecek. Emin misiniz?";
+                AdminEnrollmentRowDTO enrollment = (AdminEnrollmentRowDTO) item;
+                contentText = "Kayıt (ID: " + enrollment.id() + ") silinecek. Devam edilsin mi?";
             }
             
             confirmAlert.setContentText(contentText);
             
             Optional<ButtonType> result = confirmAlert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                // Silme işlemi
                 if ("user".equals(type)) {
-                    User user = (User) item;
-                    userRepository.delete(user);
-                    alertUtil.showInformationAlert("Başarılı", "Kullanıcı silindi: " + user.getUsername());
+                    AdminUserRowDTO user = (AdminUserRowDTO) item;
+                    adminDashboardService.deleteUser(user.id());
+                    alertUtil.showInformationAlert("Başarılı", "Kullanıcı silindi: " + user.username());
                 } else if ("course".equals(type)) {
                     CourseDTO course = (CourseDTO) item;
                     courseService.deactivateCourse(course.getId());
-                    alertUtil.showInformationAlert("Başarılı", "Ders pasif hale getirildi: " + course.getCode());
+                    alertUtil.showInformationAlert("Başarılı", "Ders pasif yapıldı: " + course.getCode());
                 } else if ("enrollment".equals(type)) {
-                    org.example.coursetrackingautomation.entity.Enrollment enrollment = 
-                        (org.example.coursetrackingautomation.entity.Enrollment) item;
-                    // EnrollmentService kullanarak kayıt silme
-                    enrollmentService.dropEnrollment(enrollment.getStudent().getId(), enrollment.getCourse().getId());
-                    alertUtil.showInformationAlert("Başarılı", "Kayıt silindi: ID " + enrollment.getId());
+                    AdminEnrollmentRowDTO enrollment = (AdminEnrollmentRowDTO) item;
+                    if (enrollment.studentId() == null || enrollment.courseId() == null) {
+                        throw new IllegalArgumentException("Enrollment is missing student/course reference");
+                    }
+                    adminDashboardService.dropEnrollment(enrollment.studentId(), enrollment.courseId());
+                    alertUtil.showInformationAlert("Başarılı", "Kayıt silindi: ID " + enrollment.id());
                 }
                 
-                // Tabloyu yenile
                 refreshCurrentView();
                 updateStatistics();
             }
         } catch (Exception e) {
-            alertUtil.showErrorAlert("Silme işlemi sırasında hata: " + e.getMessage());
+            alertUtil.showErrorAlert("Silme başarısız", e.getMessage());
         }
     }
 
-    /**
-     * Mevcut görünümü yeniler
-     */
     private void refreshCurrentView() {
         switch (currentView) {
             case "users":
@@ -500,25 +732,28 @@ public class AdminDashboardController {
             case "enrollments":
                 loadEnrollmentsIntoTable();
                 break;
+            case "attendance":
+                loadAttendanceIntoTable();
+                break;
+            case "statistics":
+                loadStatisticsIntoTable();
+                break;
         }
     }
 
-    /**
-     * Öğrenci kaydı işlemleri - EnrollmentService'e bağlı ve exception handling ile
-     */
     @FXML
     public void handleEnrollStudent(Long studentId, Long courseId) {
         try {
-            enrollmentService.enrollStudent(studentId, courseId);
+            adminDashboardService.enrollStudent(studentId, courseId);
             alertUtil.showInformationAlert("Başarılı", "Öğrenci derse başarıyla kaydedildi.");
             refreshCurrentView();
             updateStatistics();
         } catch (IllegalArgumentException e) {
-            alertUtil.showErrorAlert("Kayıt Hatası: " + e.getMessage());
+            alertUtil.showErrorAlert("Kayıt hatası", e.getMessage());
         } catch (RuntimeException e) {
-            alertUtil.showErrorAlert("Kayıt Hatası: " + e.getMessage());
+            alertUtil.showErrorAlert("Kayıt hatası", e.getMessage());
         } catch (Exception e) {
-            alertUtil.showErrorAlert("Beklenmeyen hata: " + e.getMessage());
+            alertUtil.showErrorAlert("Beklenmeyen hata", e.getMessage());
         }
     }
 }

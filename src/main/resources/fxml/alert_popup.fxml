@@ -7,54 +7,45 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      alignment="CENTER" spacing="20.0"
-      style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 30px;"
-      prefWidth="400.0" prefHeight="250.0">
-    
+      alignment="CENTER" spacing="18.0"
+      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 26px;"
+      prefWidth="400.0" prefHeight="240.0">
+
     <padding>
-        <Insets top="30.0" right="30.0" bottom="30.0" left="30.0"/>
+        <Insets top="26.0" right="26.0" bottom="26.0" left="26.0"/>
     </padding>
 
-    <!-- Dynamic Icon (Success/Error/Confirm) -->
-    <Label fx:id="iconLabel" text="✓" 
-           style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #27ae60;">
+    <Label fx:id="iconLabel" text="✓"
+           style="-fx-font-size: 46px; -fx-font-weight: bold; -fx-text-fill: #27ae60;">
         <font>
-            <Font name="System Bold" size="48.0"/>
+            <Font name="System Bold" size="46.0"/>
         </font>
     </Label>
 
-    <!-- Dynamic Title -->
-    <Label fx:id="titleLabel" text="Başlık" 
-           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;">
+    <Label fx:id="titleLabel" text="Başlık"
+           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
         <font>
             <Font name="System Bold" size="20.0"/>
         </font>
     </Label>
 
-    <!-- Dynamic Message -->
-    <Label fx:id="messageLabel" text="Mesaj" 
-           style="-fx-font-size: 14px; -fx-text-fill: #666; -fx-wrap-text: true;"
+    <Label fx:id="messageLabel" text="Mesaj"
+           style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"
            textAlignment="CENTER" wrapText="true"
-           maxWidth="350.0"/>
+           maxWidth="340.0"/>
 
-    <!-- Buttons Container -->
-    <HBox fx:id="buttonsContainer" spacing="15.0" alignment="CENTER">
-        <!-- OK Button (for Success/Error) -->
-        <Button fx:id="okButton" text="Tamam" 
+    <HBox fx:id="buttonsContainer" spacing="12.0" alignment="CENTER">
+        <Button fx:id="okButton" text="Tamam"
                 onAction="#handleOk"
-                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 30px; -fx-cursor: hand; -fx-font-weight: bold;"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 26px; -fx-cursor: hand; -fx-font-weight: bold;"
                 defaultButton="true"/>
-        
-        <!-- Cancel Button (for Confirm) -->
-        <Button fx:id="cancelButton" text="İptal" 
+        <Button fx:id="cancelButton" text="İptal"
                 onAction="#handleCancel"
-                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
+                style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 22px; -fx-cursor: hand; -fx-font-weight: bold;"
                 cancelButton="true"/>
-        
-        <!-- Confirm Button (for Confirm) -->
-        <Button fx:id="confirmButton" text="Onayla" 
+        <Button fx:id="confirmButton" text="Onayla"
                 onAction="#handleConfirm"
-                style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
+                style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 22px; -fx-cursor: hand; -fx-font-weight: bold;"
                 defaultButton="true"/>
     </HBox>
 

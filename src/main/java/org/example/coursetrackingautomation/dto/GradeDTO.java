@@ -10,13 +10,16 @@ import lombok.NoArgsConstructor;
 public class GradeDTO {
     
     private Long studentId;
-    private String studentName;      // Öğrenci Adı Soyadı
-    private String courseCode;       // Ders Kodu (örn: CSE101)
-    private Double midtermScore;     // Vize Notu
-    private Double finalScore;       // Final Notu
-    private Double averageScore;     // Ortalama
-    private String letterGrade;      // Harf Notu (AA, BB...)
-    private String status;           // Durum (Geçti/Kaldı)
-    private Integer attendanceCount; // Devamsızlık Sayısı
-    private boolean isAbsentCritically; // %20 sınırı aşıldı mı? (Kırmızı renk için)
+    private String studentName; 
+    private String courseCode;  
+    private String courseName;  
+    private Integer credit;   
+    private Double midtermScore;   
+    private Double finalScore;   
+    private Double averageScore;  
+    private String letterGrade;     
+    private String status;        
+    private Integer attendanceCount; 
+    private boolean absentCritically; 
+    private Boolean present;
 }

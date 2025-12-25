@@ -1,13 +1,23 @@
 package org.example.coursetrackingautomation.config;
 
-public class UserSession {
-    private static UserSession instance;
-    private UserSession() {}
+import java.util.Optional;
+import org.example.coursetrackingautomation.dto.SessionUser;
+import org.springframework.stereotype.Component;
 
-    public static UserSession getInstance() {
-        if (instance == null) {
-            instance = new UserSession();
-        }
-        return instance;
+@Component
+public class UserSession {
+
+    private SessionUser currentUser;
+
+    public Optional<SessionUser> getCurrentUser() {
+        return Optional.ofNullable(currentUser);
+    }
+
+    public void setCurrentUser(SessionUser user) {
+        this.currentUser = user;
+    }
+
+    public void cleanUserSession() {
+        this.currentUser = null;
     }
 }

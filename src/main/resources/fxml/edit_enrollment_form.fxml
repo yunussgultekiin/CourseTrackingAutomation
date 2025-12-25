@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.coursetrackingautomation.controller.EditEnrollmentFormController"
+      stylesheets="@styles.css"
+      spacing="14.0" styleClass="card" prefWidth="560.0" prefHeight="320.0">
+
+    <padding>
+        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <Label text="Kayıt Düzenle" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+        <Region HBox.hgrow="ALWAYS" />
+    </HBox>
+
+    <GridPane hgap="10.0" vgap="10.0">
+        <columnConstraints>
+            <ColumnConstraints minWidth="160.0" halignment="RIGHT" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label text="Kayıt ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <Label fx:id="lblEnrollmentId" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+        <Label text="Öğrenci:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <Label fx:id="lblStudent" text="-" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+        <Label text="Ders:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <Label fx:id="lblCourse" text="-" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+        <Label text="Durum:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <ComboBox fx:id="comboStatus" promptText="Durum seçin" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+    </GridPane>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10.0">
+        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
+        <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+    </HBox>
+
+</VBox>

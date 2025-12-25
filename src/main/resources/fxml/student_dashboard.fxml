@@ -15,7 +15,7 @@
         <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
             <Label text="Öğrenci Paneli" textFill="WHITE">
                 <font>
-                    <Font name="Segoe UI Bold" size="22.0" />
+                    <Font name="System Bold" size="22.0" />
                 </font>
             </Label>
             
@@ -26,7 +26,8 @@
                     <Font size="14.0" />
                 </font>
             </Label>
-            <Button fx:id="btnLogOut" mnemonicParsing="false" styleClass="button-logout" text="Çıkış Yap" />
+            <Button fx:id="btnProfile" mnemonicParsing="false" onAction="#handleProfile" styleClass="button-secondary" text="Profilim" />
+            <Button fx:id="btnLogOut" mnemonicParsing="false" onAction="#handleLogout" styleClass="button-logout" text="Çıkış Yap" />
         </HBox>
     </top>
 
@@ -34,9 +35,14 @@
         <VBox spacing="10.0" style="-fx-padding: 20; -fx-background-color: #ecf0f1;">
             <Label text="Derslerim ve Not Durumu" textFill="#2c3e50">
                 <font>
-                    <Font name="Segoe UI Semibold" size="18.0" />
+                    <Font name="System Bold" size="18.0" />
                 </font>
             </Label>
+
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                <Button fx:id="btnEnrollCourse" mnemonicParsing="false" onAction="#handleEnrollCourse" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Derse Kaydol" />
+                <Button fx:id="btnTranscript" mnemonicParsing="false" onAction="#handleShowTranscript" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Transkript Görüntüle" />
+            </HBox>
             
             <TableView fx:id="tableStudentCourses" VBox.vgrow="ALWAYS">
                 <columns>
@@ -59,7 +65,7 @@
 
     <bottom>
         <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-background-color: #bdc3c7; -fx-padding: 10;">
-            <Label text="Genel Akademik Ortalama (GPA):">
+            <Label text="Genel Not Ortalaması (GNO):">
                 <font>
                     <Font name="System Bold" size="14.0" />
                 </font>

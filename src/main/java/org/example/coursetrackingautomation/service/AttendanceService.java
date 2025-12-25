@@ -5,21 +5,33 @@ import org.springframework.stereotype.Service;
 @Service
 public class AttendanceService {
 
-    // Devamsızlık Sınırı: %20
+    private static final int DEFAULT_TOTAL_COURSE_HOURS = 42;
+    private static final double WARNING_PERCENTAGE = 0.10;
     private static final double CRITICAL_PERCENTAGE = 0.20;
 
-    /**
-     * Devamsızlık kritik sınırı aştı mı?
-     * @param totalCourseHours Dersin toplam saati (Örn: 14 hafta * 3 saat = 42)
-     * @param currentAbsentHours Öğrencinin şu anki devamsızlığı
-     * @return Sınır aşıldıysa TRUE döner.
-     */
     public boolean isAttendanceCritical(int totalCourseHours, int currentAbsentHours) {
-        if (totalCourseHours == 0) return false; // Ders saati 0 ise hesaplanamaz
-        
-        double absentRatio = (double) currentAbsentHours / totalCourseHours;
-        
-        // Eğer oran %20 veya daha fazlaysa KRİTİK'tir.
+        if (totalCourseHours <= 0) {
+            return false;
+        }
+
+        double absentRatio = (double) currentAbsentHours / (double) totalCourseHours;
         return absentRatio >= CRITICAL_PERCENTAGE;
+    }
+
+    public boolean isAttendanceWarning(int totalCourseHours, int currentAbsentHours) {
+        if (totalCourseHours <= 0) {
+            return false;
+        }
+
+        double absentRatio = (double) currentAbsentHours / (double) totalCourseHours;
+        return absentRatio >= WARNING_PERCENTAGE && absentRatio < CRITICAL_PERCENTAGE;
+    }
+
+    public boolean isAttendanceCritical(int currentAbsentHours) {
+        return isAttendanceCritical(DEFAULT_TOTAL_COURSE_HOURS, currentAbsentHours);
+    }
+
+    public boolean isAttendanceWarning(int currentAbsentHours) {
+        return isAttendanceWarning(DEFAULT_TOTAL_COURSE_HOURS, currentAbsentHours);
     }
 }

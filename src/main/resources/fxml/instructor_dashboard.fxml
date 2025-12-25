@@ -18,7 +18,7 @@
             
             <Label text="Akademisyen Paneli" textFill="WHITE">
                 <font>
-                    <Font name="Segoe UI Bold" size="20.0" />
+                    <Font name="System Bold" size="20.0" />
                 </font>
             </Label>
 
@@ -33,7 +33,8 @@
 
             <HBox HBox.hgrow="ALWAYS" />
 
-            <Button fx:id="btnLogOut" mnemonicParsing="false" styleClass="button-logout" text="Çıkış Yap" />
+            <Button fx:id="btnProfile" mnemonicParsing="false" onAction="#handleProfile" styleClass="button-secondary" text="Profilim" />
+            <Button fx:id="btnLogOut" mnemonicParsing="false" onAction="#handleLogout" styleClass="button-logout" text="Çıkış Yap" />
         </HBox>
     </top>
 
@@ -42,7 +43,7 @@
             <HBox alignment="CENTER_LEFT">
                 <Label text="Öğrenci Listesi ve Not Girişi" textFill="#2c3e50">
                     <font>
-                        <Font name="Segoe UI Semibold" size="16.0" />
+                        <Font name="System Bold" size="16.0" />
                     </font>
                 </Label>
                 <HBox HBox.hgrow="ALWAYS" />
@@ -58,6 +59,8 @@
                     <TableColumn fx:id="colFinal" prefWidth="80.0" text="Final" />
                     
                     <TableColumn fx:id="colAttendance" prefWidth="120.0" text="Devamsızlık (Saat)" />
+
+                    <TableColumn fx:id="colPresent" prefWidth="100.0" text="Derste" />
                     
                     <TableColumn fx:id="colAverage" prefWidth="80.0" text="Ortalama" />
                     <TableColumn fx:id="colStatus" prefWidth="100.0" text="Durum" />
@@ -71,7 +74,7 @@
 
     <bottom>
         <HBox alignment="CENTER" style="-fx-background-color: #bdc3c7; -fx-padding: 15;">
-            <Button fx:id="btnSave" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Değişiklikleri Kaydet">
+            <Button fx:id="btnSave" onAction="#handleSave" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Değişiklikleri Kaydet">
                 <font>
                     <Font size="14.0" />
                 </font>

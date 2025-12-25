@@ -5,32 +5,62 @@ import org.springframework.stereotype.Service;
 @Service
 public class GradeService {
 
-    // 1. Ortalama Hesaplama Mantığı (Vize %40 + Final %60)
+    private static final double MIDTERM_WEIGHT = 0.40;
+    private static final double FINAL_WEIGHT = 0.60;
+
+    private static final double THRESHOLD_AA = 90.0;
+    private static final double THRESHOLD_BA = 85.0;
+    private static final double THRESHOLD_BB = 80.0;
+    private static final double THRESHOLD_CB = 75.0;
+    private static final double THRESHOLD_CC = 70.0;
+    private static final double THRESHOLD_DC = 60.0;
+    private static final double THRESHOLD_DD = 50.0;
+    private static final double THRESHOLD_FD = 40.0;
+
     public Double calculateAverage(Double midterm, Double finalScore) {
-        if (midterm == null) midterm = 0.0;
-        if (finalScore == null) finalScore = 0.0;
-        
-        return (midterm * 0.4) + (finalScore * 0.6);
+        if (midterm == null || finalScore == null) {
+            return null;
+        }
+
+        return (midterm * MIDTERM_WEIGHT) + (finalScore * FINAL_WEIGHT);
     }
 
-    // 2. Harf Notu Belirleme Mantığı
     public String determineLetterGrade(Double average) {
-        if (average == null) return "FF";
-        
-        if (average >= 90) return "AA";
-        else if (average >= 85) return "BA";
-        else if (average >= 80) return "BB";
-        else if (average >= 75) return "CB";
-        else if (average >= 70) return "CC";
-        else if (average >= 60) return "DC";
-        else if (average >= 50) return "DD";
-        else if (average >= 40) return "FD";
-        else return "FF";
+        if (average == null) {
+            return null;
+        }
+
+        if (average >= THRESHOLD_AA) {
+            return "AA";
+        }
+        if (average >= THRESHOLD_BA) {
+            return "BA";
+        }
+        if (average >= THRESHOLD_BB) {
+            return "BB";
+        }
+        if (average >= THRESHOLD_CB) {
+            return "CB";
+        }
+        if (average >= THRESHOLD_CC) {
+            return "CC";
+        }
+        if (average >= THRESHOLD_DC) {
+            return "DC";
+        }
+        if (average >= THRESHOLD_DD) {
+            return "DD";
+        }
+        if (average >= THRESHOLD_FD) {
+            return "FD";
+        }
+        return "FF";
     }
 
-    // 3. Geçti/Kaldı Kontrolü
     public boolean isPassed(String letterGrade) {
-        // FF veya FD ise kaldı, diğer durumlarda geçti sayılır.
+        if (letterGrade == null || letterGrade.isBlank()) {
+            return false;
+        }
         return !letterGrade.equals("FF") && !letterGrade.equals("FD");
     }
 }

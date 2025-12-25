@@ -8,70 +8,62 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.coursetrackingautomation.controller.LoginController"
-            style="-fx-background-color: linear-gradient(to bottom, #667eea 0%, #764ba2 100%);"
+            stylesheets="@styles.css"
+            styleClass="app-background"
             prefHeight="600.0" prefWidth="800.0">
 
     <center>
-        <VBox alignment="CENTER" spacing="30.0" style="-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 15;">
+        <VBox alignment="CENTER" spacing="26.0" styleClass="card">
             <padding>
-                <Insets top="50.0" right="60.0" bottom="50.0" left="60.0"/>
+                <Insets top="48.0" right="58.0" bottom="48.0" left="58.0"/>
             </padding>
 
-            <!-- Title Section -->
             <VBox alignment="CENTER" spacing="10.0">
-                <Label text="Course Tracking Automation" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #667eea;">
+                <Label text="Ders Takip Otomasyonu" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
                     <font>
-                        <Font name="System Bold" size="32.0"/>
+                        <Font name="System Bold" size="30.0"/>
                     </font>
                 </Label>
-                <Label text="Welcome Back" style="-fx-font-size: 16px; -fx-text-fill: #666;">
+                <Label text="Tekrar Hoşgeldiniz" style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;">
                     <font>
                         <Font name="System" size="16.0"/>
                     </font>
                 </Label>
             </VBox>
 
-            <!-- Login Form -->
-            <VBox spacing="20.0" prefWidth="350.0">
-                <!-- Username Field -->
+            <VBox spacing="18.0" prefWidth="340.0">
                 <VBox spacing="5.0">
-                    <Label text="Username" style="-fx-font-size: 14px; -fx-text-fill: #333; -fx-font-weight: bold;">
+                    <Label text="Kullanıcı Adı" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-font-weight: bold;">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
                     </Label>
-                    <TextField fx:id="usernameField" promptText="Enter your username" 
-                               style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 12px; -fx-font-size: 14px;"/>
+                    <TextField fx:id="usernameField" promptText="Kullanıcı adınızı girin" styleClass="input"/>
                 </VBox>
 
-                <!-- Password Field -->
                 <VBox spacing="5.0">
-                    <Label text="Password" style="-fx-font-size: 14px; -fx-text-fill: #333; -fx-font-weight: bold;">
+                    <Label text="Şifre" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-font-weight: bold;">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
                     </Label>
-                    <PasswordField fx:id="passwordField" promptText="Enter your password"
-                                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 12px; -fx-font-size: 14px;"/>
+                    <PasswordField fx:id="passwordField" promptText="Şifrenizi girin" styleClass="input"/>
                 </VBox>
 
-                <!-- Error Label -->
                 <Label fx:id="errorLabel" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 12px;" visible="false"/>
 
-                <!-- Login Button -->
-                <Button fx:id="loginButton" text="Login" 
+                <Button fx:id="loginButton" text="Giriş Yap"
                         onAction="#handleLogin"
-                        style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 12px; -fx-cursor: hand;"
-                        prefHeight="45.0" prefWidth="350.0">
+                        styleClass="btn-primary-green"
+                        prefHeight="45.0" prefWidth="340.0">
                     <font>
                         <Font name="System Bold" size="16.0"/>
                     </font>
                 </Button>
             </VBox>
 
-            <!-- Footer -->
-            <Label text="© 2024 Course Tracking Automation System" 
-                   style="-fx-font-size: 12px; -fx-text-fill: #999;"/>
+            <Label text="© 2024 Ders Takip Otomasyonu Sistemi"
+                   style="-fx-font-size: 12px; -fx-text-fill: #95a5a6;"/>
         </VBox>
     </center>
 

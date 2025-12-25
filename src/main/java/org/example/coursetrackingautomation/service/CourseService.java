@@ -2,24 +2,22 @@ package org.example.coursetrackingautomation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.coursetrackingautomation.dto.CreateCourseRequest;
 import org.example.coursetrackingautomation.dto.CourseDTO;
+import org.example.coursetrackingautomation.dto.UpdateCourseRequest;
 import org.example.coursetrackingautomation.entity.Course;
 import org.example.coursetrackingautomation.entity.Enrollment;
+import org.example.coursetrackingautomation.entity.Role;
+import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.repository.CourseRepository;
 import org.example.coursetrackingautomation.repository.EnrollmentRepository;
+import org.example.coursetrackingautomation.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Course işlemlerini yöneten service sınıfı
- * - Ders oluşturma ve kontenjan belirleme
- * - Soft delete (is_active=false) ve enrollment durumu güncelleme
- * - Entity'den DTO'ya dönüşüm (Mapper işlevselliği dahil)
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,37 +25,27 @@ public class CourseService {
     
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final UserRepository userRepository;
+
+    private static final String DEFAULT_TERM = "N/A";
     
-    // Aktif enrollment durumları
-    private static final List<String> ACTIVE_ENROLLMENT_STATUSES = 
-        Arrays.asList("ACTIVE", "ENROLLED", "REGISTERED");
+    private static final List<String> ACTIVE_ENROLLMENT_STATUSES = List.of("ACTIVE", "ENROLLED", "REGISTERED");
     
-    /**
-     * Yeni bir ders oluşturur ve kontenjan belirler
-     * 
-     * @param course Oluşturulacak ders
-     * @param quota Kontenjan sayısı (null ise varsayılan değer kullanılır)
-     * @return Oluşturulan ders
-     */
     @Transactional
     public Course createCourse(Course course, Integer quota) {
         log.info("Creating course with code: {}", course.getCode());
         
-        // Kontenjan kontrolü
         if (quota != null && quota <= 0) {
             throw new IllegalArgumentException("Kontenjan 0'dan büyük olmalıdır");
         }
         
-        // Kontenjan belirleme
         if (quota != null) {
             course.setQuota(quota);
         } else if (course.getQuota() == null || course.getQuota() <= 0) {
-            // Varsayılan kontenjan
             course.setQuota(30);
             log.info("Default quota (30) set for course: {}", course.getCode());
         }
         
-        // Ders aktif olarak oluşturulur
         course.setActive(true);
         
         Course savedCourse = courseRepository.save(course);
@@ -67,21 +55,56 @@ public class CourseService {
         return savedCourse;
     }
     
-    /**
-     * Ders oluşturur (quota parametresi olmadan)
-     */
     @Transactional
     public Course createCourse(Course course) {
         return createCourse(course, null);
     }
+
+    @Transactional
+    public Course createCourse(CreateCourseRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Ders oluşturma isteği boş olamaz");
+        }
+
+        String code = request.code() == null ? "" : request.code().trim();
+        String name = request.name() == null ? "" : request.name().trim();
+        Integer credit = request.credit();
+        Integer quota = request.quota();
+
+        if (code.isBlank()) {
+            throw new IllegalArgumentException("Ders kodu boş bırakılamaz");
+        }
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("Ders adı boş bırakılamaz");
+        }
+        if (credit == null || credit <= 0) {
+            throw new IllegalArgumentException("Kredi 0'dan büyük olmalıdır");
+        }
+
+        if (request.instructorId() == null) {
+            throw new IllegalArgumentException("Akademisyen seçimi zorunludur");
+        }
+
+        User instructor = userRepository.findById(request.instructorId())
+            .orElseThrow(() -> new IllegalArgumentException("Akademisyen bulunamadı: " + request.instructorId()));
+        if (instructor.getRole() != Role.INSTRUCTOR) {
+            throw new IllegalArgumentException("Seçilen kullanıcı akademisyen değil");
+        }
+        if (!instructor.isActive()) {
+            throw new IllegalArgumentException("Seçilen akademisyen aktif değil");
+        }
+
+        Course course = Course.builder()
+            .code(code)
+            .name(name)
+            .credit(credit)
+            .term(request.term() == null || request.term().isBlank() ? DEFAULT_TERM : request.term().trim())
+            .instructor(instructor)
+            .build();
+
+        return createCourse(course, quota);
+    }
     
-    /**
-     * Mevcut bir dersin kontenjanını günceller
-     * 
-     * @param courseId Ders ID
-     * @param newQuota Yeni kontenjan
-     * @return Güncellenmiş ders
-     */
     @Transactional
     public Course updateQuota(Long courseId, Integer newQuota) {
         log.info("Updating quota for course ID: {} to {}", courseId, newQuota);
@@ -91,14 +114,13 @@ public class CourseService {
         }
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + courseId));
         
-        // Mevcut aktif kayıt sayısını kontrol et
         long currentEnrollments = getCurrentEnrollmentCount(course);
         
         if (newQuota < currentEnrollments) {
             throw new IllegalArgumentException(
-                String.format("Yeni kontenjan (%d) mevcut kayıt sayısından (%d) küçük olamaz", 
+                String.format("Yeni kontenjan (%d) mevcut kayıt sayısından (%d) küçük olamaz",
                     newQuota, currentEnrollments));
         }
         
@@ -108,35 +130,91 @@ public class CourseService {
         log.info("Quota updated successfully for course ID: {}", courseId);
         return updatedCourse;
     }
+
+    @Transactional
+    public Course updateCourse(Long courseId, UpdateCourseRequest request) {
+        if (courseId == null) {
+            throw new IllegalArgumentException("Ders id boş olamaz");
+        }
+        if (request == null) {
+            throw new IllegalArgumentException("Güncelleme isteği boş olamaz");
+        }
+
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + courseId));
+
+        if (request.name() != null && !request.name().trim().isBlank()) {
+            course.setName(request.name().trim());
+        }
+
+        if (request.credit() != null) {
+            if (request.credit() <= 0) {
+                throw new IllegalArgumentException("Kredi 0'dan büyük olmalıdır");
+            }
+            course.setCredit(request.credit());
+        }
+
+        if (request.term() != null && !request.term().trim().isBlank()) {
+            course.setTerm(request.term().trim());
+        }
+
+        if (request.quota() != null) {
+            Integer newQuota = request.quota();
+            if (newQuota <= 0) {
+                throw new IllegalArgumentException("Kontenjan 0'dan büyük olmalıdır");
+            }
+
+            long currentEnrollments = getCurrentEnrollmentCount(course);
+            if (newQuota < currentEnrollments) {
+                throw new IllegalArgumentException(
+                    String.format("Yeni kontenjan (%d) mevcut kayıt sayısından (%d) küçük olamaz", newQuota, currentEnrollments)
+                );
+            }
+            course.setQuota(newQuota);
+        }
+
+        if (request.active() != null) {
+            if (!request.active()) {
+                deactivateCourse(courseId);
+                return courseRepository.findById(courseId)
+                    .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + courseId));
+            }
+            course.setActive(true);
+        }
+
+        if (request.instructorId() != null) {
+            User instructor = userRepository.findById(request.instructorId())
+                .orElseThrow(() -> new IllegalArgumentException("Akademisyen bulunamadı: " + request.instructorId()));
+            if (instructor.getRole() != Role.INSTRUCTOR) {
+                throw new IllegalArgumentException("Seçilen kullanıcı akademisyen değil");
+            }
+            if (!instructor.isActive()) {
+                throw new IllegalArgumentException("Seçilen akademisyen aktif değil");
+            }
+            course.setInstructor(instructor);
+        }
+
+        Course saved = courseRepository.save(course);
+        log.info("Course updated: id={}, code={}", saved.getId(), saved.getCode());
+        return saved;
+    }
     
-    /**
-     * Dersi soft delete yapar (is_active=false)
-     * Dersi alan öğrencilerin kayıt durumunu CANCELLED veya DROPPED olarak günceller
-     * 
-     * @param courseId Silinecek ders ID
-     */
     @Transactional
     public void deactivateCourse(Long courseId) {
         log.info("Deactivating course ID: {}", courseId);
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + courseId));
         
         if (!course.isActive()) {
             log.warn("Course ID: {} is already deactivated", courseId);
             return;
         }
         
-        // Dersi pasif olarak işaretle
         course.setActive(false);
         courseRepository.save(course);
         
-        // Dersi alan öğrencilerin kayıtlarını güncelle
-        List<Enrollment> allEnrollments = enrollmentRepository.findAll();
-        List<Enrollment> activeEnrollments = allEnrollments.stream()
-            .filter(e -> e.getCourse().getId().equals(courseId))
-            .filter(e -> ACTIVE_ENROLLMENT_STATUSES.contains(e.getStatus()))
-            .collect(Collectors.toList());
+        List<Enrollment> activeEnrollments = enrollmentRepository.findByCourseIdAndStatusIn(courseId, ACTIVE_ENROLLMENT_STATUSES);
         
         int updatedCount = 0;
         for (Enrollment enrollment : activeEnrollments) {
@@ -153,51 +231,32 @@ public class CourseService {
         log.info("Course ID: {} deactivated successfully", courseId);
     }
     
-    /**
-     * Ders bilgilerini getirir
-     */
     @Transactional(readOnly = true)
     public Course getCourseById(Long courseId) {
         return courseRepository.findById(courseId)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + courseId));
+            .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + courseId));
     }
     
-    /**
-     * Ders koduna göre ders getirir
-     */
     @Transactional(readOnly = true)
     public Course getCourseByCode(String code) {
         return courseRepository.findByCode(code)
-            .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + code));
+            .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + code));
     }
     
-    /**
-     * Belirli bir dersin mevcut aktif kayıt sayısını döndürür
-     */
     @Transactional(readOnly = true)
     public long getCurrentEnrollmentCount(Course course) {
-        List<Enrollment> allEnrollments = enrollmentRepository.findAll();
-        return allEnrollments.stream()
-            .filter(e -> e.getCourse().getId().equals(course.getId()))
-            .filter(e -> ACTIVE_ENROLLMENT_STATUSES.contains(e.getStatus()))
-            .count();
+        if (course == null || course.getId() == null) {
+            return 0L;
+        }
+        return enrollmentRepository.countByCourseIdAndStatusIn(course.getId(), ACTIVE_ENROLLMENT_STATUSES);
     }
     
-    /**
-     * Belirli bir dersin mevcut aktif kayıt sayısını döndürür (ID ile)
-     */
     @Transactional(readOnly = true)
     public long getCurrentEnrollmentCount(Long courseId) {
         Course course = getCourseById(courseId);
         return getCurrentEnrollmentCount(course);
     }
     
-    /**
-     * Belirli bir dersin kontenjan durumunu kontrol eder
-     * 
-     * @param courseId Ders ID
-     * @return true eğer kontenjan doluysa
-     */
     @Transactional(readOnly = true)
     public boolean isQuotaFull(Long courseId) {
         Course course = getCourseById(courseId);
@@ -205,11 +264,6 @@ public class CourseService {
         return currentEnrollments >= course.getQuota();
     }
     
-    // ========== DTO DÖNÜŞÜM METODLARI (Mapper işlevselliği) ==========
-    
-    /**
-     * Course entity'sini CourseDTO'ya dönüştürür (Mapper işlevi)
-     */
     private CourseDTO toDTO(Course course, Long currentEnrollmentCount) {
         if (course == null) {
             return null;
@@ -224,14 +278,12 @@ public class CourseService {
             .term(course.getTerm())
             .active(course.isActive());
         
-        // Instructor bilgileri
         if (course.getInstructor() != null) {
             builder.instructorId(course.getInstructor().getId())
                    .instructorName(course.getInstructor().getFirstName() + " " + 
                                   course.getInstructor().getLastName());
         }
         
-        // İstatistikler
         if (currentEnrollmentCount != null) {
             builder.currentEnrollmentCount(currentEnrollmentCount);
             if (course.getQuota() != null) {
@@ -242,9 +294,6 @@ public class CourseService {
         return builder.build();
     }
     
-    /**
-     * Course entity'sini CourseDTO'ya dönüştürür
-     */
     @Transactional(readOnly = true)
     public CourseDTO getCourseDTOById(Long courseId) {
         Course course = getCourseById(courseId);
@@ -252,9 +301,6 @@ public class CourseService {
         return toDTO(course, currentEnrollments);
     }
     
-    /**
-     * Course koduna göre CourseDTO getirir
-     */
     @Transactional(readOnly = true)
     public CourseDTO getCourseDTOByCode(String code) {
         Course course = getCourseByCode(code);
@@ -262,14 +308,9 @@ public class CourseService {
         return toDTO(course, currentEnrollments);
     }
     
-    /**
-     * Tüm aktif dersleri CourseDTO listesi olarak getirir
-     */
     @Transactional(readOnly = true)
     public List<CourseDTO> getAllActiveCourseDTOs() {
-        List<Course> courses = courseRepository.findAll().stream()
-            .filter(Course::isActive)
-            .collect(Collectors.toList());
+        List<Course> courses = courseRepository.findByActiveTrue();
         
         return courses.stream()
             .map(course -> {
@@ -279,9 +320,6 @@ public class CourseService {
             .collect(Collectors.toList());
     }
     
-    /**
-     * Tüm dersleri (aktif ve pasif) CourseDTO listesi olarak getirir
-     */
     @Transactional(readOnly = true)
     public List<CourseDTO> getAllCourseDTOs() {
         List<Course> courses = courseRepository.findAll();

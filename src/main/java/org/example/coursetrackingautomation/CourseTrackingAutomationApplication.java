@@ -1,9 +1,9 @@
 package org.example.coursetrackingautomation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -12,11 +12,12 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 @SpringBootApplication
+@Slf4j
 public class CourseTrackingAutomationApplication extends Application {
 
     private static ConfigurableApplicationContext springContext;
     private static final String LOGIN_FXML_PATH = "/fxml/login.fxml";
-    private static final String APPLICATION_TITLE = "Course Tracking Automation";
+    private static final String APPLICATION_TITLE = "Ders Takip Otomasyonu";
     private static final double WINDOW_WIDTH = 800.0;
     private static final double WINDOW_HEIGHT = 600.0;
 
@@ -40,8 +41,7 @@ public class CourseTrackingAutomationApplication extends Application {
             primaryStage.centerOnScreen();
             primaryStage.show();
         } catch (Exception e) {
-            System.err.println("Error loading login screen: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error loading login screen", e);
         }
     }
 
