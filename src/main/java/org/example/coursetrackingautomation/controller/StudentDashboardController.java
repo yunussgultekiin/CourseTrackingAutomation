@@ -72,12 +72,15 @@ public class StudentDashboardController {
     private final SceneNavigator sceneNavigator;
     private final UiExceptionHandler uiExceptionHandler;
     private final ApplicationContext applicationContext;
+    @Autowired
+    private GradeService gradeService;
 
     @FXML
     public void initialize() {
         colCourseCode.setCellValueFactory(new PropertyValueFactory<>("courseCode"));
         colCourseName.setCellValueFactory(new PropertyValueFactory<>("courseName"));
         colCredit.setCellValueFactory(new PropertyValueFactory<>("credit"));
+        colCourseName.setCellValueFactory(new PropertyValueFactory<>("courseCode")); 
         
         colMidterm.setCellValueFactory(new PropertyValueFactory<>("midtermScore"));
         colFinal.setCellValueFactory(new PropertyValueFactory<>("finalScore"));
@@ -86,6 +89,7 @@ public class StudentDashboardController {
         colAttendance.setCellValueFactory(new PropertyValueFactory<>("attendanceCount"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
+<<<<<<< HEAD
         setupRowColorFactory();
         refresh();
     }
@@ -201,5 +205,21 @@ public class StudentDashboardController {
         } catch (Exception e) {
             uiExceptionHandler.handle(e);
         }
+        loadDummyData();
+    }
+
+    private void loadDummyData() {
+        ObservableList<GradeDTO> list = FXCollections.observableArrayList();
+        
+        Double avg = gradeService.calculateAverage(50.0, 60.0);
+        String letter = gradeService.determineLetterGrade(avg);
+        String status = gradeService.isPassed(letter) ? "GEÇTİ" : "KALDI";
+
+        list.add(new GradeDTO(1L, "Zeynep", "CSE101", 50.0, 60.0, avg, letter, status, 2, false));
+        list.add(new GradeDTO(2L, "Zeynep", "MATH101", 80.0, 90.0, 86.0, "BA", "GECTI", 0, false));
+        
+        tableStudentCourses.setItems(list);
+        
+        lblGpa.setText(String.format("%.2f", avg));
     }
 }

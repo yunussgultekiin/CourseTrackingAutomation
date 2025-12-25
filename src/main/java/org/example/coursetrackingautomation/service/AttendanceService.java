@@ -15,6 +15,9 @@ public class AttendanceService {
         }
 
         double absentRatio = (double) currentAbsentHours / (double) totalCourseHours;
+        if (totalCourseHours == 0) return false; 
+        
+        double absentRatio = (double) currentAbsentHours / totalCourseHours;
         return absentRatio >= CRITICAL_PERCENTAGE;
     }
 
