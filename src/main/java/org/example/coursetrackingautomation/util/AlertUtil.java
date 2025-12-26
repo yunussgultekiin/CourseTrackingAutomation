@@ -2,9 +2,11 @@ package org.example.coursetrackingautomation.util;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.scene.text.Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -95,9 +97,51 @@ public class AlertUtil {
     }
 
     private void styleAlert(Alert alert) {
+        applyModernDialogIcon(alert);
+
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initStyle(StageStyle.DECORATED);
+    }
+
+    /**
+     * UI-only: Replace the default (often outdated) platform icon with a minimal glyph.
+     */
+    private static void applyModernDialogIcon(Alert alert) {
+        if (alert == null) {
+            return;
+        }
+
+        String glyph;
+        String color;
+
+        switch (alert.getAlertType()) {
+            case ERROR -> {
+                glyph = "✕";
+                color = "#e74c3c";
+            }
+            case WARNING -> {
+                glyph = "!";
+                color = "#7f8c8d";
+            }
+            case CONFIRMATION -> {
+                glyph = "?";
+                color = "#7f8c8d";
+            }
+            case INFORMATION -> {
+                glyph = "ℹ";
+                color = "#7f8c8d";
+            }
+            default -> {
+                glyph = "";
+                color = "#7f8c8d";
+            }
+        }
+
+        Label graphic = new Label(glyph);
+        graphic.setFont(Font.font("System", 26));
+        graphic.setStyle("-fx-font-weight: bold; -fx-text-fill: " + color + ";");
+        alert.setGraphic(graphic);
     }
 }
 

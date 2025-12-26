@@ -26,7 +26,7 @@
             <TableColumn fx:id="colFinal" text="Final" prefWidth="90" />
             <TableColumn fx:id="colAverage" text="Ortalama" prefWidth="100" />
             <TableColumn fx:id="colLetter" text="Harf" prefWidth="90" />
-            <TableColumn fx:id="colAttendance" text="Devamsızlık" prefWidth="90" />
+            <TableColumn fx:id="colAttendance" text="Devamsızlık (Saat)" prefWidth="120" />
             <TableColumn fx:id="colStatus" text="Durum" prefWidth="100" />
         </columns>
         <columnResizePolicy>

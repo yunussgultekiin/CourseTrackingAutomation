@@ -47,6 +47,15 @@ public class Course extends BaseEntity {
     @Column(name = "term", nullable = false, length = MAX_TERM_LENGTH)
     private String term;
 
+    @Column(name = "weekly_total_hours")
+    private Integer weeklyTotalHours;
+
+    @Column(name = "weekly_theory_hours")
+    private Integer weeklyTheoryHours;
+
+    @Column(name = "weekly_practice_hours")
+    private Integer weeklyPracticeHours;
+
     @Column(name = "is_active", nullable = false)
     private boolean active;
 

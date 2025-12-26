@@ -1,9 +1,7 @@
 package org.example.coursetrackingautomation.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +10,7 @@ import org.example.coursetrackingautomation.entity.Role;
 import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import javafx.collections.FXCollections;
 import javafx.util.StringConverter;
@@ -21,29 +20,15 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class AddCourseFormController {
 
-    @FXML
-    private TextField courseCodeField;
-
-    @FXML
-    private TextField courseNameField;
-
-    @FXML
-    private ComboBox<User> instructorCombo;
-
-    @FXML
-    private TextArea descriptionField;
-
-    @FXML
-    private DatePicker startDatePicker;
-
-    @FXML
-    private DatePicker endDatePicker;
-
-    @FXML
-    private TextField creditsField;
-
-    @FXML
-    private TextField capacityField;
+    @FXML private TextField courseCodeField;
+    @FXML private TextField courseNameField;
+    @FXML private TextField termField;
+    @FXML private ComboBox<User> instructorCombo;
+    @FXML private TextField creditsField;
+    @FXML private TextField capacityField;
+    @FXML private TextField weeklyTotalHoursField;
+    @FXML private TextField weeklyTheoryHoursField;
+    @FXML private TextField weeklyPracticeHoursField;
 
     private final CourseService courseService;
     private final UserService userService;
@@ -79,25 +64,35 @@ public class AddCourseFormController {
     @FXML
     public void handleSave() {
         try {
-            Integer credit = parsePositiveInt(creditsField.getText(), "Kredi");
-            Integer quota = parsePositiveInt(capacityField.getText(), "Kapasite");
+            String code = requireNotBlank(safeTrim(courseCodeField.getText()), "Code");
+            String name = requireNotBlank(safeTrim(courseNameField.getText()), "Name");
+            String term = requireNotBlank(safeTrim(termField.getText()), "Term");
 
-            String term = startDatePicker.getValue() == null
-                ? ""
-                : String.valueOf(startDatePicker.getValue().getYear());
+            Integer credit = parsePositiveInt(creditsField.getText(), "Credit");
+            Integer quota = parsePositiveInt(capacityField.getText(), "Capacity");
+
+            Integer weeklyTotalHours = parsePositiveInt(weeklyTotalHoursField.getText(), "Haftalık toplam saat");
+            Integer weeklyTheoryHours = parseNonNegativeInt(weeklyTheoryHoursField.getText(), "Haftalık teori saati");
+            Integer weeklyPracticeHours = parseNonNegativeInt(weeklyPracticeHoursField.getText(), "Haftalık uygulama saati");
+            if ((weeklyTheoryHours + weeklyPracticeHours) != weeklyTotalHours) {
+                throw new IllegalArgumentException("Haftalık toplam saat, teori + uygulama toplamına eşit olmalıdır");
+            }
 
             if (instructorCombo.getValue() == null) {
-                throw new IllegalArgumentException("Akademisyen seçimi zorunludur");
+                throw new IllegalArgumentException(UiConstants.ERROR_KEY_INSTRUCTOR_SELECTION_REQUIRED);
             }
             Long instructorId = instructorCombo.getValue().getId();
 
             CreateCourseRequest request = new CreateCourseRequest(
-                safeTrim(courseCodeField.getText()),
-                safeTrim(courseNameField.getText()),
+                code,
+                name,
                 credit,
                 quota,
                 term,
-                instructorId
+                instructorId,
+                weeklyTotalHours,
+                weeklyTheoryHours,
+                weeklyPracticeHours
             );
 
             courseService.createCourse(request);
@@ -120,16 +115,40 @@ public class AddCourseFormController {
     private static Integer parsePositiveInt(String raw, String fieldName) {
         String safe = raw == null ? "" : raw.trim();
         if (safe.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
+            throw new IllegalArgumentException(fieldName + " must not be blank");
         }
         int value;
         try {
             value = Integer.parseInt(safe);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(fieldName + " sayısal olmalıdır");
+            throw new IllegalArgumentException(fieldName + " must be a number");
         }
         if (value <= 0) {
-            throw new IllegalArgumentException(fieldName + " 0'dan büyük olmalıdır");
+            throw new IllegalArgumentException(fieldName + " must be greater than 0");
+        }
+        return value;
+    }
+
+    private static Integer parseNonNegativeInt(String raw, String fieldName) {
+        String safe = raw == null ? "" : raw.trim();
+        if (safe.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " must not be blank");
+        }
+        int value;
+        try {
+            value = Integer.parseInt(safe);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(fieldName + " must be a number");
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException(fieldName + " 0 veya daha büyük olmalıdır");
+        }
+        return value;
+    }
+
+    private static String requireNotBlank(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " must not be blank");
         }
         return value;
     }

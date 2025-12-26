@@ -4,17 +4,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.*?>
-<?import javafx.collections.FXCollections?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
     fx:controller="org.example.coursetrackingautomation.controller.AddUserFormController"
       spacing="18.0"
-      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 28px;"
-      prefWidth="520.0" prefHeight="660.0">
+    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 28px;"
+    prefWidth="520.0" prefHeight="600.0">
 
     <padding>
         <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
@@ -97,16 +93,6 @@
         </Label>
         <TextField fx:id="phoneField" promptText="Örn: 555-123-4567"
                    style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
-
-    <VBox spacing="5.0">
-        <Label text="Doğum Tarihi" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <DatePicker fx:id="birthDatePicker"
-                    style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 6px; -fx-font-size: 14px;"/>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS"/>

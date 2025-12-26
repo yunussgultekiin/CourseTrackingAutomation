@@ -6,11 +6,12 @@ import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.CourseDTO;
-import org.example.coursetrtrackingautomation.entity.Role;
+import org.example.coursetrackingautomation.entity.Role;
 import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.service.AdminDashboardService;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
 
@@ -18,11 +19,8 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class AdminEnrollStudentFormController {
 
-    @FXML
-    private ComboBox<UserOption> comboStudent;
-
-    @FXML
-    private ComboBox<CourseOption> comboCourse;
+    @FXML private ComboBox<UserOption> comboStudent;
+    @FXML private ComboBox<CourseOption> comboCourse;
 
     private final UserService userService;
     private final CourseService courseService;
@@ -54,10 +52,10 @@ public class AdminEnrollStudentFormController {
             CourseOption course = comboCourse.getValue();
 
             if (student == null || student.id() == null) {
-                throw new IllegalArgumentException("Student must be selected");
+                throw new IllegalArgumentException(UiConstants.ERROR_KEY_STUDENT_SELECTION_REQUIRED);
             }
             if (course == null || course.id() == null) {
-                throw new IllegalArgumentException("Course must be selected");
+                throw new IllegalArgumentException(UiConstants.ERROR_KEY_COURSE_SELECTION_REQUIRED);
             }
 
             adminDashboardService.enrollStudent(student.id(), course.id());

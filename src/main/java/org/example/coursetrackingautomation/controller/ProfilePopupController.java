@@ -10,6 +10,7 @@ import org.example.coursetrackingautomation.config.UserSession;
 import org.example.coursetrackingautomation.dto.SessionUser;
 import org.example.coursetrackingautomation.dto.UpdateUserRequest;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.example.coursetrackingautomation.util.AlertUtil;
 import org.springframework.stereotype.Controller;
@@ -18,29 +19,14 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class ProfilePopupController {
 
-    @FXML
-    private Label lblUsername;
-
-    @FXML
-    private PasswordField txtCurrentPassword;
-
-    @FXML
-    private PasswordField txtNewPassword;
-
-    @FXML
-    private PasswordField txtConfirmPassword;
-
-    @FXML
-    private TextField txtFirstName;
-
-    @FXML
-    private TextField txtLastName;
-
-    @FXML
-    private TextField txtEmail;
-
-    @FXML
-    private TextField txtPhone;
+    @FXML private Label lblUsername;
+    @FXML private PasswordField txtCurrentPassword;
+    @FXML private PasswordField txtNewPassword;
+    @FXML private PasswordField txtConfirmPassword;
+    @FXML private TextField txtFirstName;
+    @FXML private TextField txtLastName;
+    @FXML private TextField txtEmail;
+    @FXML private TextField txtPhone;
 
     private final UserSession userSession;
     private final UserService userService;
@@ -51,7 +37,7 @@ public class ProfilePopupController {
     public void initialize() {
         try {
             var currentUser = userSession.getCurrentUser()
-                .orElseThrow(() -> new IllegalStateException("Aktif oturum yok"));
+                .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION));
             lblUsername.setText(currentUser.username());
             txtFirstName.setText(currentUser.firstName());
             txtLastName.setText(currentUser.lastName());
@@ -67,7 +53,7 @@ public class ProfilePopupController {
     public void handleSave() {
         try {
             var currentUser = userSession.getCurrentUser()
-                .orElseThrow(() -> new IllegalStateException("Aktif oturum yok"));
+                .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION));
 
             String firstName = safeTrim(txtFirstName.getText());
             String lastName = safeTrim(txtLastName.getText());
@@ -75,10 +61,10 @@ public class ProfilePopupController {
             String phone = safeTrimOrNull(txtPhone.getText());
 
             if (firstName.isBlank()) {
-                throw new IllegalArgumentException("Ad boş bırakılamaz");
+                throw new IllegalArgumentException("First name must not be blank");
             }
             if (lastName.isBlank()) {
-                throw new IllegalArgumentException("Soyad boş bırakılamaz");
+                throw new IllegalArgumentException("Last name must not be blank");
             }
 
             userService.updateUser(currentUser.id(), new UpdateUserRequest(
@@ -104,18 +90,18 @@ public class ProfilePopupController {
             boolean passwordSectionTouched = !currentPassword.isBlank() || !newPassword.isBlank() || !confirmPassword.isBlank();
             if (passwordSectionTouched) {
                 if (currentPassword.isBlank()) {
-                    throw new IllegalArgumentException("Mevcut şifre boş bırakılamaz");
+                    throw new IllegalArgumentException("Current password must not be blank");
                 }
                 if (newPassword.isBlank()) {
-                    throw new IllegalArgumentException("Yeni şifre boş bırakılamaz");
+                    throw new IllegalArgumentException("New password must not be blank");
                 }
                 if (!newPassword.equals(confirmPassword)) {
-                    throw new IllegalArgumentException("Yeni şifre ile doğrulama şifresi uyuşmuyor");
+                    throw new IllegalArgumentException("New password and confirmation do not match");
                 }
                 userService.changePassword(currentUser.id(), currentPassword, newPassword);
             }
 
-            alertUtil.showSuccessAlert("Başarılı", "Profil bilgileriniz güncellendi.");
+            alertUtil.showSuccessAlert(UiConstants.ALERT_TITLE_SUCCESS, UiConstants.UI_MESSAGE_PROFILE_UPDATED);
             close();
         } catch (Exception e) {
             uiExceptionHandler.handle(e);

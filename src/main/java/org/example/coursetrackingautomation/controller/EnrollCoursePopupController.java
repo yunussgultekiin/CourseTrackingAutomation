@@ -5,20 +5,28 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.config.UserSession;
 import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.EnrollmentService;
+import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
 public class EnrollCoursePopupController {
+
+    private static final String PROPERTY_CODE = "code";
+    private static final String PROPERTY_NAME = "name";
+    private static final String PROPERTY_CREDIT = "credit";
+    private static final String PROPERTY_AVAILABLE_QUOTA = "availableQuota";
 
     @FXML
     private TableView<CourseDTO> tableCourses;
@@ -48,10 +56,24 @@ public class EnrollCoursePopupController {
 
     @FXML
     public void initialize() {
-        colCode.setCellValueFactory(new PropertyValueFactory<>("code"));
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colCredit.setCellValueFactory(new PropertyValueFactory<>("credit"));
-        colAvailable.setCellValueFactory(new PropertyValueFactory<>("availableQuota"));
+        colCode.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_CODE));
+        colName.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_NAME));
+        colCredit.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_CREDIT));
+        colAvailable.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_AVAILABLE_QUOTA));
+
+        tableCourses.setRowFactory(tv -> {
+            TableRow<CourseDTO> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getButton() != MouseButton.PRIMARY) {
+                    return;
+                }
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    tableCourses.getSelectionModel().select(row.getItem());
+                    handleEnroll();
+                }
+            });
+            return row;
+        });
 
         refreshCourses();
     }
@@ -61,11 +83,11 @@ public class EnrollCoursePopupController {
         try {
             CourseDTO selected = tableCourses.getSelectionModel().getSelectedItem();
             if (selected == null || selected.getId() == null) {
-                throw new IllegalArgumentException("Please select a course");
+                throw new IllegalArgumentException(UiConstants.ERROR_KEY_COURSE_SELECTION_REQUIRED);
             }
 
             Long studentId = userSession.getCurrentUser()
-                .orElseThrow(() -> new IllegalStateException("No active session"))
+                .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION))
                 .id();
 
             enrollmentService.enrollStudent(studentId, selected.getId());

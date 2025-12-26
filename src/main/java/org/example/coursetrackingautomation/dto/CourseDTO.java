@@ -17,6 +17,9 @@ public class CourseDTO {
     private Integer quota;
     private String term;
     private Boolean active;
+    private Integer weeklyTotalHours;
+    private Integer weeklyTheoryHours;
+    private Integer weeklyPracticeHours;
     private Long instructorId;
     private String instructorName;
     private Long currentEnrollmentCount;

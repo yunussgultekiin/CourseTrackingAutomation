@@ -14,6 +14,9 @@ public class GradeDTO {
     private String courseCode;  
     private String courseName;  
     private Integer credit;   
+    private Integer weeklyTotalHours;
+    private Integer weeklyTheoryHours;
+    private Integer weeklyPracticeHours;
     private Double midtermScore;   
     private Double finalScore;   
     private Double averageScore;  

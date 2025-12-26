@@ -16,23 +16,12 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class EditUserFormController {
 
-    @FXML
-    private Label lblUsername;
-
-    @FXML
-    private TextField txtFirstName;
-
-    @FXML
-    private TextField txtLastName;
-
-    @FXML
-    private TextField txtEmail;
-
-    @FXML
-    private TextField txtPhone;
-
-    @FXML
-    private PasswordField txtPassword;
+    @FXML private Label lblUsername;
+    @FXML private TextField txtFirstName;
+    @FXML private TextField txtLastName;
+    @FXML private TextField txtEmail;
+    @FXML private TextField txtPhone;
+    @FXML private PasswordField txtPassword;
 
     private final UserService userService;
     private final UiExceptionHandler uiExceptionHandler;
@@ -66,12 +55,15 @@ public class EditUserFormController {
     public void handleSave() {
         try {
             if (userId == null) {
-                throw new IllegalArgumentException("Kullanıcı id boş olamaz");
+                throw new IllegalArgumentException("User id must not be blank");
             }
 
+            String firstName = requireNotBlank(safeTrim(txtFirstName.getText()), "First name");
+            String lastName = requireNotBlank(safeTrim(txtLastName.getText()), "Last name");
+
             UpdateUserRequest request = new UpdateUserRequest(
-                safeTrim(txtFirstName.getText()),
-                safeTrim(txtLastName.getText()),
+                firstName,
+                lastName,
                 safeTrimToNull(txtEmail.getText()),
                 safeTrimToNull(txtPhone.getText()),
                 txtPassword.getText() == null ? null : txtPassword.getText()
@@ -101,5 +93,12 @@ public class EditUserFormController {
     private static String safeTrimToNull(String value) {
         String trimmed = value == null ? "" : value.trim();
         return trimmed.isBlank() ? null : trimmed;
+    }
+
+    private static String requireNotBlank(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " must not be blank");
+        }
+        return value;
     }
 }

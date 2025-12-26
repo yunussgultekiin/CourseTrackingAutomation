@@ -34,16 +34,25 @@ public class DataSeeder implements CommandLineRunner {
     private static final String[] FIRST_NAMES = {"Ali", "Veli", "Ayşe", "Fatma", "Mehmet", "Zeynep", "Can", "Elif", "Murat", "Selin"};
     private static final String[] LAST_NAMES = {"Yılmaz", "Kaya", "Demir", "Şahin", "Çelik", "Aydın", "Arslan", "Doğan", "Koç", "Öztürk"};
 
-    private record CourseSeedData(String code, String name, int credit, int quota) {}
+    private record CourseSeedData(
+        String code,
+        String name,
+        int credit,
+        int quota,
+        int weeklyTotalHours,
+        int weeklyTheoryHours,
+        int weeklyPracticeHours,
+        boolean active
+    ) {}
     private static final List<CourseSeedData> INITIAL_COURSES = List.of(
-        new CourseSeedData("BLM101", "Programlamaya Giriş", 4, 80),
-        new CourseSeedData("BLM102", "Veri Yapıları", 4, 70),
-        new CourseSeedData("BLM201", "Veritabanı Sistemleri", 3, 70),
-        new CourseSeedData("BLM202", "İşletim Sistemleri", 3, 60),
-        new CourseSeedData("MAT101", "Matematik I", 4, 90),
-        new CourseSeedData("IST101", "İstatistik", 3, 80),
-        new CourseSeedData("FIZ101", "Fizik I", 4, 80),
-        new CourseSeedData("ING101", "İngilizce I", 2, 100)
+        new CourseSeedData("BLM101", "Programlamaya Giriş", 4, 80, 4, 3, 1, true),
+        new CourseSeedData("BLM102", "Veri Yapıları", 4, 70, 4, 3, 1, true),
+        new CourseSeedData("BLM201", "Veritabanı Sistemleri", 3, 70, 3, 2, 1, true),
+        new CourseSeedData("BLM202", "İşletim Sistemleri", 3, 60, 3, 2, 1, false),
+        new CourseSeedData("MAT101", "Matematik I", 4, 90, 4, 4, 0, true),
+        new CourseSeedData("IST101", "İstatistik", 3, 80, 3, 3, 0, true),
+        new CourseSeedData("FIZ101", "Fizik I", 4, 80, 4, 3, 1, true),
+        new CourseSeedData("ING101", "İngilizce I", 2, 100, 2, 2, 0, true)
     );
 
     private final UserService userService;
@@ -55,11 +64,11 @@ public class DataSeeder implements CommandLineRunner {
     private final GradeService gradeService;
 
     @Override
+    @Transactional
     public void run(String... args) {
         seedAll();
     }
 
-    @Transactional
     protected void seedAll() {
         log.info("Checking and Seeding Data...");
 
@@ -103,7 +112,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private List<User> getOrSeedStudents() {
-        if (userRepository.countByRole(Role.STUDENT) > 0) {
+        if (userRepository.findFirstByRoleAndActiveTrue(Role.STUDENT).isPresent()) {
             return userRepository.findByRoleAndActiveTrue(Role.STUDENT);
         }
 
@@ -127,7 +136,61 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private List<Course> getOrSeedCourses(List<User> instructors) {
-        if (courseRepository.count() > 0) return courseRepository.findAll();
+        if (courseRepository.count() > 0) {
+            List<Course> existing = courseRepository.findAll();
+
+            boolean changed = false;
+            for (Course course : existing) {
+                Integer weeklyTotalHours = course.getWeeklyTotalHours();
+                Integer weeklyTheoryHours = course.getWeeklyTheoryHours();
+                Integer weeklyPracticeHours = course.getWeeklyPracticeHours();
+
+                if (weeklyTotalHours == null && weeklyTheoryHours == null && weeklyPracticeHours == null) {
+                    course.setWeeklyTotalHours(4);
+                    course.setWeeklyTheoryHours(2);
+                    course.setWeeklyPracticeHours(2);
+                    changed = true;
+                    continue;
+                }
+
+                if (weeklyTotalHours == null) {
+                    int total = (weeklyTheoryHours != null ? weeklyTheoryHours : 0) + (weeklyPracticeHours != null ? weeklyPracticeHours : 0);
+                    course.setWeeklyTotalHours(Math.max(total, 0));
+                    changed = true;
+                    weeklyTotalHours = course.getWeeklyTotalHours();
+                }
+
+                if (weeklyTheoryHours == null && weeklyPracticeHours == null) {
+                    int total = weeklyTotalHours != null ? weeklyTotalHours : 0;
+                    int theory = Math.max(total, 0);
+                    course.setWeeklyTheoryHours(theory);
+                    course.setWeeklyPracticeHours(0);
+                    changed = true;
+                    continue;
+                }
+
+                if (weeklyTheoryHours == null) {
+                    int total = weeklyTotalHours != null ? weeklyTotalHours : 0;
+                    int practice = weeklyPracticeHours != null ? weeklyPracticeHours : 0;
+                    course.setWeeklyTheoryHours(Math.max(total - practice, 0));
+                    changed = true;
+                }
+
+                if (weeklyPracticeHours == null) {
+                    int total = weeklyTotalHours != null ? weeklyTotalHours : 0;
+                    int theory = weeklyTheoryHours != null ? weeklyTheoryHours : 0;
+                    course.setWeeklyPracticeHours(Math.max(total - theory, 0));
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                courseRepository.saveAll(existing);
+                log.info("Existing courses updated with weekly hours defaults.");
+            }
+
+            return existing;
+        }
 
         log.info("Seeding courses...");
         List<Course> newCourses = new ArrayList<>();
@@ -142,7 +205,10 @@ public class DataSeeder implements CommandLineRunner {
                 .credit(data.credit())
                 .quota(data.quota())
                 .term(CURRENT_TERM)
-                .active(true)
+                .weeklyTotalHours(data.weeklyTotalHours())
+                .weeklyTheoryHours(data.weeklyTheoryHours())
+                .weeklyPracticeHours(data.weeklyPracticeHours())
+                .active(data.active())
                 .instructor(instructor)
                 .build();
 

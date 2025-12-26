@@ -23,21 +23,21 @@ public class CourseTrackingAutomationApplication extends Application {
 
     @Override
     public void init() {
-        springContext = SpringApplication.run(SpringEntry.class);
+        springContext = SpringApplication.run(CourseTrackingAutomationApplication.class);
     }
 
     @Override
     public void start(Stage primaryStage) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(LOGIN_FXML_PATH));
-            fxmlLoader.setControllerFactory(springContext::getBean);
+            fxmlLoader.setControllerFactory(clazz -> springContext.getAutowireCapableBeanFactory().createBean(clazz));
             
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
             
             primaryStage.setTitle(APPLICATION_TITLE);
             primaryStage.setScene(scene);
-            primaryStage.setResizable(false);
+            primaryStage.setResizable(true);
             primaryStage.centerOnScreen();
             primaryStage.show();
         } catch (Exception e) {

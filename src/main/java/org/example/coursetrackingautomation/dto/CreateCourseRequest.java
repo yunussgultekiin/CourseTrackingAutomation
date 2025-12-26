@@ -6,6 +6,9 @@ public record CreateCourseRequest(
     Integer credit,
     Integer quota,
     String term,
-    Long instructorId
+    Long instructorId,
+    Integer weeklyTotalHours,
+    Integer weeklyTheoryHours,
+    Integer weeklyPracticeHours
 ) {
 }

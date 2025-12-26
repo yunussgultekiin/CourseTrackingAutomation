@@ -85,6 +85,11 @@ public class CourseService {
             throw new IllegalArgumentException("Akademisyen seçimi zorunludur");
         }
 
+        Integer weeklyTotalHours = requireNonNegative(request.weeklyTotalHours(), "Haftalık toplam saat");
+        Integer weeklyTheoryHours = requireNonNegative(request.weeklyTheoryHours(), "Haftalık teori saati");
+        Integer weeklyPracticeHours = requireNonNegative(request.weeklyPracticeHours(), "Haftalık uygulama saati");
+        validateWeeklyHours(weeklyTotalHours, weeklyTheoryHours, weeklyPracticeHours);
+
         User instructor = userRepository.findById(request.instructorId())
             .orElseThrow(() -> new IllegalArgumentException("Akademisyen bulunamadı: " + request.instructorId()));
         if (instructor.getRole() != Role.INSTRUCTOR) {
@@ -99,6 +104,9 @@ public class CourseService {
             .name(name)
             .credit(credit)
             .term(request.term() == null || request.term().isBlank() ? DEFAULT_TERM : request.term().trim())
+            .weeklyTotalHours(weeklyTotalHours)
+            .weeklyTheoryHours(weeklyTheoryHours)
+            .weeklyPracticeHours(weeklyPracticeHours)
             .instructor(instructor)
             .build();
 
@@ -158,6 +166,21 @@ public class CourseService {
             course.setTerm(request.term().trim());
         }
 
+        if (request.weeklyTotalHours() != null || request.weeklyTheoryHours() != null || request.weeklyPracticeHours() != null) {
+            Integer mergedTotal = request.weeklyTotalHours() != null ? request.weeklyTotalHours() : course.getWeeklyTotalHours();
+            Integer mergedTheory = request.weeklyTheoryHours() != null ? request.weeklyTheoryHours() : course.getWeeklyTheoryHours();
+            Integer mergedPractice = request.weeklyPracticeHours() != null ? request.weeklyPracticeHours() : course.getWeeklyPracticeHours();
+
+            mergedTotal = requireNonNegative(mergedTotal, "Haftalık toplam saat");
+            mergedTheory = requireNonNegative(mergedTheory, "Haftalık teori saati");
+            mergedPractice = requireNonNegative(mergedPractice, "Haftalık uygulama saati");
+            validateWeeklyHours(mergedTotal, mergedTheory, mergedPractice);
+
+            course.setWeeklyTotalHours(mergedTotal);
+            course.setWeeklyTheoryHours(mergedTheory);
+            course.setWeeklyPracticeHours(mergedPractice);
+        }
+
         if (request.quota() != null) {
             Integer newQuota = request.quota();
             if (newQuota <= 0) {
@@ -213,21 +236,7 @@ public class CourseService {
         
         course.setActive(false);
         courseRepository.save(course);
-        
-        List<Enrollment> activeEnrollments = enrollmentRepository.findByCourseIdAndStatusIn(courseId, ACTIVE_ENROLLMENT_STATUSES);
-        
-        int updatedCount = 0;
-        for (Enrollment enrollment : activeEnrollments) {
-            enrollment.setStatus("CANCELLED");
-            updatedCount++;
-        }
-        
-        if (!activeEnrollments.isEmpty()) {
-            enrollmentRepository.saveAll(activeEnrollments);
-            log.info("Updated {} enrollment(s) to CANCELLED for deactivated course ID: {}", 
-                updatedCount, courseId);
-        }
-        
+
         log.info("Course ID: {} deactivated successfully", courseId);
     }
     
@@ -276,7 +285,10 @@ public class CourseService {
             .credit(course.getCredit())
             .quota(course.getQuota())
             .term(course.getTerm())
-            .active(course.isActive());
+            .active(course.isActive())
+            .weeklyTotalHours(course.getWeeklyTotalHours())
+            .weeklyTheoryHours(course.getWeeklyTheoryHours())
+            .weeklyPracticeHours(course.getWeeklyPracticeHours());
         
         if (course.getInstructor() != null) {
             builder.instructorId(course.getInstructor().getId())
@@ -292,6 +304,28 @@ public class CourseService {
         }
         
         return builder.build();
+    }
+
+    private static Integer requireNonNegative(Integer value, String label) {
+        if (value == null) {
+            throw new IllegalArgumentException(label + " boş bırakılamaz");
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException(label + " 0 veya daha büyük olmalıdır");
+        }
+        return value;
+    }
+
+    private static void validateWeeklyHours(Integer total, Integer theory, Integer practice) {
+        if (total == null || theory == null || practice == null) {
+            throw new IllegalArgumentException("Haftalık ders saatleri boş bırakılamaz");
+        }
+        if (total <= 0) {
+            throw new IllegalArgumentException("Haftalık toplam saat 0'dan büyük olmalıdır");
+        }
+        if ((theory + practice) != total) {
+            throw new IllegalArgumentException("Haftalık toplam saat, teori + uygulama toplamına eşit olmalıdır");
+        }
     }
     
     @Transactional(readOnly = true)

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.coursetrackingautomation.controller.EditGradePopupController"
+      stylesheets="@styles.css"
+      spacing="14.0" styleClass="card" prefWidth="520.0" prefHeight="340.0">
+
+    <padding>
+        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <Label text="Not Düzenle" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+        <Region HBox.hgrow="ALWAYS" />
+    </HBox>
+
+    <GridPane hgap="10.0" vgap="10.0">
+        <columnConstraints>
+            <ColumnConstraints minWidth="160.0" halignment="RIGHT" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label text="Öğrenci:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <Label fx:id="lblStudent" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+        <Label text="Vize:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <TextField fx:id="txtMidterm" promptText="0-100" styleClass="input-compact"
+                   GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+        <Label text="Final:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <TextField fx:id="txtFinal" promptText="0-100" styleClass="input-compact"
+                   GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+        <Label text="Ortalama:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <Label fx:id="lblAverage" text="-" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+
+        <Label text="Harf:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+        <Label fx:id="lblLetter" text="-" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+
+        <Label text="Durum:" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+        <Label fx:id="lblStatus" text="-" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+    </GridPane>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10.0">
+        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
+        <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+    </HBox>
+
+</VBox>

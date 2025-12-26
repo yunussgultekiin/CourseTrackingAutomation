@@ -5,12 +5,19 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-    fx:controller="org.example.coursetrackingautomation.controller.AddCourseFormController"
-      spacing="18.0"
-      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 28px;"
-    prefWidth="520.0" prefHeight="580.0">
+<ScrollPane xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fitToWidth="true"
+        hbarPolicy="NEVER"
+        vbarPolicy="AS_NEEDED"
+        prefWidth="520.0" prefHeight="600.0"
+        style="-fx-background-color: transparent;">
+
+    <content>
+      <VBox fx:controller="org.example.coursetrackingautomation.controller.AddCourseFormController"
+          spacing="18.0"
+          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 28px;"
+          prefWidth="520.0" prefHeight="600.0">
 
     <padding>
         <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
@@ -56,34 +63,13 @@
     </VBox>
 
     <VBox spacing="5.0">
-        <Label text="Açıklama" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+        <Label text="Dönem *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
             <font>
                 <Font name="System Bold" size="14.0"/>
             </font>
         </Label>
-        <TextArea fx:id="descriptionField" promptText="Ders açıklaması..."
-                  wrapText="true" prefRowCount="4"
-                  style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
-
-    <VBox spacing="5.0">
-        <Label text="Başlangıç Tarihi *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <DatePicker fx:id="startDatePicker"
-                    style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 6px; -fx-font-size: 14px;"/>
-    </VBox>
-
-    <VBox spacing="5.0">
-        <Label text="Bitiş Tarihi *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <DatePicker fx:id="endDatePicker"
-                    style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 6px; -fx-font-size: 14px;"/>
+        <TextField fx:id="termField" promptText="Örn: 2025"
+                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
     </VBox>
 
     <VBox spacing="5.0">
@@ -93,6 +79,36 @@
             </font>
         </Label>
         <TextField fx:id="creditsField" promptText="Örn: 3"
+                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <VBox spacing="5.0">
+        <Label text="Haftalık Toplam Saat *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="weeklyTotalHoursField" promptText="Örn: 3"
+                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <VBox spacing="5.0">
+        <Label text="Haftalık Teori Saati *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="weeklyTheoryHoursField" promptText="Örn: 2"
+                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <VBox spacing="5.0">
+        <Label text="Haftalık Uygulama Saati *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="weeklyPracticeHoursField" promptText="Örn: 1"
                    style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
     </VBox>
 
@@ -119,5 +135,8 @@
                 defaultButton="true"/>
     </HBox>
 
-</VBox>
+        </VBox>
+    </content>
+
+</ScrollPane>
 

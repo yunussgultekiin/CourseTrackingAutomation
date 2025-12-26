@@ -31,6 +31,19 @@
             </Label>
             <ComboBox fx:id="comboCourses" prefWidth="250.0" promptText="Lütfen Ders Seçiniz..." style="-fx-font-size: 13px;" />
 
+            <Label text="Hafta:" textFill="#ecf0f1">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+            <ComboBox fx:id="comboWeeks" prefWidth="140.0" promptText="Hafta Seçiniz..." style="-fx-font-size: 13px;" />
+
+            <Label fx:id="lblCourseHours" textFill="#ecf0f1" wrapText="true">
+                <font>
+                    <Font size="12.0" />
+                </font>
+            </Label>
+
             <HBox HBox.hgrow="ALWAYS" />
 
             <Button fx:id="btnProfile" mnemonicParsing="false" onAction="#handleProfile" styleClass="button-secondary" text="Profilim" />
@@ -47,7 +60,7 @@
                     </font>
                 </Label>
                 <HBox HBox.hgrow="ALWAYS" />
-                <Label text="* Tablo üzerinde notları düzenleyebilirsiniz." textFill="#7f8c8d" />
+                <Label text="* Not girmek/düzenlemek için satıra çift tıklayın." textFill="#7f8c8d" />
             </HBox>
 
             <TableView fx:id="tableStudents" editable="true" VBox.vgrow="ALWAYS">
@@ -63,6 +76,7 @@
                     <TableColumn fx:id="colPresent" prefWidth="100.0" text="Derste" />
                     
                     <TableColumn fx:id="colAverage" prefWidth="80.0" text="Ortalama" />
+                    <TableColumn fx:id="colLetterGrade" prefWidth="70.0" text="Harf" />
                     <TableColumn fx:id="colStatus" prefWidth="100.0" text="Durum" />
                 </columns>
                 <columnResizePolicy>

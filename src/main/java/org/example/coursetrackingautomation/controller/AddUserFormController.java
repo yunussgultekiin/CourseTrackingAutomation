@@ -3,7 +3,7 @@ package org.example.coursetrackingautomation.controller;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.CreateUserRequest;
 import org.example.coursetrackingautomation.entity.Role;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
 
@@ -18,29 +19,13 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class AddUserFormController {
 
-    @FXML
-    private TextField firstNameField;
-
-    @FXML
-    private TextField lastNameField;
-
-    @FXML
-    private TextField emailField;
-
-    @FXML
-    private TextField usernameField;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private ComboBox<Role> roleComboBox;
-
-    @FXML
-    private TextField phoneField;
-
-    @FXML
-    private DatePicker birthDatePicker;
+    @FXML private TextField firstNameField;
+    @FXML private TextField lastNameField;
+    @FXML private TextField emailField;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private ComboBox<Role> roleComboBox;
+    @FXML private TextField phoneField;
 
     private final UserService userService;
     private final UiExceptionHandler uiExceptionHandler;
@@ -48,20 +33,46 @@ public class AddUserFormController {
     @FXML
     public void initialize() {
         roleComboBox.setItems(FXCollections.observableArrayList(Role.values()));
+
+        roleComboBox.setCellFactory(cb -> new ListCell<>() {
+            @Override
+            protected void updateItem(Role item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : toTurkishRole(item));
+            }
+        });
+        roleComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Role item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : toTurkishRole(item));
+            }
+        });
     }
 
     @FXML
     public void handleSave() {
         try {
+            String username = requireNotBlank(safeTrim(usernameField.getText()), "Username");
+            String password = requireNotBlank(safe(passwordField.getText()), "Password");
+            String firstName = requireNotBlank(safeTrim(firstNameField.getText()), "First name");
+            String lastName = requireNotBlank(safeTrim(lastNameField.getText()), "Last name");
+            String email = requireNotBlank(safeTrim(emailField.getText()), "Email");
+
+            Role role = roleComboBox.getValue();
+            if (role == null) {
+                throw new IllegalArgumentException(UiConstants.ERROR_KEY_ROLE_SELECTION_REQUIRED);
+            }
+
             CreateUserRequest request = new CreateUserRequest(
-                safeTrim(usernameField.getText()),
-                safeString(passwordField.getText()),
-                safeTrim(firstNameField.getText()),
-                safeTrim(lastNameField.getText()),
-                roleComboBox.getValue(),
+                username,
+                password,
+                firstName,
+                lastName,
+                role,
                 null,
-                safeTrim(emailField.getText()),
-                safeTrim(phoneField.getText()),
+                email,
+                safeTrimToNull(phoneField.getText()),
                 true
             );
 
@@ -86,7 +97,30 @@ public class AddUserFormController {
         return value == null ? "" : value.trim();
     }
 
-    private static String safeString(String value) {
+    private static String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private static String safeTrimToNull(String value) {
+        String trimmed = safeTrim(value);
+        return trimmed.isBlank() ? null : trimmed;
+    }
+
+    private static String requireNotBlank(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " must not be blank");
+        }
+        return value;
+    }
+
+    private static String toTurkishRole(Role role) {
+        if (role == null) {
+            return "";
+        }
+        return switch (role) {
+            case ADMIN -> "Yönetici";
+            case INSTRUCTOR -> "Akademisyen";
+            case STUDENT -> "Öğrenci";
+        };
     }
 }

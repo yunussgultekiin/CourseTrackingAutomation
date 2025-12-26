@@ -86,7 +86,7 @@ public class EditEnrollmentFormController {
     public void handleSave() {
         try {
             if (enrollmentId == null) {
-                throw new IllegalArgumentException("Kayıt id boş olamaz");
+                throw new IllegalArgumentException("Enrollment id must not be blank");
             }
 
             String status = comboStatus.getValue();

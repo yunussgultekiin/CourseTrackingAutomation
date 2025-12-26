@@ -21,14 +21,9 @@ public class LoginController {
     private final SceneNavigator sceneNavigator;
     private final UiExceptionHandler uiExceptionHandler;
 
-    @FXML
-    private TextField usernameField;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private Label errorLabel;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private Label errorLabel;
 
     @FXML
     public void handleLogin() {
@@ -45,8 +40,8 @@ public class LoginController {
                 case STUDENT -> sceneNavigator.showStudentDashboard(stage);
             }
         } catch (Exception e) {
-            errorLabel.setText("Login failed");
-            errorLabel.setVisible(true);
+            errorLabel.setText("");
+            errorLabel.setVisible(false);
             uiExceptionHandler.handle(e);
         }
     }

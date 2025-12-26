@@ -6,6 +6,9 @@ public record UpdateCourseRequest(
     Integer quota,
     String term,
     Boolean active,
-    Long instructorId
+    Long instructorId,
+    Integer weeklyTotalHours,
+    Integer weeklyTheoryHours,
+    Integer weeklyPracticeHours
 ) {
 }

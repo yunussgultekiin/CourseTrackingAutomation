@@ -49,11 +49,14 @@
                     <TableColumn fx:id="colCourseCode" prefWidth="90.0" text="Ders Kodu" />
                     <TableColumn fx:id="colCourseName" prefWidth="200.0" text="Ders Adı" />
                     <TableColumn fx:id="colCredit" prefWidth="60.0" text="Kredi" />
+                    <TableColumn fx:id="colWeeklyTotalHours" prefWidth="90.0" text="Haftalık (Toplam)" />
+                    <TableColumn fx:id="colWeeklyTheoryHours" prefWidth="80.0" text="Teori" />
+                    <TableColumn fx:id="colWeeklyPracticeHours" prefWidth="90.0" text="Uygulama" />
                     <TableColumn fx:id="colMidterm" prefWidth="70.0" text="Vize" />
                     <TableColumn fx:id="colFinal" prefWidth="70.0" text="Final" />
                     <TableColumn fx:id="colAverage" prefWidth="80.0" text="Ortalama" />
                     <TableColumn fx:id="colLetter" prefWidth="80.0" text="Harf Notu" />
-                    <TableColumn fx:id="colAttendance" prefWidth="100.0" text="Devamsızlık" />
+                    <TableColumn fx:id="colAttendance" prefWidth="120.0" text="Devamsızlık (Saat)" />
                     <TableColumn fx:id="colStatus" prefWidth="100.0" text="Durum" />
                 </columns>
                 <columnResizePolicy>
