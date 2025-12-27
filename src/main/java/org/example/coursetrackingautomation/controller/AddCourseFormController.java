@@ -6,14 +6,13 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.CreateCourseRequest;
-import org.example.coursetrackingautomation.entity.Role;
-import org.example.coursetrackingautomation.entity.User;
+import org.example.coursetrackingautomation.dto.RoleDTO;
+import org.example.coursetrackingautomation.dto.SelectOptionDTO;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import javafx.collections.FXCollections;
-import javafx.util.StringConverter;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -23,7 +22,7 @@ public class AddCourseFormController {
     @FXML private TextField courseCodeField;
     @FXML private TextField courseNameField;
     @FXML private TextField termField;
-    @FXML private ComboBox<User> instructorCombo;
+    @FXML private ComboBox<SelectOptionDTO> instructorComboBox;
     @FXML private TextField creditsField;
     @FXML private TextField capacityField;
     @FXML private TextField weeklyTotalHoursField;
@@ -37,25 +36,7 @@ public class AddCourseFormController {
     @FXML
     public void initialize() {
         try {
-            instructorCombo.setConverter(new StringConverter<>() {
-                @Override
-                public String toString(User user) {
-                    if (user == null) {
-                        return "";
-                    }
-                    String fullName = (user.getFirstName() == null ? "" : user.getFirstName())
-                        + " "
-                        + (user.getLastName() == null ? "" : user.getLastName());
-                    return fullName.trim() + " (" + user.getUsername() + ")";
-                }
-
-                @Override
-                public User fromString(String string) {
-                    return null;
-                }
-            });
-
-            instructorCombo.setItems(FXCollections.observableArrayList(userService.getActiveUsersByRole(Role.INSTRUCTOR)));
+            instructorComboBox.setItems(FXCollections.observableArrayList(userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR)));
         } catch (Exception e) {
             uiExceptionHandler.handle(e);
         }
@@ -64,12 +45,12 @@ public class AddCourseFormController {
     @FXML
     public void handleSave() {
         try {
-            String code = requireNotBlank(safeTrim(courseCodeField.getText()), "Code");
-            String name = requireNotBlank(safeTrim(courseNameField.getText()), "Name");
-            String term = requireNotBlank(safeTrim(termField.getText()), "Term");
+            String code = requireNotBlank(safeTrim(courseCodeField.getText()), "Ders kodu");
+            String name = requireNotBlank(safeTrim(courseNameField.getText()), "Ders adı");
+            String term = requireNotBlank(safeTrim(termField.getText()), "Dönem");
 
-            Integer credit = parsePositiveInt(creditsField.getText(), "Credit");
-            Integer quota = parsePositiveInt(capacityField.getText(), "Capacity");
+            Integer credit = parsePositiveInt(creditsField.getText(), "Kredi");
+            Integer quota = parsePositiveInt(capacityField.getText(), "Kontenjan");
 
             Integer weeklyTotalHours = parsePositiveInt(weeklyTotalHoursField.getText(), "Haftalık toplam saat");
             Integer weeklyTheoryHours = parseNonNegativeInt(weeklyTheoryHoursField.getText(), "Haftalık teori saati");
@@ -78,10 +59,10 @@ public class AddCourseFormController {
                 throw new IllegalArgumentException("Haftalık toplam saat, teori + uygulama toplamına eşit olmalıdır");
             }
 
-            if (instructorCombo.getValue() == null) {
+            if (instructorComboBox.getValue() == null) {
                 throw new IllegalArgumentException(UiConstants.ERROR_KEY_INSTRUCTOR_SELECTION_REQUIRED);
             }
-            Long instructorId = instructorCombo.getValue().getId();
+            Long instructorId = instructorComboBox.getValue().id();
 
             CreateCourseRequest request = new CreateCourseRequest(
                 code,
@@ -115,16 +96,16 @@ public class AddCourseFormController {
     private static Integer parsePositiveInt(String raw, String fieldName) {
         String safe = raw == null ? "" : raw.trim();
         if (safe.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
+            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
         }
         int value;
         try {
             value = Integer.parseInt(safe);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(fieldName + " must be a number");
+            throw new IllegalArgumentException(fieldName + " sayı olmalıdır");
         }
         if (value <= 0) {
-            throw new IllegalArgumentException(fieldName + " must be greater than 0");
+            throw new IllegalArgumentException(fieldName + " 0'dan büyük olmalıdır");
         }
         return value;
     }
@@ -132,13 +113,13 @@ public class AddCourseFormController {
     private static Integer parseNonNegativeInt(String raw, String fieldName) {
         String safe = raw == null ? "" : raw.trim();
         if (safe.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
+            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
         }
         int value;
         try {
             value = Integer.parseInt(safe);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(fieldName + " must be a number");
+            throw new IllegalArgumentException(fieldName + " sayı olmalıdır");
         }
         if (value < 0) {
             throw new IllegalArgumentException(fieldName + " 0 veya daha büyük olmalıdır");
@@ -148,7 +129,7 @@ public class AddCourseFormController {
 
     private static String requireNotBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
+            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
         }
         return value;
     }

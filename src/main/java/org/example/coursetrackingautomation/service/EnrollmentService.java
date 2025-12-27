@@ -2,6 +2,7 @@ package org.example.coursetrackingautomation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.coursetrackingautomation.dto.EnrollmentDetailsDTO;
 import org.example.coursetrackingautomation.entity.Course;
 import org.example.coursetrackingautomation.entity.Enrollment;
 import org.example.coursetrackingautomation.entity.User;
@@ -174,5 +175,32 @@ public class EnrollmentService {
         }
         return enrollmentRepository.findById(enrollmentId)
             .orElseThrow(() -> new IllegalArgumentException("Kayıt bulunamadı: " + enrollmentId));
+    }
+
+    @Transactional(readOnly = true)
+    public EnrollmentDetailsDTO getEnrollmentDetailsById(Long enrollmentId) {
+        Enrollment enrollment = getEnrollmentById(enrollmentId);
+        String studentDisplay = "-";
+        if (enrollment.getStudent() != null) {
+            String firstName = enrollment.getStudent().getFirstName() == null ? "" : enrollment.getStudent().getFirstName();
+            String lastName = enrollment.getStudent().getLastName() == null ? "" : enrollment.getStudent().getLastName();
+            studentDisplay = (firstName + " " + lastName).trim();
+            if (studentDisplay.isBlank()) {
+                studentDisplay = enrollment.getStudent().getUsername() == null ? "-" : enrollment.getStudent().getUsername();
+            }
+        }
+
+        String courseDisplay = "-";
+        if (enrollment.getCourse() != null) {
+            String code = enrollment.getCourse().getCode() == null ? "" : enrollment.getCourse().getCode();
+            String name = enrollment.getCourse().getName() == null ? "" : enrollment.getCourse().getName();
+            courseDisplay = (code + " - " + name).trim();
+            if (courseDisplay.equals("-")) {
+                courseDisplay = name.isBlank() ? (code.isBlank() ? "-" : code) : name;
+            }
+        }
+
+        String status = enrollment.getStatus();
+        return new EnrollmentDetailsDTO(enrollment.getId(), studentDisplay, courseDisplay, status);
     }
 }

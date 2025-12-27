@@ -3,12 +3,15 @@ package org.example.coursetrackingautomation.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.config.UserSession;
+import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.dto.SessionUser;
 import org.example.coursetrackingautomation.dto.UpdateUserRequest;
+import org.example.coursetrackingautomation.dto.UserDetailsDTO;
 import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
@@ -20,6 +23,10 @@ import org.springframework.stereotype.Controller;
 public class ProfilePopupController {
 
     @FXML private Label lblUsername;
+    @FXML private Separator sepPassword;
+    @FXML private Label lblCurrentPassword;
+    @FXML private Label lblNewPassword;
+    @FXML private Label lblConfirmPassword;
     @FXML private PasswordField txtCurrentPassword;
     @FXML private PasswordField txtNewPassword;
     @FXML private PasswordField txtConfirmPassword;
@@ -41,9 +48,14 @@ public class ProfilePopupController {
             lblUsername.setText(currentUser.username());
             txtFirstName.setText(currentUser.firstName());
             txtLastName.setText(currentUser.lastName());
-            var fullUser = userService.getUserById(currentUser.id());
-            txtEmail.setText(fullUser.getEmail());
-            txtPhone.setText(fullUser.getPhone());
+            UserDetailsDTO userDetails = userService.getUserDetailsById(currentUser.id());
+            txtEmail.setText(userDetails.email());
+            txtPhone.setText(userDetails.phone());
+
+            boolean canChangePassword = currentUser.role() == RoleDTO.INSTRUCTOR || currentUser.role() == RoleDTO.STUDENT;
+            if (!canChangePassword) {
+                setPasswordSectionVisible(false);
+            }
         } catch (Exception e) {
             uiExceptionHandler.handle(e);
         }
@@ -61,10 +73,10 @@ public class ProfilePopupController {
             String phone = safeTrimOrNull(txtPhone.getText());
 
             if (firstName.isBlank()) {
-                throw new IllegalArgumentException("First name must not be blank");
+                throw new IllegalArgumentException("Ad boş bırakılamaz");
             }
             if (lastName.isBlank()) {
-                throw new IllegalArgumentException("Last name must not be blank");
+                throw new IllegalArgumentException("Soyad boş bırakılamaz");
             }
 
             userService.updateUser(currentUser.id(), new UpdateUserRequest(
@@ -83,28 +95,65 @@ public class ProfilePopupController {
                 currentUser.role()
             ));
 
-            String currentPassword = safe(txtCurrentPassword.getText());
-            String newPassword = safe(txtNewPassword.getText());
-            String confirmPassword = safe(txtConfirmPassword.getText());
+            boolean canChangePassword = currentUser.role() == RoleDTO.INSTRUCTOR || currentUser.role() == RoleDTO.STUDENT;
+            if (canChangePassword) {
+                String currentPassword = safe(txtCurrentPassword.getText());
+                String newPassword = safe(txtNewPassword.getText());
+                String confirmPassword = safe(txtConfirmPassword.getText());
 
-            boolean passwordSectionTouched = !currentPassword.isBlank() || !newPassword.isBlank() || !confirmPassword.isBlank();
-            if (passwordSectionTouched) {
-                if (currentPassword.isBlank()) {
-                    throw new IllegalArgumentException("Current password must not be blank");
+                boolean passwordSectionTouched = !currentPassword.isBlank() || !newPassword.isBlank() || !confirmPassword.isBlank();
+                if (passwordSectionTouched) {
+                    if (currentPassword.isBlank()) {
+                        throw new IllegalArgumentException("Mevcut şifre boş bırakılamaz");
+                    }
+                    if (newPassword.isBlank()) {
+                        throw new IllegalArgumentException("Yeni şifre boş bırakılamaz");
+                    }
+                    if (!newPassword.equals(confirmPassword)) {
+                        throw new IllegalArgumentException("Yeni şifre ve doğrulama şifresi eşleşmiyor");
+                    }
+                    userService.changePassword(currentUser.id(), currentPassword, newPassword);
                 }
-                if (newPassword.isBlank()) {
-                    throw new IllegalArgumentException("New password must not be blank");
-                }
-                if (!newPassword.equals(confirmPassword)) {
-                    throw new IllegalArgumentException("New password and confirmation do not match");
-                }
-                userService.changePassword(currentUser.id(), currentPassword, newPassword);
             }
 
             alertUtil.showSuccessAlert(UiConstants.ALERT_TITLE_SUCCESS, UiConstants.UI_MESSAGE_PROFILE_UPDATED);
             close();
         } catch (Exception e) {
             uiExceptionHandler.handle(e);
+        }
+    }
+
+    private void setPasswordSectionVisible(boolean visible) {
+        if (sepPassword != null) {
+            sepPassword.setVisible(visible);
+            sepPassword.setManaged(visible);
+        }
+        if (lblCurrentPassword != null) {
+            lblCurrentPassword.setVisible(visible);
+            lblCurrentPassword.setManaged(visible);
+        }
+        if (lblNewPassword != null) {
+            lblNewPassword.setVisible(visible);
+            lblNewPassword.setManaged(visible);
+        }
+        if (lblConfirmPassword != null) {
+            lblConfirmPassword.setVisible(visible);
+            lblConfirmPassword.setManaged(visible);
+        }
+        if (txtCurrentPassword != null) {
+            txtCurrentPassword.clear();
+            txtCurrentPassword.setVisible(visible);
+            txtCurrentPassword.setManaged(visible);
+        }
+        if (txtNewPassword != null) {
+            txtNewPassword.clear();
+            txtNewPassword.setVisible(visible);
+            txtNewPassword.setManaged(visible);
+        }
+        if (txtConfirmPassword != null) {
+            txtConfirmPassword.clear();
+            txtConfirmPassword.setVisible(visible);
+            txtConfirmPassword.setManaged(visible);
         }
     }
 

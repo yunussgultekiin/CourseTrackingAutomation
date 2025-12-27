@@ -9,6 +9,7 @@ import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.coursetrackingautomation.dto.CreateUserRequest;
+import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.entity.*;
 import org.example.coursetrackingautomation.repository.*;
 import org.example.coursetrackingautomation.service.GradeService;
@@ -103,7 +104,7 @@ public class DataSeeder implements CommandLineRunner {
             String phone = "0500" + String.format("%07d", i);
 
             User created = userService.createUser(new CreateUserRequest(
-                username, DEFAULT_PASSWORD, firstName, lastName, Role.INSTRUCTOR,
+                username, DEFAULT_PASSWORD, firstName, lastName, RoleDTO.INSTRUCTOR,
                 null, email, phone, true
             ));
             newInstructors.add(created);
@@ -127,7 +128,7 @@ public class DataSeeder implements CommandLineRunner {
             String email = String.format("%s@%s", username, EMAIL_DOMAIN_STUDENT);
 
             User created = userService.createUser(new CreateUserRequest(
-                username, DEFAULT_PASSWORD, firstName, lastName, Role.STUDENT,
+                username, DEFAULT_PASSWORD, firstName, lastName, RoleDTO.STUDENT,
                 studentNumber, email, null, true
             ));
             newStudents.add(created);

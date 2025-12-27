@@ -43,14 +43,11 @@
         <TextField fx:id="txtPhone" promptText="Telefon" styleClass="input-compact"
                    GridPane.rowIndex="4" GridPane.columnIndex="1" />
 
-        <Label text="Yeni şifre (opsiyonel):" GridPane.rowIndex="5" GridPane.columnIndex="0" />
-        <PasswordField fx:id="txtPassword" promptText="Boş bırakılırsa değişmez" styleClass="input-compact"
-                       GridPane.rowIndex="5" GridPane.columnIndex="1" />
     </GridPane>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
-        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
         <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
     </HBox>
 
 </VBox>

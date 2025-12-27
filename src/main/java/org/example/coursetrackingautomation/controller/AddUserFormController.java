@@ -9,7 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.CreateUserRequest;
-import org.example.coursetrackingautomation.entity.Role;
+import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
@@ -24,7 +24,7 @@ public class AddUserFormController {
     @FXML private TextField emailField;
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
-    @FXML private ComboBox<Role> roleComboBox;
+    @FXML private ComboBox<RoleDTO> roleComboBox;
     @FXML private TextField phoneField;
 
     private final UserService userService;
@@ -32,18 +32,18 @@ public class AddUserFormController {
 
     @FXML
     public void initialize() {
-        roleComboBox.setItems(FXCollections.observableArrayList(Role.values()));
+        roleComboBox.setItems(FXCollections.observableArrayList(RoleDTO.values()));
 
         roleComboBox.setCellFactory(cb -> new ListCell<>() {
             @Override
-            protected void updateItem(Role item, boolean empty) {
+            protected void updateItem(RoleDTO item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : toTurkishRole(item));
             }
         });
         roleComboBox.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(Role item, boolean empty) {
+            protected void updateItem(RoleDTO item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : toTurkishRole(item));
             }
@@ -53,13 +53,13 @@ public class AddUserFormController {
     @FXML
     public void handleSave() {
         try {
-            String username = requireNotBlank(safeTrim(usernameField.getText()), "Username");
-            String password = requireNotBlank(safe(passwordField.getText()), "Password");
-            String firstName = requireNotBlank(safeTrim(firstNameField.getText()), "First name");
-            String lastName = requireNotBlank(safeTrim(lastNameField.getText()), "Last name");
-            String email = requireNotBlank(safeTrim(emailField.getText()), "Email");
+            String username = requireNotBlank(safeTrim(usernameField.getText()), "Kullanıcı adı");
+            String password = requireNotBlank(safe(passwordField.getText()), "Şifre");
+            String firstName = requireNotBlank(safeTrim(firstNameField.getText()), "Ad");
+            String lastName = requireNotBlank(safeTrim(lastNameField.getText()), "Soyad");
+            String email = requireNotBlank(safeTrim(emailField.getText()), "E-posta");
 
-            Role role = roleComboBox.getValue();
+            RoleDTO role = roleComboBox.getValue();
             if (role == null) {
                 throw new IllegalArgumentException(UiConstants.ERROR_KEY_ROLE_SELECTION_REQUIRED);
             }
@@ -108,12 +108,12 @@ public class AddUserFormController {
 
     private static String requireNotBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
+            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
         }
         return value;
     }
 
-    private static String toTurkishRole(Role role) {
+    private static String toTurkishRole(RoleDTO role) {
         if (role == null) {
             return "";
         }

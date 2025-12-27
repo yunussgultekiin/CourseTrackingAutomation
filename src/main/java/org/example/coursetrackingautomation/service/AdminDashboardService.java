@@ -7,6 +7,7 @@ import org.example.coursetrackingautomation.dto.AdminEnrollmentRowDTO;
 import org.example.coursetrackingautomation.dto.AdminStatistics;
 import org.example.coursetrackingautomation.dto.AdminUserRowDTO;
 import org.example.coursetrackingautomation.dto.CourseDTO;
+import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.repository.AttendanceRecordRepository;
 import org.example.coursetrackingautomation.repository.CourseRepository;
 import org.example.coursetrackingautomation.repository.EnrollmentRepository;
@@ -43,7 +44,7 @@ public class AdminDashboardService {
                 u.getUsername(),
                 u.getFirstName(),
                 u.getLastName(),
-                u.getRole(),
+                RoleDTO.valueOf(u.getRole().name()),
                 u.getEmail()
             ))
             .toList();
@@ -54,7 +55,9 @@ public class AdminDashboardService {
         if (userId == null) {
             throw new IllegalArgumentException("Kullanıcı id boş olamaz");
         }
-        userRepository.deleteById(userId);
+        var user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı: " + userId));
+        userRepository.delete(user);
     }
 
     @Transactional(readOnly = true)

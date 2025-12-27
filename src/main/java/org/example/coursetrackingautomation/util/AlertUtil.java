@@ -104,9 +104,6 @@ public class AlertUtil {
         stage.initStyle(StageStyle.DECORATED);
     }
 
-    /**
-     * UI-only: Replace the default (often outdated) platform icon with a minimal glyph.
-     */
     private static void applyModernDialogIcon(Alert alert) {
         if (alert == null) {
             return;

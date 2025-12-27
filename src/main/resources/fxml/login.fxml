@@ -62,7 +62,7 @@
                 </Button>
             </VBox>
 
-            <Label text="© 2024 Ders Takip Otomasyonu Sistemi"
+            <Label text="© 2026 Ders Takip Otomasyonu Sistemi"
                    style="-fx-font-size: 12px; -fx-text-fill: #95a5a6;"/>
         </VBox>
     </center>

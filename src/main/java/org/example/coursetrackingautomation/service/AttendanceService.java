@@ -10,16 +10,20 @@ public class AttendanceService {
     private static final int DEFAULT_TERM_WEEKS = 14;
     private static final double WARNING_PERCENTAGE = 0.10;
     private static final double CRITICAL_PERCENTAGE = 0.20;
-
-    /**
-     * DB: absenteeismCount is stored as "absence count" (weekly attendance records). UI: display in hours.
-     */
     public int toAbsentHours(Course course, Integer absenteeismCount) {
         int count = absenteeismCount == null ? 0 : Math.max(0, absenteeismCount);
         if (course == null || course.getWeeklyTotalHours() == null || course.getWeeklyTotalHours() <= 0) {
             return count;
         }
         return count * course.getWeeklyTotalHours();
+    }
+
+    public int toAbsentHours(Integer weeklyTotalHours, Integer absenteeismCount) {
+        int count = absenteeismCount == null ? 0 : Math.max(0, absenteeismCount);
+        if (weeklyTotalHours == null || weeklyTotalHours <= 0) {
+            return count;
+        }
+        return count * weeklyTotalHours;
     }
 
     public int toAbsentCount(Course course, Integer absentHours) {
@@ -32,6 +36,14 @@ public class AttendanceService {
             return hours;
         }
         return hours / weekly;
+    }
+
+    public int toAbsentCount(Integer weeklyTotalHours, Integer absentHours) {
+        int hours = absentHours == null ? 0 : Math.max(0, absentHours);
+        if (weeklyTotalHours == null || weeklyTotalHours <= 0) {
+            return hours;
+        }
+        return hours / weeklyTotalHours;
     }
 
     public int getTotalCourseHoursForTerm(Course course) {
@@ -65,8 +77,18 @@ public class AttendanceService {
         return isAttendanceCritical(totalCourseHours, absentHours);
     }
 
+    public boolean isAttendanceCriticalByHours(Integer weeklyTotalHours, int absentHours) {
+        int totalCourseHours = getTotalCourseHoursForTerm(weeklyTotalHours);
+        return isAttendanceCritical(totalCourseHours, absentHours);
+    }
+
     public boolean isAttendanceWarningByHours(Course course, int absentHours) {
         int totalCourseHours = getTotalCourseHoursForTerm(course);
+        return isAttendanceWarning(totalCourseHours, absentHours);
+    }
+
+    public boolean isAttendanceWarningByHours(Integer weeklyTotalHours, int absentHours) {
+        int totalCourseHours = getTotalCourseHoursForTerm(weeklyTotalHours);
         return isAttendanceWarning(totalCourseHours, absentHours);
     }
 

@@ -3,6 +3,7 @@ package org.example.coursetrackingautomation.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.coursetrackingautomation.config.UserSession;
+import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.dto.SessionUser;
 import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.exception.InactiveUserException;
@@ -46,7 +47,7 @@ public class AuthService {
 			user.getUsername(),
 			user.getFirstName(),
 			user.getLastName(),
-			user.getRole()
+			RoleDTO.valueOf(user.getRole().name())
 		);
 
 		userSession.setCurrentUser(sessionUser);

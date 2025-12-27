@@ -1,11 +1,11 @@
 package org.example.coursetrackingautomation.dto;
 
-public record AdminUserRowDTO(
+public record UserDetailsDTO(
     Long id,
     String username,
     String firstName,
     String lastName,
-    RoleDTO role,
-    String email
+    String email,
+    String phone
 ) {
 }

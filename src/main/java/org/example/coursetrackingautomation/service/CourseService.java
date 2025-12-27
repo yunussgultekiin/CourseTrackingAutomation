@@ -6,7 +6,6 @@ import org.example.coursetrackingautomation.dto.CreateCourseRequest;
 import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.dto.UpdateCourseRequest;
 import org.example.coursetrackingautomation.entity.Course;
-import org.example.coursetrackingautomation.entity.Enrollment;
 import org.example.coursetrackingautomation.entity.Role;
 import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.repository.CourseRepository;
@@ -15,6 +14,7 @@ import org.example.coursetrackingautomation.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +28,7 @@ public class CourseService {
     private final UserRepository userRepository;
 
     private static final String DEFAULT_TERM = "N/A";
+    private static final int DEFAULT_QUOTA = 30;
     
     private static final List<String> ACTIVE_ENROLLMENT_STATUSES = List.of("ACTIVE", "ENROLLED", "REGISTERED");
     
@@ -42,7 +43,7 @@ public class CourseService {
         if (quota != null) {
             course.setQuota(quota);
         } else if (course.getQuota() == null || course.getQuota() <= 0) {
-            course.setQuota(30);
+            course.setQuota(DEFAULT_QUOTA);
             log.info("Default quota (30) set for course: {}", course.getCode());
         }
         
@@ -74,6 +75,8 @@ public class CourseService {
         if (code.isBlank()) {
             throw new IllegalArgumentException("Ders kodu boş bırakılamaz");
         }
+
+        code = code.toUpperCase(Locale.ROOT);
         if (name.isBlank()) {
             throw new IllegalArgumentException("Ders adı boş bırakılamaz");
         }
@@ -83,6 +86,11 @@ public class CourseService {
 
         if (request.instructorId() == null) {
             throw new IllegalArgumentException("Akademisyen seçimi zorunludur");
+        }
+
+        Course existingByCode = courseRepository.findByCodeIgnoreCase(code).orElse(null);
+        if (existingByCode != null && existingByCode.isActive()) {
+            throw new IllegalArgumentException("Bu ders kodu zaten mevcut: " + code);
         }
 
         Integer weeklyTotalHours = requireNonNegative(request.weeklyTotalHours(), "Haftalık toplam saat");
@@ -99,11 +107,37 @@ public class CourseService {
             throw new IllegalArgumentException("Seçilen akademisyen aktif değil");
         }
 
+        String term = request.term() == null || request.term().isBlank() ? DEFAULT_TERM : request.term().trim();
+
+        if (existingByCode != null) {
+            existingByCode.setName(name);
+            existingByCode.setCredit(credit);
+            existingByCode.setTerm(term);
+            existingByCode.setWeeklyTotalHours(weeklyTotalHours);
+            existingByCode.setWeeklyTheoryHours(weeklyTheoryHours);
+            existingByCode.setWeeklyPracticeHours(weeklyPracticeHours);
+            existingByCode.setInstructor(instructor);
+
+            if (quota != null) {
+                if (quota <= 0) {
+                    throw new IllegalArgumentException("Kontenjan 0'dan büyük olmalıdır");
+                }
+                existingByCode.setQuota(quota);
+            } else if (existingByCode.getQuota() == null || existingByCode.getQuota() <= 0) {
+                existingByCode.setQuota(DEFAULT_QUOTA);
+            }
+
+            existingByCode.setActive(true);
+            Course saved = courseRepository.save(existingByCode);
+            log.info("Course re-activated: id={}, code={}", saved.getId(), saved.getCode());
+            return saved;
+        }
+
         Course course = Course.builder()
             .code(code)
             .name(name)
             .credit(credit)
-            .term(request.term() == null || request.term().isBlank() ? DEFAULT_TERM : request.term().trim())
+            .term(term)
             .weeklyTotalHours(weeklyTotalHours)
             .weeklyTheoryHours(weeklyTheoryHours)
             .weeklyPracticeHours(weeklyPracticeHours)
@@ -245,6 +279,12 @@ public class CourseService {
         return courseRepository.findById(courseId)
             .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + courseId));
     }
+
+    @Transactional(readOnly = true)
+    public CourseDTO getCourseDTOById(Long courseId) {
+        Course course = getCourseById(courseId);
+        return toDTO(course, getCurrentEnrollmentCount(course));
+    }
     
     @Transactional(readOnly = true)
     public Course getCourseByCode(String code) {
@@ -327,14 +367,6 @@ public class CourseService {
             throw new IllegalArgumentException("Haftalık toplam saat, teori + uygulama toplamına eşit olmalıdır");
         }
     }
-    
-    @Transactional(readOnly = true)
-    public CourseDTO getCourseDTOById(Long courseId) {
-        Course course = getCourseById(courseId);
-        long currentEnrollments = getCurrentEnrollmentCount(courseId);
-        return toDTO(course, currentEnrollments);
-    }
-    
     @Transactional(readOnly = true)
     public CourseDTO getCourseDTOByCode(String code) {
         Course course = getCourseByCode(code);

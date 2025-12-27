@@ -2,9 +2,15 @@ package org.example.coursetrackingautomation.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.dto.GradeDTO;
+import org.example.coursetrackingautomation.dto.InstructorCourseRosterDTO;
 import org.example.coursetrackingautomation.entity.AttendanceRecord;
 import org.example.coursetrackingautomation.entity.Course;
 import org.example.coursetrackingautomation.entity.Enrollment;
@@ -30,6 +36,127 @@ public class InstructorWorkflowService {
     private final AttendanceRecordRepository attendanceRecordRepository;
     private final GradeService gradeService;
     private final AttendanceService attendanceService;
+
+    @Transactional(readOnly = true)
+    public List<String> getActiveCourseCodesForInstructor(Long instructorId) {
+        if (instructorId == null) {
+            throw new IllegalArgumentException("Akademisyen id boş olamaz");
+        }
+        return courseRepository.findByInstructorIdAndActiveTrue(instructorId).stream()
+            .map(Course::getCode)
+            .filter(code -> code != null && !code.isBlank())
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public InstructorCourseRosterDTO getCourseRoster(String courseCode) {
+        if (courseCode == null || courseCode.isBlank()) {
+            throw new IllegalArgumentException("Ders kodu boş bırakılamaz");
+        }
+        Course course = courseRepository.findByCode(courseCode)
+            .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı"));
+
+        CourseDTO courseDto = CourseDTO.builder()
+            .id(course.getId())
+            .code(course.getCode())
+            .name(course.getName())
+            .credit(course.getCredit())
+            .quota(course.getQuota())
+            .term(course.getTerm())
+            .active(course.isActive())
+            .weeklyTotalHours(course.getWeeklyTotalHours())
+            .weeklyTheoryHours(course.getWeeklyTheoryHours())
+            .weeklyPracticeHours(course.getWeeklyPracticeHours())
+            .instructorId(course.getInstructor() == null ? null : course.getInstructor().getId())
+            .instructorName(course.getInstructor() == null ? null : (course.getInstructor().getFirstName() + " " + course.getInstructor().getLastName()))
+            .build();
+
+        Map<Long, Long> enrollmentIdByStudentId = new HashMap<>();
+        List<GradeDTO> rows = enrollmentRepository.findByCourseIdWithStudentAndGrade(course.getId()).stream()
+            .map(enrollment -> {
+                if (enrollment.getStudent() != null && enrollment.getStudent().getId() != null) {
+                    enrollmentIdByStudentId.put(enrollment.getStudent().getId(), enrollment.getId());
+                }
+
+                Double midterm = enrollment.getGrade() == null || enrollment.getGrade().getMidtermScore() == null
+                    ? null : enrollment.getGrade().getMidtermScore().doubleValue();
+                Double finalScore = enrollment.getGrade() == null || enrollment.getGrade().getFinalScore() == null
+                    ? null : enrollment.getGrade().getFinalScore().doubleValue();
+
+                boolean graded = midterm != null && finalScore != null;
+                Double average = gradeService.calculateAverage(midterm, finalScore);
+                String letter = graded ? gradeService.determineLetterGrade(average) : null;
+                boolean passed = graded && gradeService.isPassed(letter);
+
+                int absentHoursUi = attendanceService.toAbsentHours(course, enrollment.getAbsenteeismCount());
+                boolean critical = attendanceService.isAttendanceCritical(course, enrollment.getAbsenteeismCount());
+
+                String status;
+                if (!graded) {
+                    status = org.example.coursetrackingautomation.ui.UiConstants.UI_STATUS_NOT_GRADED;
+                } else {
+                    status = passed
+                        ? org.example.coursetrackingautomation.ui.UiConstants.UI_STATUS_PASSED
+                        : org.example.coursetrackingautomation.ui.UiConstants.UI_STATUS_FAILED;
+                }
+
+                Long studentId = enrollment.getStudent() == null ? null : enrollment.getStudent().getId();
+                String studentName = enrollment.getStudent() == null
+                    ? "-"
+                    : (String.valueOf(enrollment.getStudent().getFirstName() == null ? "" : enrollment.getStudent().getFirstName())
+                        + " "
+                        + String.valueOf(enrollment.getStudent().getLastName() == null ? "" : enrollment.getStudent().getLastName())).trim();
+
+                return new GradeDTO(
+                    studentId,
+                    studentName,
+                    course.getCode(),
+                    course.getName(),
+                    course.getCredit(),
+                    course.getWeeklyTotalHours(),
+                    course.getWeeklyTheoryHours(),
+                    course.getWeeklyPracticeHours(),
+                    midterm,
+                    finalScore,
+                    average,
+                    letter,
+                    status,
+                    absentHoursUi,
+                    critical,
+                    true
+                );
+            })
+            .toList();
+
+        return new InstructorCourseRosterDTO(courseDto, rows, enrollmentIdByStudentId);
+    }
+
+    @Transactional(readOnly = true)
+    public int getNextWeekNumber(Long courseId) {
+        if (courseId == null) {
+            return FIRST_WEEK_NUMBER;
+        }
+        Integer maxWeekNumber = attendanceRecordRepository.findMaxWeekNumberByCourseId(courseId);
+        if (maxWeekNumber == null || maxWeekNumber < FIRST_WEEK_NUMBER) {
+            return FIRST_WEEK_NUMBER;
+        }
+        return Math.min(DEFAULT_TERM_WEEKS, maxWeekNumber + 1);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Boolean> getPresentByEnrollmentIdsAndWeekNumber(Collection<Long> enrollmentIds, Integer weekNumber) {
+        if (enrollmentIds == null || enrollmentIds.isEmpty() || weekNumber == null) {
+            return Map.of();
+        }
+        List<AttendanceRecord> records = attendanceRecordRepository.findByEnrollmentIdsAndWeekNumberWithEnrollment(enrollmentIds, weekNumber);
+        Map<Long, Boolean> presentByEnrollmentId = new HashMap<>();
+        for (AttendanceRecord record : records) {
+            if (record.getEnrollment() != null && record.getEnrollment().getId() != null) {
+                presentByEnrollmentId.put(record.getEnrollment().getId(), record.isPresent());
+            }
+        }
+        return presentByEnrollmentId;
+    }
 
     @Transactional
     public void saveCourseStudentUpdates(String courseCode, Integer weekNumber, Iterable<GradeDTO> updates) {

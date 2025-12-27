@@ -6,8 +6,8 @@ import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.CourseDTO;
-import org.example.coursetrackingautomation.entity.Role;
-import org.example.coursetrackingautomation.entity.User;
+import org.example.coursetrackingautomation.dto.RoleDTO;
+import org.example.coursetrackingautomation.dto.SelectOptionDTO;
 import org.example.coursetrackingautomation.service.AdminDashboardService;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.UserService;
@@ -19,8 +19,8 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class AdminEnrollStudentFormController {
 
-    @FXML private ComboBox<UserOption> comboStudent;
-    @FXML private ComboBox<CourseOption> comboCourse;
+    @FXML private ComboBox<SelectOptionDTO> comboStudent;
+    @FXML private ComboBox<SelectOptionDTO> comboCourse;
 
     private final UserService userService;
     private final CourseService courseService;
@@ -30,9 +30,7 @@ public class AdminEnrollStudentFormController {
     @FXML
     public void initialize() {
         try {
-            var students = userService.getActiveUsersByRole(Role.STUDENT).stream()
-                .map(AdminEnrollStudentFormController::toUserOption)
-                .toList();
+            var students = userService.getActiveUserOptionsByRole(RoleDTO.STUDENT);
 
             var courses = courseService.getAllActiveCourseDTOs().stream()
                 .map(AdminEnrollStudentFormController::toCourseOption)
@@ -48,8 +46,8 @@ public class AdminEnrollStudentFormController {
     @FXML
     public void handleEnroll() {
         try {
-            UserOption student = comboStudent.getValue();
-            CourseOption course = comboCourse.getValue();
+            SelectOptionDTO student = comboStudent.getValue();
+            SelectOptionDTO course = comboCourse.getValue();
 
             if (student == null || student.id() == null) {
                 throw new IllegalArgumentException(UiConstants.ERROR_KEY_STUDENT_SELECTION_REQUIRED);
@@ -75,27 +73,8 @@ public class AdminEnrollStudentFormController {
         stage.close();
     }
 
-    private static UserOption toUserOption(User user) {
-        String display = user.getUsername() + " - " + user.getFirstName() + " " + user.getLastName();
-        return new UserOption(user.getId(), display);
-    }
-
-    private static CourseOption toCourseOption(CourseDTO dto) {
+    private static SelectOptionDTO toCourseOption(CourseDTO dto) {
         String display = dto.getCode() + " - " + dto.getName();
-        return new CourseOption(dto.getId(), display);
-    }
-
-    public record UserOption(Long id, String display) {
-        @Override
-        public String toString() {
-            return display;
-        }
-    }
-
-    public record CourseOption(Long id, String display) {
-        @Override
-        public String toString() {
-            return display;
-        }
+        return new SelectOptionDTO(dto.getId(), display);
     }
 }

@@ -1,13 +1,11 @@
 package org.example.coursetrackingautomation.dto;
 
-import org.example.coursetrackingautomation.entity.Role;
-
 public record SessionUser(
     Long id,
     String username,
     String firstName,
     String lastName,
-    Role role
+    RoleDTO role
 ) {
 
     public String fullName() {

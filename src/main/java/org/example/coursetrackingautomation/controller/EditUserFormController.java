@@ -2,12 +2,11 @@ package org.example.coursetrackingautomation.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.UpdateUserRequest;
-import org.example.coursetrackingautomation.entity.User;
+import org.example.coursetrackingautomation.dto.UserDetailsDTO;
 import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
@@ -21,7 +20,6 @@ public class EditUserFormController {
     @FXML private TextField txtLastName;
     @FXML private TextField txtEmail;
     @FXML private TextField txtPhone;
-    @FXML private PasswordField txtPassword;
 
     private final UserService userService;
     private final UiExceptionHandler uiExceptionHandler;
@@ -39,13 +37,12 @@ public class EditUserFormController {
                 return;
             }
 
-            User user = userService.getUserById(userId);
-            lblUsername.setText(user.getUsername() == null ? "-" : user.getUsername());
-            txtFirstName.setText(user.getFirstName());
-            txtLastName.setText(user.getLastName());
-            txtEmail.setText(user.getEmail());
-            txtPhone.setText(user.getPhone());
-            txtPassword.clear();
+            UserDetailsDTO user = userService.getUserDetailsById(userId);
+            lblUsername.setText(user.username() == null ? "-" : user.username());
+            txtFirstName.setText(user.firstName());
+            txtLastName.setText(user.lastName());
+            txtEmail.setText(user.email());
+            txtPhone.setText(user.phone());
         } catch (Exception e) {
             uiExceptionHandler.handle(e);
         }
@@ -55,18 +52,18 @@ public class EditUserFormController {
     public void handleSave() {
         try {
             if (userId == null) {
-                throw new IllegalArgumentException("User id must not be blank");
+                throw new IllegalArgumentException("Kullanıcı ID boş olamaz");
             }
 
-            String firstName = requireNotBlank(safeTrim(txtFirstName.getText()), "First name");
-            String lastName = requireNotBlank(safeTrim(txtLastName.getText()), "Last name");
+            String firstName = requireNotBlank(safeTrim(txtFirstName.getText()), "Ad");
+            String lastName = requireNotBlank(safeTrim(txtLastName.getText()), "Soyad");
 
             UpdateUserRequest request = new UpdateUserRequest(
                 firstName,
                 lastName,
                 safeTrimToNull(txtEmail.getText()),
                 safeTrimToNull(txtPhone.getText()),
-                txtPassword.getText() == null ? null : txtPassword.getText()
+                null
             );
 
             userService.updateUser(userId, request);
@@ -97,7 +94,7 @@ public class EditUserFormController {
 
     private static String requireNotBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
+            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
         }
         return value;
     }

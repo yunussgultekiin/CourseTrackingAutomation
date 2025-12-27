@@ -3,7 +3,10 @@ package org.example.coursetrackingautomation.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.coursetrackingautomation.dto.CreateUserRequest;
+import org.example.coursetrackingautomation.dto.RoleDTO;
+import org.example.coursetrackingautomation.dto.SelectOptionDTO;
 import org.example.coursetrackingautomation.dto.UpdateUserRequest;
+import org.example.coursetrackingautomation.dto.UserDetailsDTO;
 import org.example.coursetrackingautomation.entity.Role;
 import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.repository.UserRepository;
@@ -58,7 +61,7 @@ public class UserService {
 			.password(passwordEncoder.encode(password))
 			.firstName(request.firstName().trim())
 			.lastName(request.lastName().trim())
-			.role(request.role())
+			.role(Role.valueOf(request.role().name()))
 			.studentNumber(request.studentNumber())
 			.email(request.email())
 			.phone(request.phone())
@@ -112,7 +115,7 @@ public class UserService {
 					DEFAULT_ADMIN_PASSWORD,
 					"Yönetici",
 					"Hesabı",
-					Role.ADMIN,
+					RoleDTO.ADMIN,
 					null,
 					null,
 					null,
@@ -163,5 +166,58 @@ public class UserService {
 			throw new IllegalArgumentException("Rol boş olamaz");
 		}
 		return userRepository.findByRoleAndActiveTrue(role);
+	}
+
+	@Transactional(readOnly = true)
+	public List<User> getActiveUsersByRole(RoleDTO role) {
+		if (role == null) {
+			throw new IllegalArgumentException("Rol boş olamaz");
+		}
+		return getActiveUsersByRole(Role.valueOf(role.name()));
+	}
+
+	@Transactional(readOnly = true)
+	public List<SelectOptionDTO> getActiveUserOptionsByRole(Role role) {
+		return getActiveUsersByRole(role).stream()
+			.map(user -> {
+				String firstName = user.getFirstName() == null ? "" : user.getFirstName();
+				String lastName = user.getLastName() == null ? "" : user.getLastName();
+				String username = user.getUsername() == null ? "" : user.getUsername();
+				String label = (firstName + " " + lastName).trim();
+				if (!username.isBlank()) {
+					label = label.isBlank() ? ("(" + username + ")") : (label + " (" + username + ")");
+				}
+				return new SelectOptionDTO(user.getId(), label);
+			})
+			.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<SelectOptionDTO> getActiveUserOptionsByRole(RoleDTO role) {
+		return getActiveUsersByRole(role).stream()
+			.map(user -> {
+				String firstName = user.getFirstName() == null ? "" : user.getFirstName();
+				String lastName = user.getLastName() == null ? "" : user.getLastName();
+				String username = user.getUsername() == null ? "" : user.getUsername();
+				String label = (firstName + " " + lastName).trim();
+				if (!username.isBlank()) {
+					label = label.isBlank() ? ("(" + username + ")") : (label + " (" + username + ")");
+				}
+				return new SelectOptionDTO(user.getId(), label);
+			})
+			.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public UserDetailsDTO getUserDetailsById(Long userId) {
+		User user = getUserById(userId);
+		return new UserDetailsDTO(
+			user.getId(),
+			user.getUsername(),
+			user.getFirstName(),
+			user.getLastName(),
+			user.getEmail(),
+			user.getPhone()
+		);
 	}
 }

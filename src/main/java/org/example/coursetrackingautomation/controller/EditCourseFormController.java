@@ -8,10 +8,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
+import org.example.coursetrackingautomation.dto.CourseDTO;
+import org.example.coursetrackingautomation.dto.RoleDTO;
+import org.example.coursetrackingautomation.dto.SelectOptionDTO;
 import org.example.coursetrackingautomation.dto.UpdateCourseRequest;
-import org.example.coursetrackingautomation.entity.Course;
-import org.example.coursetrackingautomation.entity.Role;
-import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
@@ -19,23 +19,22 @@ import org.example.coursetrackingautomation.util.AlertUtil;
 import org.springframework.stereotype.Controller;
 
 import javafx.collections.FXCollections;
-import javafx.util.StringConverter;
 
 @Controller
 @RequiredArgsConstructor
 public class EditCourseFormController {
 
-    @FXML private Label lblCourseCode;
-    @FXML private TextField txtName;
-    @FXML private TextField txtCredit;
-    @FXML private TextField txtQuota;
-    @FXML private TextField txtTerm;
-    @FXML private TextField txtWeeklyTotalHours;
-    @FXML private TextField txtWeeklyTheoryHours;
-    @FXML private TextField txtWeeklyPracticeHours;
-    @FXML private ComboBox<User> cmbInstructor;
-    @FXML private RadioButton rbActive;
-    @FXML private RadioButton rbPassive;
+    @FXML private Label courseCodeLabel;
+    @FXML private TextField nameField;
+    @FXML private TextField creditField;
+    @FXML private TextField quotaField;
+    @FXML private TextField termField;
+    @FXML private TextField weeklyTotalHoursField;
+    @FXML private TextField weeklyTheoryHoursField;
+    @FXML private TextField weeklyPracticeHoursField;
+    @FXML private ComboBox<SelectOptionDTO> instructorComboBox;
+    @FXML private RadioButton activeRadio;
+    @FXML private RadioButton passiveRadio;
 
     private final ToggleGroup statusGroup = new ToggleGroup();
 
@@ -49,28 +48,10 @@ public class EditCourseFormController {
     @FXML
     public void initialize() {
         try {
-            rbActive.setToggleGroup(statusGroup);
-            rbPassive.setToggleGroup(statusGroup);
+            activeRadio.setToggleGroup(statusGroup);
+            passiveRadio.setToggleGroup(statusGroup);
 
-            cmbInstructor.setConverter(new StringConverter<>() {
-                @Override
-                public String toString(User user) {
-                    if (user == null) {
-                        return "";
-                    }
-                    String fullName = (user.getFirstName() == null ? "" : user.getFirstName())
-                        + " "
-                        + (user.getLastName() == null ? "" : user.getLastName());
-                    return fullName.trim() + " (" + user.getUsername() + ")";
-                }
-
-                @Override
-                public User fromString(String string) {
-                    return null;
-                }
-            });
-
-            cmbInstructor.setItems(FXCollections.observableArrayList(userService.getActiveUsersByRole(Role.INSTRUCTOR)));
+            instructorComboBox.setItems(FXCollections.observableArrayList(userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR)));
         } catch (Exception e) {
             uiExceptionHandler.handle(e);
         }
@@ -86,29 +67,29 @@ public class EditCourseFormController {
             if (courseId == null) {
                 return;
             }
-            Course course = courseService.getCourseById(courseId);
-            lblCourseCode.setText(course.getCode() == null ? "-" : course.getCode());
-            txtName.setText(course.getName());
-            txtCredit.setText(course.getCredit() == null ? "" : String.valueOf(course.getCredit()));
-            txtQuota.setText(course.getQuota() == null ? "" : String.valueOf(course.getQuota()));
-            txtTerm.setText(course.getTerm());
-            txtWeeklyTotalHours.setText(course.getWeeklyTotalHours() == null ? "" : String.valueOf(course.getWeeklyTotalHours()));
-            txtWeeklyTheoryHours.setText(course.getWeeklyTheoryHours() == null ? "" : String.valueOf(course.getWeeklyTheoryHours()));
-            txtWeeklyPracticeHours.setText(course.getWeeklyPracticeHours() == null ? "" : String.valueOf(course.getWeeklyPracticeHours()));
+            CourseDTO course = courseService.getCourseDTOById(courseId);
+            courseCodeLabel.setText(course.getCode() == null ? "-" : course.getCode());
+            nameField.setText(course.getName());
+            creditField.setText(course.getCredit() == null ? "" : String.valueOf(course.getCredit()));
+            quotaField.setText(course.getQuota() == null ? "" : String.valueOf(course.getQuota()));
+            termField.setText(course.getTerm());
+            weeklyTotalHoursField.setText(course.getWeeklyTotalHours() == null ? "" : String.valueOf(course.getWeeklyTotalHours()));
+            weeklyTheoryHoursField.setText(course.getWeeklyTheoryHours() == null ? "" : String.valueOf(course.getWeeklyTheoryHours()));
+            weeklyPracticeHoursField.setText(course.getWeeklyPracticeHours() == null ? "" : String.valueOf(course.getWeeklyPracticeHours()));
 
-            originalActive = course.isActive();
-            if (course.isActive()) {
-                rbActive.setSelected(true);
+            originalActive = Boolean.TRUE.equals(course.getActive());
+            if (Boolean.TRUE.equals(course.getActive())) {
+                activeRadio.setSelected(true);
             } else {
-                rbPassive.setSelected(true);
+                passiveRadio.setSelected(true);
             }
 
-            if (course.getInstructor() != null) {
-                Long instructorId = course.getInstructor().getId();
-                cmbInstructor.getItems().stream()
-                    .filter(u -> u != null && instructorId != null && instructorId.equals(u.getId()))
+            if (course.getInstructorId() != null) {
+                Long instructorId = course.getInstructorId();
+                instructorComboBox.getItems().stream()
+                    .filter(opt -> opt != null && instructorId.equals(opt.id()))
                     .findFirst()
-                    .ifPresent(cmbInstructor::setValue);
+                    .ifPresent(instructorComboBox::setValue);
             }
         } catch (Exception e) {
             uiExceptionHandler.handle(e);
@@ -119,37 +100,32 @@ public class EditCourseFormController {
     public void handleSave() {
         try {
             if (courseId == null) {
-                throw new IllegalArgumentException("Course id must not be blank");
+                throw new IllegalArgumentException("Ders ID boş olamaz");
             }
 
-            String name = requireNotBlank(safeTrim(txtName.getText()), "Name");
-            String term = requireNotBlank(safeTrim(txtTerm.getText()), "Term");
+            String name = requireNotBlank(safeTrim(nameField.getText()), "Ders adı");
+            String term = requireNotBlank(safeTrim(termField.getText()), "Dönem");
 
-            Integer credit = parseNullablePositiveInt(txtCredit.getText(), "Credit");
-            Integer quota = parseNullablePositiveInt(txtQuota.getText(), "Quota");
+            Integer credit = parseNullablePositiveInt(creditField.getText(), "Kredi");
+            Integer quota = parseNullablePositiveInt(quotaField.getText(), "Kota");
 
-            Integer weeklyTotalHours = parsePositiveInt(txtWeeklyTotalHours.getText(), "Haftalık toplam saat");
-            Integer weeklyTheoryHours = parseNonNegativeInt(txtWeeklyTheoryHours.getText(), "Haftalık teori saati");
-            Integer weeklyPracticeHours = parseNonNegativeInt(txtWeeklyPracticeHours.getText(), "Haftalık uygulama saati");
+            Integer weeklyTotalHours = parsePositiveInt(weeklyTotalHoursField.getText(), "Haftalık toplam saat");
+            Integer weeklyTheoryHours = parseNonNegativeInt(weeklyTheoryHoursField.getText(), "Haftalık teori saati");
+            Integer weeklyPracticeHours = parseNonNegativeInt(weeklyPracticeHoursField.getText(), "Haftalık uygulama saati");
             if ((weeklyTheoryHours + weeklyPracticeHours) != weeklyTotalHours) {
                 throw new IllegalArgumentException("Haftalık toplam saat, teori + uygulama toplamına eşit olmalıdır");
             }
 
-            Long instructorId = cmbInstructor.getValue() == null ? null : cmbInstructor.getValue().getId();
+            Long instructorId = instructorComboBox.getValue() == null ? null : instructorComboBox.getValue().id();
 
-            boolean newActive = rbActive.isSelected();
+            boolean newActive = activeRadio.isSelected();
             if (originalActive && !newActive) {
                 boolean confirmed = alertUtil.showConfirmationAlert(
                     "Onay",
-                    "Bu dersi Pasif yapmak üzeresiniz.\n\n" +
-                        "Bu işlemden sonra:\n" +
-                        "- Ders artık yeni öğrenci kabul etmeyecek.\n" +
-                        "- Öğrenciler bu dersi seçemeyecek.\n\n" +
-                        "Devam etmek istiyor musunuz?"
+                    "Bu dersi Pasif yapmak üzeresiniz. Pasif hale getirilen ders yeni öğrenci kabul etmez ve öğrenciler tarafından seçilemez. Devam etmek istiyor musunuz?"
                 );
                 if (!confirmed) {
-                    // keep UI consistent
-                    rbActive.setSelected(true);
+                    activeRadio.setSelected(true);
                     return;
                 }
             }
@@ -179,7 +155,7 @@ public class EditCourseFormController {
     }
 
     private void close() {
-        Stage stage = (Stage) lblCourseCode.getScene().getWindow();
+        Stage stage = (Stage) courseCodeLabel.getScene().getWindow();
         stage.close();
     }
 
@@ -195,32 +171,32 @@ public class EditCourseFormController {
         try {
             int parsed = Integer.parseInt(raw.trim());
             if (parsed <= 0) {
-                throw new IllegalArgumentException(label + " must be greater than 0");
+                throw new IllegalArgumentException(label + " 0'dan büyük olmalıdır");
             }
             return parsed;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(label + " must be a number");
+            throw new IllegalArgumentException(label + " sayı olmalıdır");
         }
     }
 
     private static Integer parsePositiveInt(String raw, String label) {
         if (raw == null || raw.trim().isBlank()) {
-            throw new IllegalArgumentException(label + " must not be blank");
+            throw new IllegalArgumentException(label + " boş bırakılamaz");
         }
         try {
             int parsed = Integer.parseInt(raw.trim());
             if (parsed <= 0) {
-                throw new IllegalArgumentException(label + " must be greater than 0");
+                throw new IllegalArgumentException(label + " 0'dan büyük olmalıdır");
             }
             return parsed;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(label + " must be a number");
+            throw new IllegalArgumentException(label + " sayı olmalıdır");
         }
     }
 
     private static Integer parseNonNegativeInt(String raw, String label) {
         if (raw == null || raw.trim().isBlank()) {
-            throw new IllegalArgumentException(label + " must not be blank");
+            throw new IllegalArgumentException(label + " boş bırakılamaz");
         }
         try {
             int parsed = Integer.parseInt(raw.trim());
@@ -229,13 +205,13 @@ public class EditCourseFormController {
             }
             return parsed;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(label + " must be a number");
+            throw new IllegalArgumentException(label + " sayı olmalıdır");
         }
     }
 
     private static String requireNotBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " must not be blank");
+            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
         }
         return value;
     }

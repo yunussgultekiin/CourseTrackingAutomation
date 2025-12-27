@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.coursetrackingautomation.config.UserSession;
 import org.example.coursetrackingautomation.dto.*;
-import org.example.coursetrackingautomation.entity.Role;
 import org.example.coursetrackingautomation.service.AdminDashboardService;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.ui.SceneNavigator;
@@ -351,7 +350,6 @@ public class AdminDashboardController {
     }
 
     private void loadEnrollmentsIntoTable() {
-        // Spec: Records are displayed only after search/filter input.
         populateTable(List.of(), this::configureEnrollmentColumns);
         applyEnrollmentFilters();
     }
@@ -449,17 +447,10 @@ public class AdminDashboardController {
         table.getColumns().add(createColumn("Tarih", AdminAttendanceRowDTO::date));
     }
 
-    private void configureStatisticsColumns(TableView<AdminKeyValueRowDTO> table) {
-        table.getColumns().add(createColumn("Metrik", AdminKeyValueRowDTO::key));
-        table.getColumns().add(createColumn("Değer", AdminKeyValueRowDTO::value));
-    }
-
     private <S, T> TableColumn<S, T> createColumn(String title, java.util.function.Function<S, T> mapper) {
         TableColumn<S, T> column = new TableColumn<>(title);
         column.setCellValueFactory(cellData -> new SimpleObjectProperty<>(mapper.apply(cellData.getValue())));
 
-        // Prevent JavaFX from collapsing columns to near-zero widths (observed after closing modals).
-        // Keep ID narrow so it doesn't consume the whole table.
         if ("ID".equals(title)) {
             column.setMinWidth(60);
             column.setPrefWidth(80);
@@ -581,10 +572,7 @@ public class AdminDashboardController {
     private String getDeleteConfirmationMessage(Object item, String type) {
         return switch (type) {
             case ACTION_TYPE_USER -> "'" + ((AdminUserRowDTO) item).username() + "' kullanıcısı silinecek.";
-            case ACTION_TYPE_COURSE -> "'" + ((CourseDTO) item).getCode() + "' dersi pasif yapılacak.\n\n" +
-                "Bu işlemden sonra:\n" +
-                "- Ders yeni öğrenci kabul etmeyecek.\n" +
-                "- Öğrenciler bu dersi seçemeyecek.";
+            case ACTION_TYPE_COURSE -> "Bu dersi Pasif yapmak üzeresiniz. Pasif hale getirilen ders yeni öğrenci kabul etmez ve öğrenciler tarafından seçilemez. Devam etmek istiyor musunuz?";
             case ACTION_TYPE_ENROLLMENT -> "Kayıt silinecek.";
             default -> "Bu öğe silinecek.";
         };
@@ -668,7 +656,7 @@ public class AdminDashboardController {
         });
     }
 
-    private String translateRole(Role role) {
+    private String translateRole(RoleDTO role) {
         if (role == null) return "";
         return switch (role) {
             case ADMIN -> "Yönetici";

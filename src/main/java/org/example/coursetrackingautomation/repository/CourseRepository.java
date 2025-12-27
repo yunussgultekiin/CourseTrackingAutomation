@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface CourseRepository extends JpaRepository<Course, Long> {
     Optional<Course> findByCode(String code);
 
+    Optional<Course> findByCodeIgnoreCase(String code);
+
     List<Course> findByInstructorIdAndActiveTrue(Long instructorId);
 
     List<Course> findByActiveTrue();

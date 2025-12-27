@@ -11,23 +11,19 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.util.StringConverter;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.dto.GradeDTO;
+import org.example.coursetrackingautomation.dto.InstructorCourseRosterDTO;
 import org.example.coursetrackingautomation.config.UserSession;
-import org.example.coursetrackingautomation.entity.Course;
-import org.example.coursetrackingautomation.entity.Enrollment;
 import org.example.coursetrackingautomation.service.AttendanceService;
 import org.example.coursetrackingautomation.service.GradeService;
 import org.example.coursetrackingautomation.service.InstructorWorkflowService;
-import org.example.coursetrackingautomation.repository.AttendanceRecordRepository;
-import org.example.coursetrackingautomation.repository.CourseRepository;
-import org.example.coursetrackingautomation.repository.EnrollmentRepository;
 import org.example.coursetrackingautomation.ui.SceneNavigator;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
@@ -40,12 +36,7 @@ public class InstructorDashboardController {
 
     private static final String PROPERTY_STUDENT_ID = "studentId";
     private static final String PROPERTY_STUDENT_NAME = "studentName";
-    private static final String PROPERTY_AVERAGE_SCORE = "averageScore";
-    private static final String PROPERTY_STATUS = "status";
     private static final String PROPERTY_ATTENDANCE_COUNT = "attendanceCount";
-    private static final String PROPERTY_MIDTERM_SCORE = "midtermScore";
-    private static final String PROPERTY_FINAL_SCORE = "finalScore";
-    private static final String PROPERTY_LETTER_GRADE = "letterGrade";
 
     private static final String STYLE_CRITICAL_ATTENDANCE = "critical-attendance";
     private static final String STYLE_WARNING_ATTENDANCE = "warning-attendance";
@@ -68,9 +59,6 @@ public class InstructorDashboardController {
     @FXML private Button btnProfile;
 
     private final UserSession userSession;
-    private final CourseRepository courseRepository;
-    private final EnrollmentRepository enrollmentRepository;
-    private final AttendanceRecordRepository attendanceRecordRepository;
     private final InstructorWorkflowService instructorWorkflowService;
     private final GradeService gradeService;
     private final AttendanceService attendanceService;
@@ -78,7 +66,7 @@ public class InstructorDashboardController {
     private final UiExceptionHandler uiExceptionHandler;
     private final AlertUtil alertUtil;
 
-    private Course selectedCourse;
+    private CourseDTO selectedCourse;
     private Integer selectedWeekNumber;
     private final Map<Long, Long> enrollmentIdByStudentId = new HashMap<>();
     private final Map<Long, Boolean> originalPresentByStudentId = new HashMap<>();
@@ -95,26 +83,6 @@ public class InstructorDashboardController {
 
     private boolean hasUnsavedChanges = false;
 
-    private final StringConverter<Double> scoreConverter = new StringConverter<>() {
-        @Override
-        public String toString(Double value) {
-            return value == null ? "" : stripTrailingZeros(value);
-        }
-
-        @Override
-        public Double fromString(String text) {
-            if (text == null) {
-                return null;
-            }
-            String normalized = text.trim();
-            if (normalized.isEmpty()) {
-                return null;
-            }
-            normalized = normalized.replace(',', '.');
-            return Double.parseDouble(normalized);
-        }
-    };
-
     @FXML
     public void initialize() {
         setupTableColumns();
@@ -129,8 +97,8 @@ public class InstructorDashboardController {
 
         try {
             var currentUser = userSession.getCurrentUser().orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION));
-            var courses = courseRepository.findByInstructorIdAndActiveTrue(currentUser.id());
-            comboCourses.setItems(FXCollections.observableArrayList(courses.stream().map(Course::getCode).toList()));
+            var courseCodes = instructorWorkflowService.getActiveCourseCodesForInstructor(currentUser.id());
+            comboCourses.setItems(FXCollections.observableArrayList(courseCodes));
             comboCourses.setOnAction(e -> handleCourseSelection());
 
             if (comboWeeks != null) {
@@ -223,18 +191,16 @@ public class InstructorDashboardController {
                 return;
             }
 
-            Course course = courseRepository.findByCode(courseCode)
-                .orElseThrow(() -> new IllegalArgumentException(UiConstants.ERROR_KEY_COURSE_NOT_FOUND));
-
-            selectedCourse = course;
+            InstructorCourseRosterDTO roster = instructorWorkflowService.getCourseRoster(courseCode);
+            selectedCourse = roster.course();
             originalPresentByStudentId.clear();
 
             setupWeeksForSelectedCourse();
 
-            if (lblCourseHours != null) {
-                Integer weeklyTotal = course.getWeeklyTotalHours();
-                Integer weeklyTheory = course.getWeeklyTheoryHours();
-                Integer weeklyPractice = course.getWeeklyPracticeHours();
+            if (lblCourseHours != null && selectedCourse != null) {
+                Integer weeklyTotal = selectedCourse.getWeeklyTotalHours();
+                Integer weeklyTheory = selectedCourse.getWeeklyTheoryHours();
+                Integer weeklyPractice = selectedCourse.getWeeklyPracticeHours();
 
                 String totalText = weeklyTotal == null ? "-" : weeklyTotal.toString();
                 String theoryText = weeklyTheory == null ? "-" : weeklyTheory.toString();
@@ -242,53 +208,11 @@ public class InstructorDashboardController {
                 lblCourseHours.setText("Saat: " + totalText + " (Teori " + theoryText + ", Uyg. " + practiceText + ")");
             }
 
-            String courseName = course.getName();
-            Integer credit = course.getCredit();
-
-            ObservableList<GradeDTO> rows = FXCollections.observableArrayList();
+            ObservableList<GradeDTO> rows = FXCollections.observableArrayList(roster.rows());
             enrollmentIdByStudentId.clear();
+            enrollmentIdByStudentId.putAll(roster.enrollmentIdByStudentId());
             originalPresentByStudentId.clear();
             clearDirtyTracking();
-            for (Enrollment enrollment : enrollmentRepository.findByCourseIdWithStudentAndGrade(course.getId())) {
-                enrollmentIdByStudentId.put(enrollment.getStudent().getId(), enrollment.getId());
-                Double midterm = enrollment.getGrade() == null || enrollment.getGrade().getMidtermScore() == null
-                    ? null : enrollment.getGrade().getMidtermScore().doubleValue();
-                Double finalScore = enrollment.getGrade() == null || enrollment.getGrade().getFinalScore() == null
-                    ? null : enrollment.getGrade().getFinalScore().doubleValue();
-
-                boolean graded = midterm != null && finalScore != null;
-                Double average = gradeService.calculateAverage(midterm, finalScore);
-                String letter = graded ? gradeService.determineLetterGrade(average) : null;
-                boolean passed = graded && gradeService.isPassed(letter);
-                int absentHoursUi = attendanceService.toAbsentHours(course, enrollment.getAbsenteeismCount());
-                boolean critical = attendanceService.isAttendanceCritical(course, enrollment.getAbsenteeismCount());
-
-                String status;
-                if (!graded) {
-                    status = UiConstants.UI_STATUS_NOT_GRADED;
-                } else {
-                    status = passed ? UiConstants.UI_STATUS_PASSED : UiConstants.UI_STATUS_FAILED;
-                }
-
-                rows.add(new GradeDTO(
-                    enrollment.getStudent().getId(),
-                    enrollment.getStudent().getFirstName() + " " + enrollment.getStudent().getLastName(),
-                    courseCode,
-                    courseName,
-                    credit,
-                    course.getWeeklyTotalHours(),
-                    course.getWeeklyTheoryHours(),
-                    course.getWeeklyPracticeHours(),
-                    midterm,
-                    finalScore,
-                    average,
-                    letter,
-                    status,
-                    absentHoursUi,
-                    critical,
-                    true
-                ));
-            }
 
             tableStudents.setItems(rows);
 
@@ -314,15 +238,7 @@ public class InstructorDashboardController {
         }
         comboWeeks.setItems(weeks);
 
-        int defaultWeek = 1;
-        try {
-            Integer maxWeekNumber = attendanceRecordRepository.findMaxWeekNumberByCourseId(selectedCourse.getId());
-            if (maxWeekNumber != null && maxWeekNumber >= 1) {
-                defaultWeek = Math.min(14, maxWeekNumber + 1);
-            }
-        } catch (Exception ignored) {
-            defaultWeek = 1;
-        }
+        int defaultWeek = instructorWorkflowService.getNextWeekNumber(selectedCourse.getId());
 
         selectedWeekNumber = defaultWeek;
         comboWeeks.setValue(String.valueOf(defaultWeek));
@@ -369,14 +285,7 @@ public class InstructorDashboardController {
                 return;
             }
 
-            var records = attendanceRecordRepository.findByEnrollmentIdsAndWeekNumberWithEnrollment(enrollmentIds, selectedWeekNumber);
-
-            Map<Long, Boolean> presentByEnrollmentId = new HashMap<>();
-            for (var record : records) {
-                if (record.getEnrollment() != null && record.getEnrollment().getId() != null) {
-                    presentByEnrollmentId.put(record.getEnrollment().getId(), record.isPresent());
-                }
-            }
+            Map<Long, Boolean> presentByEnrollmentId = instructorWorkflowService.getPresentByEnrollmentIdsAndWeekNumber(enrollmentIds, selectedWeekNumber);
 
             for (GradeDTO row : items) {
                 if (row == null || row.getStudentId() == null) {
@@ -433,7 +342,7 @@ public class InstructorDashboardController {
             }
 
             row.setAttendanceCount(newHours);
-            boolean critical = attendanceService.isAttendanceCriticalByHours(selectedCourse, newHours);
+            boolean critical = attendanceService.isAttendanceCriticalByHours(selectedCourse == null ? null : selectedCourse.getWeeklyTotalHours(), newHours);
             row.setAbsentCritically(critical);
             markDirtyIfChanged(row);
         });
@@ -472,12 +381,11 @@ public class InstructorDashboardController {
             if (row == null || row.getStudentId() == null) {
                 continue;
             }
-            Long sid = row.getStudentId();
-            midtermPropByStudentId.put(sid, new SimpleObjectProperty<>(row.getMidtermScore()));
-            finalPropByStudentId.put(sid, new SimpleObjectProperty<>(row.getFinalScore()));
-            averagePropByStudentId.put(sid, new SimpleObjectProperty<>(row.getAverageScore()));
-            letterPropByStudentId.put(sid, new SimpleObjectProperty<>(row.getLetterGrade()));
-            statusPropByStudentId.put(sid, new SimpleObjectProperty<>(row.getStatus()));
+            midtermPropByStudentId.put(row.getStudentId(), new SimpleObjectProperty<>(row.getMidtermScore()));
+            finalPropByStudentId.put(row.getStudentId(), new SimpleObjectProperty<>(row.getFinalScore()));
+            averagePropByStudentId.put(row.getStudentId(), new SimpleObjectProperty<>(row.getAverageScore()));
+            letterPropByStudentId.put(row.getStudentId(), new SimpleObjectProperty<>(row.getLetterGrade()));
+            statusPropByStudentId.put(row.getStudentId(), new SimpleObjectProperty<>(row.getStatus()));
         }
     }
 
@@ -490,7 +398,6 @@ public class InstructorDashboardController {
             if (row == null || row.getStudentId() == null) {
                 continue;
             }
-            Long sid = row.getStudentId();
             getMidtermProp(row).set(row.getMidtermScore());
             getFinalProp(row).set(row.getFinalScore());
             getAverageProp(row).set(row.getAverageScore());
@@ -532,57 +439,6 @@ public class InstructorDashboardController {
             return new SimpleObjectProperty<>(null);
         }
         return statusPropByStudentId.computeIfAbsent(row.getStudentId(), k -> new SimpleObjectProperty<>(row.getStatus()));
-    }
-
-    private void recomputeDerivedGradeFields(GradeDTO row) {
-        if (row == null) {
-            return;
-        }
-
-        Double midterm = row.getMidtermScore();
-        Double fin = row.getFinalScore();
-        boolean graded = midterm != null && fin != null;
-
-        Double average = gradeService.calculateAverage(midterm, fin);
-        String letter = graded ? gradeService.determineLetterGrade(average) : null;
-        boolean passed = graded && gradeService.isPassed(letter);
-
-        row.setAverageScore(average);
-        row.setLetterGrade(letter);
-        if (!graded) {
-            row.setStatus(UiConstants.UI_STATUS_NOT_GRADED);
-        } else {
-            row.setStatus(passed ? UiConstants.UI_STATUS_PASSED : UiConstants.UI_STATUS_FAILED);
-        }
-
-        getAverageProp(row).set(average);
-        getLetterProp(row).set(letter);
-        getStatusProp(row).set(row.getStatus());
-    }
-
-    private boolean isValidScore(Double score) {
-        if (score == null) {
-            return true;
-        }
-        return score >= 0.0 && score <= 100.0;
-    }
-
-    private void setMidtermValue(GradeDTO row, Double value) {
-        if (row == null) {
-            return;
-        }
-        row.setMidtermScore(value);
-        getMidtermProp(row).set(value);
-        tableStudents.refresh();
-    }
-
-    private void setFinalValue(GradeDTO row, Double value) {
-        if (row == null) {
-            return;
-        }
-        row.setFinalScore(value);
-        getFinalProp(row).set(value);
-        tableStudents.refresh();
     }
 
     private void resetDirtyTrackingFromCurrentRows() {
@@ -648,17 +504,6 @@ public class InstructorDashboardController {
         return a.equals(b);
     }
 
-    private String stripTrailingZeros(Double value) {
-        if (value == null) {
-            return "";
-        }
-        // Keep it simple: show integer values without .0
-        if (value % 1.0 == 0.0) {
-            return String.valueOf(value.intValue());
-        }
-        return String.valueOf(value);
-    }
-
     private void attemptExit(Stage stage) {
         if (!hasUnsavedChanges) {
             sceneNavigator.performLogout(stage);
@@ -707,7 +552,6 @@ public class InstructorDashboardController {
                 attemptExit(stage);
             });
         } catch (Exception e) {
-            // don't block UI for close handler issues
         }
     }
 
@@ -722,8 +566,9 @@ public class InstructorDashboardController {
                         getStyleClass().removeAll(STYLE_CRITICAL_ATTENDANCE, STYLE_WARNING_ATTENDANCE);
                     } else {
                         int absentHours = item.getAttendanceCount() == null ? 0 : item.getAttendanceCount();
-                        boolean critical = attendanceService.isAttendanceCriticalByHours(selectedCourse, absentHours);
-                        boolean warning = !critical && attendanceService.isAttendanceWarningByHours(selectedCourse, absentHours);
+                        Integer weeklyTotalHours = selectedCourse == null ? null : selectedCourse.getWeeklyTotalHours();
+                        boolean critical = attendanceService.isAttendanceCriticalByHours(weeklyTotalHours, absentHours);
+                        boolean warning = !critical && attendanceService.isAttendanceWarningByHours(weeklyTotalHours, absentHours);
 
                         getStyleClass().removeAll(STYLE_CRITICAL_ATTENDANCE, STYLE_WARNING_ATTENDANCE);
                         if (critical) {
@@ -739,7 +584,11 @@ public class InstructorDashboardController {
                 if (event.getButton() != MouseButton.PRIMARY) {
                     return;
                 }
-                if (event.getClickCount() == 2 && !row.isEmpty() && tableStudents.getEditingCell() == null) {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    try {
+                        tableStudents.edit(-1, null);
+                    } catch (Exception ignored) {
+                    }
                     GradeDTO item = row.getItem();
                     if (item == null) {
                         return;
@@ -750,7 +599,6 @@ public class InstructorDashboardController {
                         UiConstants.WINDOW_TITLE_EDIT_GRADE,
                         tableStudents.getScene().getWindow(),
                         (EditGradePopupController c) -> c.setContext(item, updated -> {
-                            // Keep UI properties in sync and mark dirty.
                             getMidtermProp(updated).set(updated.getMidtermScore());
                             getFinalProp(updated).set(updated.getFinalScore());
                             getAverageProp(updated).set(updated.getAverageScore());

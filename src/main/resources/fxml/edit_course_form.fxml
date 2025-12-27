@@ -25,50 +25,50 @@
         </columnConstraints>
 
         <Label text="Ders Kodu:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-        <Label fx:id="lblCourseCode" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+        <Label fx:id="courseCodeLabel" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 
         <Label text="Ders Adı:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-        <TextField fx:id="txtName" promptText="Ders adı" styleClass="input-compact"
+        <TextField fx:id="nameField" promptText="Ders adı" styleClass="input-compact"
                    GridPane.rowIndex="1" GridPane.columnIndex="1" />
 
         <Label text="Kredi:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-        <TextField fx:id="txtCredit" promptText="örn: 4" styleClass="input-compact"
+        <TextField fx:id="creditField" promptText="örn: 4" styleClass="input-compact"
                    GridPane.rowIndex="2" GridPane.columnIndex="1" />
 
         <Label text="Kota:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-        <TextField fx:id="txtQuota" promptText="örn: 30" styleClass="input-compact"
+        <TextField fx:id="quotaField" promptText="örn: 30" styleClass="input-compact"
                    GridPane.rowIndex="3" GridPane.columnIndex="1" />
 
         <Label text="Dönem:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
-        <TextField fx:id="txtTerm" promptText="örn: 2025" styleClass="input-compact"
+        <TextField fx:id="termField" promptText="örn: 2025" styleClass="input-compact"
                    GridPane.rowIndex="4" GridPane.columnIndex="1" />
 
         <Label text="Haftalık Toplam Saat:" GridPane.rowIndex="5" GridPane.columnIndex="0" />
-        <TextField fx:id="txtWeeklyTotalHours" promptText="örn: 3" styleClass="input-compact"
+        <TextField fx:id="weeklyTotalHoursField" promptText="örn: 3" styleClass="input-compact"
                    GridPane.rowIndex="5" GridPane.columnIndex="1" />
 
         <Label text="Haftalık Teori Saati:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
-        <TextField fx:id="txtWeeklyTheoryHours" promptText="örn: 2" styleClass="input-compact"
+        <TextField fx:id="weeklyTheoryHoursField" promptText="örn: 2" styleClass="input-compact"
                    GridPane.rowIndex="6" GridPane.columnIndex="1" />
 
         <Label text="Haftalık Uygulama Saati:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
-        <TextField fx:id="txtWeeklyPracticeHours" promptText="örn: 1" styleClass="input-compact"
+        <TextField fx:id="weeklyPracticeHoursField" promptText="örn: 1" styleClass="input-compact"
                    GridPane.rowIndex="7" GridPane.columnIndex="1" />
 
         <Label text="Akademisyen:" GridPane.rowIndex="8" GridPane.columnIndex="0" />
-        <ComboBox fx:id="cmbInstructor" promptText="Akademisyen seçin" styleClass="input-compact"
+        <ComboBox fx:id="instructorComboBox" promptText="Akademisyen seçin" styleClass="input-compact"
                   GridPane.rowIndex="8" GridPane.columnIndex="1" />
 
         <Label text="Durum:" GridPane.rowIndex="9" GridPane.columnIndex="0" />
         <HBox spacing="12.0" GridPane.rowIndex="9" GridPane.columnIndex="1">
-            <RadioButton fx:id="rbActive" text="Aktif" />
-            <RadioButton fx:id="rbPassive" text="Pasif" />
+            <RadioButton fx:id="activeRadio" text="Aktif" />
+            <RadioButton fx:id="passiveRadio" text="Pasif" />
         </HBox>
     </GridPane>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
-        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
         <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
     </HBox>
 
 </VBox>

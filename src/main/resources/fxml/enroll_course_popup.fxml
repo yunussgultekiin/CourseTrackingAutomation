@@ -34,8 +34,8 @@
     </TableView>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
-        <Button fx:id="btnEnroll" text="Kaydol" onAction="#handleEnroll" styleClass="btn-primary-green" />
         <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+        <Button fx:id="btnEnroll" text="Kaydol" onAction="#handleEnroll" styleClass="btn-primary-green" />
     </HBox>
 
 </VBox>

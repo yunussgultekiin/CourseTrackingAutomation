@@ -43,24 +43,24 @@
         <TextField fx:id="txtPhone" promptText="Telefon" styleClass="input-compact"
                    GridPane.rowIndex="4" GridPane.columnIndex="1" />
 
-        <Separator GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+        <Separator fx:id="sepPassword" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 
-        <Label text="Mevcut şifre:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+        <Label fx:id="lblCurrentPassword" text="Mevcut şifre:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
         <PasswordField fx:id="txtCurrentPassword" promptText="Mevcut şifre" styleClass="input-compact"
                        GridPane.rowIndex="6" GridPane.columnIndex="1" />
 
-        <Label text="Yeni şifre:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+        <Label fx:id="lblNewPassword" text="Yeni şifre:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
         <PasswordField fx:id="txtNewPassword" promptText="Yeni şifre" styleClass="input-compact"
                        GridPane.rowIndex="7" GridPane.columnIndex="1" />
 
-        <Label text="Yeni şifre (tekrar):" GridPane.rowIndex="8" GridPane.columnIndex="0" />
+        <Label fx:id="lblConfirmPassword" text="Yeni şifre (tekrar):" GridPane.rowIndex="8" GridPane.columnIndex="0" />
         <PasswordField fx:id="txtConfirmPassword" promptText="Yeni şifre (tekrar)" styleClass="input-compact"
                        GridPane.rowIndex="8" GridPane.columnIndex="1" />
     </GridPane>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
-        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
         <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
     </HBox>
 
 </VBox>

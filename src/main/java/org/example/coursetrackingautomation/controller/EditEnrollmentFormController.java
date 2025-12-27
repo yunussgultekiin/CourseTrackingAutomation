@@ -6,7 +6,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
-import org.example.coursetrackingautomation.entity.Enrollment;
+import org.example.coursetrackingautomation.dto.EnrollmentDetailsDTO;
 import org.example.coursetrackingautomation.service.EnrollmentService;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
@@ -60,20 +60,12 @@ public class EditEnrollmentFormController {
                 return;
             }
 
-            Enrollment enrollment = enrollmentService.getEnrollmentById(enrollmentId);
-            lblEnrollmentId.setText(String.valueOf(enrollment.getId()));
+            EnrollmentDetailsDTO details = enrollmentService.getEnrollmentDetailsById(enrollmentId);
+            lblEnrollmentId.setText(String.valueOf(details.id()));
+            lblStudent.setText(details.studentDisplay());
+            lblCourse.setText(details.courseDisplay());
 
-            String studentName = enrollment.getStudent() == null
-                ? "-"
-                : (enrollment.getStudent().getFirstName() + " " + enrollment.getStudent().getLastName());
-            String courseDisplay = enrollment.getCourse() == null
-                ? "-"
-                : (enrollment.getCourse().getCode() + " - " + enrollment.getCourse().getName());
-
-            lblStudent.setText(studentName);
-            lblCourse.setText(courseDisplay);
-
-            String status = enrollment.getStatus() == null ? null : enrollment.getStatus().trim().toUpperCase();
+            String status = details.status() == null ? null : details.status().trim().toUpperCase();
             if (status != null && !status.isBlank()) {
                 comboStatus.setValue(status);
             }
@@ -86,7 +78,7 @@ public class EditEnrollmentFormController {
     public void handleSave() {
         try {
             if (enrollmentId == null) {
-                throw new IllegalArgumentException("Enrollment id must not be blank");
+                throw new IllegalArgumentException("Kayıt ID boş olamaz");
             }
 
             String status = comboStatus.getValue();
