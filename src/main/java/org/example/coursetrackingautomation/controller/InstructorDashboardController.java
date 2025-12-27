@@ -22,7 +22,6 @@ import org.example.coursetrackingautomation.dto.GradeDTO;
 import org.example.coursetrackingautomation.dto.InstructorCourseRosterDTO;
 import org.example.coursetrackingautomation.config.UserSession;
 import org.example.coursetrackingautomation.service.AttendanceService;
-import org.example.coursetrackingautomation.service.GradeService;
 import org.example.coursetrackingautomation.service.InstructorWorkflowService;
 import org.example.coursetrackingautomation.ui.SceneNavigator;
 import org.example.coursetrackingautomation.ui.UiConstants;
@@ -60,7 +59,6 @@ public class InstructorDashboardController {
 
     private final UserSession userSession;
     private final InstructorWorkflowService instructorWorkflowService;
-    private final GradeService gradeService;
     private final AttendanceService attendanceService;
     private final SceneNavigator sceneNavigator;
     private final UiExceptionHandler uiExceptionHandler;
