@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.coursetrackingautomation.controller.AdminEnrollStudentFormController"
+      stylesheets="@styles.css"
+    spacing="18.0" styleClass="dialog-card" prefWidth="720.0" prefHeight="360.0">
+
+    <padding>
+        <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
+    </padding>
+
+    <Label text="Kayıt Ekle" styleClass="section-title" />
+
+    <Separator/>
+
+    <GridPane hgap="16.0" vgap="12.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
+        </columnConstraints>
+
+        <VBox spacing="5.0" GridPane.rowIndex="0" GridPane.columnIndex="0">
+            <Label text="Öğrenci *" styleClass="sidebar-title" />
+            <ComboBox fx:id="comboStudent" promptText="Öğrenci seçin" styleClass="input" />
+        </VBox>
+
+        <VBox spacing="5.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+            <Label text="Ders *" styleClass="sidebar-title" />
+            <ComboBox fx:id="comboCourse" promptText="Ders seçin" styleClass="input" />
+        </VBox>
+    </GridPane>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <HBox alignment="CENTER_RIGHT" spacing="15.0">
+        <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" cancelButton="true" />
+        <Button text="Kaydet" onAction="#handleEnroll" styleClass="btn-primary-green" defaultButton="true" />
+    </HBox>
+
+</VBox>

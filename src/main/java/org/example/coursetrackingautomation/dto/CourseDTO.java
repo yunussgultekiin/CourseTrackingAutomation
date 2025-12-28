@@ -6,7 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Course entity'sini UI'da göstermek için kullanılan DTO sınıfı
+ * Course representation used by the UI and service layer.
+ *
+ * <p>Includes instructor display data and derived quota-related fields used by dashboards and
+ * enrollment screens.
  */
 @Data
 @Builder
@@ -20,12 +23,11 @@ public class CourseDTO {
     private Integer quota;
     private String term;
     private Boolean active;
-    
-    // Instructor bilgileri
+    private Integer weeklyTotalHours;
+    private Integer weeklyTheoryHours;
+    private Integer weeklyPracticeHours;
     private Long instructorId;
     private String instructorName;
-    
-    // İstatistikler (opsiyonel - UI'da gösterim için)
     private Long currentEnrollmentCount;
-    private Long availableQuota; // quota - currentEnrollmentCount
+    private Long availableQuota; 
 }

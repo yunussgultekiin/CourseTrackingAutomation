@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.coursetrackingautomation.controller.EditUserFormController"
+      stylesheets="@styles.css"
+    spacing="18.0" styleClass="dialog-card" prefWidth="540.0" prefHeight="380.0">
+
+    <padding>
+        <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
+    </padding>
+
+    <Label text="Kullanıcı Düzenle" styleClass="section-title" />
+
+    <Separator />
+
+    <GridPane hgap="10.0" vgap="10.0">
+        <columnConstraints>
+            <ColumnConstraints minWidth="160.0" halignment="RIGHT" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label text="Kullanıcı Adı:" styleClass="sidebar-title" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <Label fx:id="lblUsername" text="-" styleClass="muted" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+        <Label text="Ad:" styleClass="sidebar-title" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <TextField fx:id="txtFirstName" promptText="Ad" styleClass="input"
+                   GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+        <Label text="Soyad:" styleClass="sidebar-title" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <TextField fx:id="txtLastName" promptText="Soyad" styleClass="input"
+                   GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+        <Label text="E-posta:" styleClass="sidebar-title" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <TextField fx:id="txtEmail" promptText="E-posta" styleClass="input"
+                   GridPane.rowIndex="3" GridPane.columnIndex="1" />
+
+        <Label text="Telefon:" styleClass="sidebar-title" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+        <TextField fx:id="txtPhone" promptText="Telefon" styleClass="input"
+                   GridPane.rowIndex="4" GridPane.columnIndex="1" />
+
+    </GridPane>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10.0">
+        <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
+    </HBox>
+
+</VBox>

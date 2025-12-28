@@ -2,44 +2,48 @@ package org.example.coursetrackingautomation.util;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.scene.text.Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-/**
- * Utility class for displaying alert dialogs.
- * Follows DRY principle and provides standardized alert dialogs.
- */
 @Component
+/**
+ * Convenience utility for displaying JavaFX alert dialogs.
+ *
+ * <p>Wraps the standard {@link Alert} API and applies consistent dialog styling.
+ * Intended for UI-level feedback (validation errors, confirmations, and informational messages).</p>
+ */
 public class AlertUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(AlertUtil.class);
 
-    private static final String ERROR_TITLE = "Error";
-    private static final String SUCCESS_TITLE = "Success";
-    private static final String WARNING_TITLE = "Warning";
-    private static final String INFORMATION_TITLE = "Information";
-    private static final String CONFIRMATION_TITLE = "Confirmation";
+    private static final String ERROR_TITLE = "Hata";
+    private static final String SUCCESS_TITLE = "Başarılı";
+    private static final String WARNING_TITLE = "Uyarı";
+    private static final String INFORMATION_TITLE = "Bilgi";
+    private static final String CONFIRMATION_TITLE = "Onay";
 
     /**
-     * Shows an error alert dialog.
+     * Shows an error alert with a default title.
      *
-     * @param message The error message to display
+     * @param message message to display
      */
     public void showErrorAlert(String message) {
         showErrorAlert(ERROR_TITLE, message);
     }
 
     /**
-     * Shows an error alert dialog with custom title.
+     * Shows an error alert.
      *
-     * @param title   The title of the alert
-     * @param message The error message to display
+     * @param title header title
+     * @param message message to display
      */
     public void showErrorAlert(String title, String message) {
         logger.error("Error Alert: {} - {}", title, message);
@@ -52,19 +56,19 @@ public class AlertUtil {
     }
 
     /**
-     * Shows a success alert dialog.
+     * Shows a success alert with a default title.
      *
-     * @param message The success message to display
+     * @param message message to display
      */
     public void showSuccessAlert(String message) {
         showSuccessAlert(SUCCESS_TITLE, message);
     }
 
     /**
-     * Shows a success alert dialog with custom title.
+     * Shows a success alert.
      *
-     * @param title   The title of the alert
-     * @param message The success message to display
+     * @param title header title
+     * @param message message to display
      */
     public void showSuccessAlert(String title, String message) {
         logger.info("Success Alert: {} - {}", title, message);
@@ -77,19 +81,19 @@ public class AlertUtil {
     }
 
     /**
-     * Shows a warning alert dialog.
+     * Shows a warning alert with a default title.
      *
-     * @param message The warning message to display
+     * @param message message to display
      */
     public void showWarningAlert(String message) {
         showWarningAlert(WARNING_TITLE, message);
     }
 
     /**
-     * Shows a warning alert dialog with custom title.
+     * Shows a warning alert.
      *
-     * @param title   The title of the alert
-     * @param message The warning message to display
+     * @param title header title
+     * @param message message to display
      */
     public void showWarningAlert(String title, String message) {
         logger.warn("Warning Alert: {} - {}", title, message);
@@ -102,19 +106,19 @@ public class AlertUtil {
     }
 
     /**
-     * Shows an information alert dialog.
+     * Shows an informational alert with a default title.
      *
-     * @param message The information message to display
+     * @param message message to display
      */
     public void showInformationAlert(String message) {
         showInformationAlert(INFORMATION_TITLE, message);
     }
 
     /**
-     * Shows an information alert dialog with custom title.
+     * Shows an informational alert.
      *
-     * @param title   The title of the alert
-     * @param message The information message to display
+     * @param title header title
+     * @param message message to display
      */
     public void showInformationAlert(String title, String message) {
         logger.info("Information Alert: {} - {}", title, message);
@@ -127,21 +131,21 @@ public class AlertUtil {
     }
 
     /**
-     * Shows a confirmation dialog and returns the user's choice.
+     * Shows a confirmation alert with a default title.
      *
-     * @param message The confirmation message to display
-     * @return true if user confirmed, false otherwise
+     * @param message message to display
+     * @return {@code true} if the user confirms
      */
     public boolean showConfirmationAlert(String message) {
         return showConfirmationAlert(CONFIRMATION_TITLE, message);
     }
 
     /**
-     * Shows a confirmation dialog with custom title and returns the user's choice.
+     * Shows a confirmation alert.
      *
-     * @param title   The title of the alert
-     * @param message The confirmation message to display
-     * @return true if user confirmed, false otherwise
+     * @param title header title
+     * @param message message to display
+     * @return {@code true} if the user confirms
      */
     public boolean showConfirmationAlert(String title, String message) {
         logger.info("Confirmation Alert: {} - {}", title, message);
@@ -155,15 +159,49 @@ public class AlertUtil {
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 
-    /**
-     * Styles the alert dialog for better appearance.
-     *
-     * @param alert The alert to style
-     */
     private void styleAlert(Alert alert) {
+        applyModernDialogIcon(alert);
+
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initStyle(StageStyle.DECORATED);
+    }
+
+    private static void applyModernDialogIcon(Alert alert) {
+        if (alert == null) {
+            return;
+        }
+
+        String glyph;
+        String color;
+
+        switch (alert.getAlertType()) {
+            case ERROR -> {
+                glyph = "✕";
+                color = "#e74c3c";
+            }
+            case WARNING -> {
+                glyph = "!";
+                color = "#7f8c8d";
+            }
+            case CONFIRMATION -> {
+                glyph = "?";
+                color = "#7f8c8d";
+            }
+            case INFORMATION -> {
+                glyph = "ℹ";
+                color = "#7f8c8d";
+            }
+            default -> {
+                glyph = "";
+                color = "#7f8c8d";
+            }
+        }
+
+        Label graphic = new Label(glyph);
+        graphic.setFont(Font.font("System", 26));
+        graphic.setStyle("-fx-font-weight: bold; -fx-text-fill: " + color + ";");
+        alert.setGraphic(graphic);
     }
 }
 

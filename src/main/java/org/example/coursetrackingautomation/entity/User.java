@@ -8,7 +8,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -18,8 +17,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
 
+/**
+ * Represents an application user account.
+ *
+ * <p>A {@code User} can act as an {@link Role#ADMIN administrator}, {@link Role#INSTRUCTOR instructor},
+ * or {@link Role#STUDENT student}. Depending on the role, the user may instruct courses and/or be
+ * enrolled as a student.
+ *
+ * <p>Credentials are stored as an encoded password (see security configuration). The {@code active}
+ * flag is used to prevent authentication and participation for deactivated accounts.
+ */
 @Entity
 @Table(name = "users")
 @Getter
@@ -65,10 +73,6 @@ public class User extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private boolean active;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default

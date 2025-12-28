@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.coursetrackingautomation.controller.EditEnrollmentFormController"
+      stylesheets="@styles.css"
+    spacing="18.0" styleClass="dialog-card" prefWidth="560.0" prefHeight="320.0">
+
+    <padding>
+        <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
+    </padding>
+
+    <Label text="Kayıt Düzenle" styleClass="section-title" />
+
+    <Separator />
+
+    <GridPane hgap="10.0" vgap="10.0">
+        <columnConstraints>
+            <ColumnConstraints minWidth="160.0" halignment="RIGHT" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label text="Kayıt ID:" styleClass="sidebar-title" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <Label fx:id="lblEnrollmentId" text="-" styleClass="muted" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+        <Label text="Öğrenci:" styleClass="sidebar-title" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <Label fx:id="lblStudent" text="-" styleClass="muted" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+        <Label text="Ders:" styleClass="sidebar-title" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <Label fx:id="lblCourse" text="-" styleClass="muted" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+        <Label text="Durum:" styleClass="sidebar-title" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <ComboBox fx:id="comboStatus" promptText="Durum seçin" styleClass="input" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+    </GridPane>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10.0">
+        <Button text="İptal" onAction="#handleClose" styleClass="btn-secondary" />
+        <Button text="Kaydet" onAction="#handleSave" styleClass="btn-primary-green" />
+    </HBox>
+
+</VBox>

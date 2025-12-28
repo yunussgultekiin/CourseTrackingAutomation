@@ -7,7 +7,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -15,8 +14,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
 
+/**
+ * Represents attendance for a single week/session within an {@link Enrollment}.
+ *
+ * <p>Attendance is tracked as a week number and a boolean presence flag, along with the calendar
+ * date of the session. Aggregations (e.g., absenteeism counts and warning thresholds) are computed
+ * in service-layer logic.
+ */
 @Entity
 @Table(name = "attendance_records")
 @Getter
@@ -40,7 +45,4 @@ public class AttendanceRecord extends BaseEntity {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 }
