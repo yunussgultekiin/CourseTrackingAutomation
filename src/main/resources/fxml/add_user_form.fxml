@@ -1,141 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.text.*?>
+<?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="20.0"
-      style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 30px;"
-      prefWidth="500.0" prefHeight="650.0">
-    
-    <padding>
-        <Insets top="30.0" right="30.0" bottom="30.0" left="30.0"/>
+<VBox prefHeight="650.0" prefWidth="500.0" spacing="15.0" styleClass="card-pane" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.coursetrackingautomation.controller.AddUserController"> <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
 
-    <!-- Form Title -->
-    <Label text="Kullanıcı Ekle" 
-           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #667eea;">
-        <font>
-            <Font name="System Bold" size="24.0"/>
-        </font>
-    </Label>
-    
-    <Separator/>
+    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Kullanici Ekle" />
+    <Separator />
 
-    <!-- First Name -->
     <VBox spacing="5.0">
-        <Label text="Ad *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="firstNameField" promptText="Ad" 
-                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+        <Label styleClass="form-label" text="Ad *" />
+        <TextField fx:id="firstNameField" promptText="Ad" />
     </VBox>
 
-    <!-- Last Name -->
     <VBox spacing="5.0">
-        <Label text="Soyad *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="lastNameField" promptText="Soyad" 
-                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+        <Label styleClass="form-label" text="Soyad *" />
+        <TextField fx:id="lastNameField" promptText="Soyad" />
     </VBox>
 
-    <!-- Email -->
     <VBox spacing="5.0">
-        <Label text="E-posta *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="emailField" promptText="ornek@email.com" 
-                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+        <Label styleClass="form-label" text="E-posta *" />
+        <TextField fx:id="emailField" promptText="ornek@email.com" />
     </VBox>
 
-    <!-- Username -->
     <VBox spacing="5.0">
-        <Label text="Kullanıcı Adı *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="usernameField" promptText="Kullanıcı adı" 
-                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+        <Label styleClass="form-label" text="Kullanici Adi *" />
+        <TextField fx:id="usernameField" promptText="Kullanici adi" />
     </VBox>
 
-    <!-- Password -->
     <VBox spacing="5.0">
-        <Label text="Şifre *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <PasswordField fx:id="passwordField" promptText="Şifre" 
-                       style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+        <Label styleClass="form-label" text="Sifre *" />
+        <PasswordField fx:id="passwordField" promptText="Sifre" />
     </VBox>
 
-    <!-- Role -->
     <VBox spacing="5.0">
-        <Label text="Rol *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <ComboBox fx:id="roleComboBox" promptText="Rol seçin" 
-                  style="-fx-background-radius: 5; -fx-padding: 5px; -fx-font-size: 14px;"
-                  prefWidth="200.0">
+        <Label styleClass="form-label" text="Rol *" />
+        <ComboBox fx:id="roleComboBox" maxWidth="Infinity" promptText="Rol secin">
             <items>
                 <FXCollections fx:factory="observableArrayList">
-                    <String fx:value="STUDENT"/>
-                    <String fx:value="INSTRUCTOR"/>
-                    <String fx:value="ADMIN"/>
+                    <String fx:value="STUDENT" />
+                    <String fx:value="INSTRUCTOR" />
+                    <String fx:value="ADMIN" />
                 </FXCollections>
             </items>
         </ComboBox>
     </VBox>
 
-    <!-- Phone -->
     <VBox spacing="5.0">
-        <Label text="Telefon" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="phoneField" promptText="Örn: 555-123-4567" 
-                   style="-fx-background-radius: 5; -fx-padding: 10px; -fx-font-size: 14px;"/>
+        <Label styleClass="form-label" text="Telefon" />
+        <TextField fx:id="phoneField" promptText="Orn: 555-123-4567" />
     </VBox>
 
-    <!-- Birth Date -->
     <VBox spacing="5.0">
-        <Label text="Doğum Tarihi" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <DatePicker fx:id="birthDatePicker" 
-                    style="-fx-background-radius: 5; -fx-padding: 5px; -fx-font-size: 14px;"/>
+        <Label styleClass="form-label" text="Dogum Tarihi" />
+        <DatePicker fx:id="birthDatePicker" maxWidth="Infinity" />
     </VBox>
 
-    <Region VBox.vgrow="ALWAYS"/>
+    <Region VBox.vgrow="ALWAYS" />
 
-    <!-- Buttons -->
-    <HBox spacing="15.0" alignment="CENTER_RIGHT">
-        <Button fx:id="cancelButton" text="İptal" 
-                onAction="#handleCancel"
-                style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
-                cancelButton="true"/>
-        <Button fx:id="saveButton" text="Kaydet" 
-                onAction="#handleSave"
-                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 10px 25px; -fx-cursor: hand; -fx-font-weight: bold;"
-                defaultButton="true"/>
+    <HBox alignment="CENTER_RIGHT" spacing="15.0">
+        <Button fx:id="cancelButton" cancelButton="true" onAction="#handleCancel" styleClass="button, button-secondary" text="Iptal" />
+        <Button fx:id="saveButton" defaultButton="true" onAction="#handleSave" styleClass="button, button-success" text="Kaydet" />
     </HBox>
-
 </VBox>
-
