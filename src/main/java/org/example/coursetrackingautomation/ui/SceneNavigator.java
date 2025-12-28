@@ -17,6 +17,13 @@ import javafx.stage.Stage;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+/**
+ * Centralizes scene transitions and modal dialog navigation for the JavaFX UI.
+ *
+ * <p>This component loads FXML views using Spring's {@link ApplicationContext} so that controllers
+ * can be dependency-injected. Exceptions encountered during navigation are delegated to
+ * {@link UiExceptionHandler}.</p>
+ */
 public class SceneNavigator {
 
     private static final double ADMIN_WINDOW_WIDTH = 1200.0;
@@ -28,37 +35,74 @@ public class SceneNavigator {
     private final AuthService authService;
     private final UiExceptionHandler uiExceptionHandler;
 
+    /**
+     * Displays the login view on the given stage.
+     *
+     * @param stage the primary stage to update
+     */
     public void showLogin(Stage stage) {
         setScene(stage, UiConstants.FXML_LOGIN, UiConstants.DEFAULT_WINDOW_WIDTH, UiConstants.DEFAULT_WINDOW_HEIGHT);
     }
 
+    /**
+     * Displays the admin dashboard view and enables resizing/maximization.
+     *
+     * @param stage the primary stage to update
+     */
     public void showAdminDashboard(Stage stage) {
         setScene(stage, UiConstants.FXML_ADMIN_DASHBOARD, ADMIN_WINDOW_WIDTH, ADMIN_WINDOW_HEIGHT);
         stage.setResizable(true);
         stage.setMaximized(true);
     }
 
+    /**
+     * Displays the student dashboard view and enables resizing/maximization.
+     *
+     * @param stage the primary stage to update
+     */
     public void showStudentDashboard(Stage stage) {
         setScene(stage, UiConstants.FXML_STUDENT_DASHBOARD, DASHBOARD_WINDOW_WIDTH, DASHBOARD_WINDOW_HEIGHT);
         stage.setResizable(true);
         stage.setMaximized(true);
     }
 
+    /**
+     * Displays the instructor dashboard view and enables resizing/maximization.
+     *
+     * @param stage the primary stage to update
+     */
     public void showInstructorDashboard(Stage stage) {
         setScene(stage, UiConstants.FXML_INSTRUCTOR_DASHBOARD, DASHBOARD_WINDOW_WIDTH, DASHBOARD_WINDOW_HEIGHT);
         stage.setResizable(true);
         stage.setMaximized(true);
     }
 
+    /**
+     * Logs out the current user and returns to the login view.
+     *
+     * @param stage the primary stage to update
+     */
     public void logoutToLogin(Stage stage) {
         performLogout(stage);
     }
 
+    /**
+     * Performs logout and navigates to login.
+     *
+     * @param stage the primary stage to update
+     */
     public void performLogout(Stage stage) {
         authService.logout();
         showLogin(stage);
     }
 
+    /**
+     * Opens an FXML view as a modal dialog.
+     *
+     * @param fxmlPath the classpath-relative FXML resource path
+     * @param title the window title
+     * @param ownerWindow the owner window; may be {@code null}
+     */
     public void openModal(String fxmlPath, String title, Window ownerWindow) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -84,6 +128,16 @@ public class SceneNavigator {
         }
     }
 
+    /**
+     * Opens an FXML view as a modal dialog and allows the caller to configure the controller before
+     * showing the dialog.
+     *
+     * @param fxmlPath the classpath-relative FXML resource path
+     * @param title the window title
+     * @param ownerWindow the owner window; may be {@code null}
+     * @param controllerConfigurator a callback invoked with the resolved controller; may be {@code null}
+     * @param <T> expected controller type
+     */
     public <T> void openModalWithController(String fxmlPath, String title, Window ownerWindow, Consumer<T> controllerConfigurator) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));

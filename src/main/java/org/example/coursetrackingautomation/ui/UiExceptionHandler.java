@@ -9,12 +9,23 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+/**
+ * Maps exceptions to user-facing UI feedback.
+ *
+ * <p>This component centralizes alert handling for the JavaFX UI and translates common message
+ * keys into localized Turkish text. Unknown exceptions are reported using a generic message.</p>
+ */
 public class UiExceptionHandler {
 
     private static final String DEFAULT_ERROR_TITLE = UiConstants.ALERT_TITLE_ERROR;
 
     private final AlertUtil alertUtil;
 
+    /**
+     * Handles an exception and displays an appropriate alert to the user.
+     *
+     * @param exception exception to handle; may be {@code null}
+     */
     public void handle(Exception exception) {
         if (exception == null) {
             return;
@@ -32,6 +43,29 @@ public class UiExceptionHandler {
             return;
         }
 
+        alertUtil.showErrorAlert(DEFAULT_ERROR_TITLE, UiConstants.ALERT_MESSAGE_UNEXPECTED_ERROR);
+    }
+
+    /**
+     * Handles a {@link Throwable} and displays an appropriate alert to the user.
+     *
+     * <p>This overload is useful for background {@link javafx.concurrent.Task} failures where
+     * the reported error type may not be an {@link Exception}. Unknown throwables are shown using
+     * a generic Turkish message, while technical details are logged.</p>
+     *
+     * @param throwable throwable to handle; may be {@code null}
+     */
+    public void handle(Throwable throwable) {
+        if (throwable == null) {
+            return;
+        }
+
+        if (throwable instanceof Exception ex) {
+            handle(ex);
+            return;
+        }
+
+        log.warn("UI error", throwable);
         alertUtil.showErrorAlert(DEFAULT_ERROR_TITLE, UiConstants.ALERT_MESSAGE_UNEXPECTED_ERROR);
     }
 

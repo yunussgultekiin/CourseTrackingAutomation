@@ -8,12 +8,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
-import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.dto.SelectOptionDTO;
 import org.example.coursetrackingautomation.dto.UpdateCourseRequest;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.example.coursetrackingautomation.util.AlertUtil;
 import org.springframework.stereotype.Controller;
@@ -22,6 +22,12 @@ import javafx.collections.FXCollections;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the "Edit Course" form.
+ *
+ * <p>Loads an existing course by id, allows editing of mutable fields, and persists updates via
+ * {@link CourseService}. Includes a confirmation prompt when deactivating a course.</p>
+ */
 public class EditCourseFormController {
 
     @FXML private Label courseCodeLabel;
@@ -46,60 +52,76 @@ public class EditCourseFormController {
     private boolean originalActive;
 
     @FXML
+    /**
+     * Initializes the form controls (toggle group, instructor choices).
+     */
     public void initialize() {
-        try {
-            activeRadio.setToggleGroup(statusGroup);
-            passiveRadio.setToggleGroup(statusGroup);
+        activeRadio.setToggleGroup(statusGroup);
+        passiveRadio.setToggleGroup(statusGroup);
 
-            instructorComboBox.setItems(FXCollections.observableArrayList(userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR)));
-        } catch (Exception e) {
-            uiExceptionHandler.handle(e);
-        }
+        FxAsync.runAsync(
+            () -> userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR),
+            instructors -> instructorComboBox.setItems(FXCollections.observableArrayList(instructors)),
+            uiExceptionHandler::handle
+        );
     }
 
+    /**
+     * Sets the course id to edit and loads the current course values into the form.
+     *
+     * @param courseId course identifier
+     */
     public void setCourseId(Long courseId) {
         this.courseId = courseId;
         refresh();
     }
 
     private void refresh() {
-        try {
-            if (courseId == null) {
-                return;
-            }
-            CourseDTO course = courseService.getCourseDTOById(courseId);
-            courseCodeLabel.setText(course.getCode() == null ? "-" : course.getCode());
-            nameField.setText(course.getName());
-            creditField.setText(course.getCredit() == null ? "" : String.valueOf(course.getCredit()));
-            quotaField.setText(course.getQuota() == null ? "" : String.valueOf(course.getQuota()));
-            termField.setText(course.getTerm());
-            weeklyTotalHoursField.setText(course.getWeeklyTotalHours() == null ? "" : String.valueOf(course.getWeeklyTotalHours()));
-            weeklyTheoryHoursField.setText(course.getWeeklyTheoryHours() == null ? "" : String.valueOf(course.getWeeklyTheoryHours()));
-            weeklyPracticeHoursField.setText(course.getWeeklyPracticeHours() == null ? "" : String.valueOf(course.getWeeklyPracticeHours()));
-
-            originalActive = Boolean.TRUE.equals(course.getActive());
-            if (Boolean.TRUE.equals(course.getActive())) {
-                activeRadio.setSelected(true);
-            } else {
-                passiveRadio.setSelected(true);
-            }
-
-            if (course.getInstructorId() != null) {
-                Long instructorId = course.getInstructorId();
-                instructorComboBox.getItems().stream()
-                    .filter(opt -> opt != null && instructorId.equals(opt.id()))
-                    .findFirst()
-                    .ifPresent(instructorComboBox::setValue);
-            }
-        } catch (Exception e) {
-            uiExceptionHandler.handle(e);
+        if (courseId == null) {
+            return;
         }
+
+        Long id = courseId;
+        FxAsync.runAsync(
+            () -> courseService.getCourseDTOById(id),
+            course -> {
+                courseCodeLabel.setText(course.getCode() == null ? "-" : course.getCode());
+                nameField.setText(course.getName());
+                creditField.setText(course.getCredit() == null ? "" : String.valueOf(course.getCredit()));
+                quotaField.setText(course.getQuota() == null ? "" : String.valueOf(course.getQuota()));
+                termField.setText(course.getTerm());
+                weeklyTotalHoursField.setText(course.getWeeklyTotalHours() == null ? "" : String.valueOf(course.getWeeklyTotalHours()));
+                weeklyTheoryHoursField.setText(course.getWeeklyTheoryHours() == null ? "" : String.valueOf(course.getWeeklyTheoryHours()));
+                weeklyPracticeHoursField.setText(course.getWeeklyPracticeHours() == null ? "" : String.valueOf(course.getWeeklyPracticeHours()));
+
+                originalActive = Boolean.TRUE.equals(course.getActive());
+                if (Boolean.TRUE.equals(course.getActive())) {
+                    activeRadio.setSelected(true);
+                } else {
+                    passiveRadio.setSelected(true);
+                }
+
+                if (course.getInstructorId() != null) {
+                    Long instructorId = course.getInstructorId();
+                    instructorComboBox.getItems().stream()
+                        .filter(opt -> opt != null && instructorId.equals(opt.id()))
+                        .findFirst()
+                        .ifPresent(instructorComboBox::setValue);
+                }
+            },
+            uiExceptionHandler::handle
+        );
     }
 
     @FXML
+    /**
+     * Validates input and persists course updates.
+     */
     public void handleSave() {
+        final Long id = courseId;
+        final UpdateCourseRequest updateRequest;
         try {
-            if (courseId == null) {
+            if (id == null) {
                 throw new IllegalArgumentException("Ders ID boş olamaz");
             }
 
@@ -130,7 +152,7 @@ public class EditCourseFormController {
                 }
             }
 
-            UpdateCourseRequest request = new UpdateCourseRequest(
+            updateRequest = new UpdateCourseRequest(
                 name,
                 credit,
                 quota,
@@ -141,15 +163,24 @@ public class EditCourseFormController {
                 weeklyTheoryHours,
                 weeklyPracticeHours
             );
-
-            courseService.updateCourse(courseId, request);
-            close();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             uiExceptionHandler.handle(e);
+            return;
         }
+
+        FxAsync.runAsync(
+            () -> {
+                courseService.updateCourse(id, updateRequest);
+            },
+            this::close,
+            uiExceptionHandler::handle
+        );
     }
 
     @FXML
+    /**
+     * Closes the window without saving.
+     */
     public void handleClose() {
         close();
     }

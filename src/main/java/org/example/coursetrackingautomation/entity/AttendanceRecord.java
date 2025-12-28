@@ -15,6 +15,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Represents attendance for a single week/session within an {@link Enrollment}.
+ *
+ * <p>Attendance is tracked as a week number and a boolean presence flag, along with the calendar
+ * date of the session. Aggregations (e.g., absenteeism counts and warning thresholds) are computed
+ * in service-layer logic.
+ */
 @Entity
 @Table(name = "attendance_records")
 @Getter

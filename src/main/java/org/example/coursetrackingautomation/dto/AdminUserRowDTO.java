@@ -1,5 +1,8 @@
 package org.example.coursetrackingautomation.dto;
 
+/**
+ * Projection used to render user rows in the admin dashboard.
+ */
 public record AdminUserRowDTO(
     Long id,
     String username,

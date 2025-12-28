@@ -3,6 +3,8 @@ package org.example.coursetrackingautomation.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -20,6 +22,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Represents a student's enrollment in a specific {@link Course}.
+ *
+ * <p>This entity links a {@link User student} to a course and stores enrollment-specific state such
+ * as attendance-derived absenteeism counts, administrative status (e.g., active/dropped), and the
+ * time the enrollment was created.
+ *
+ * <p>Associated data includes an optional {@link Grade} (one-to-one) and a set of
+ * {@link AttendanceRecord attendance records} (one-to-many).
+ */
 @Entity
 @Table(name = "enrollments")
 @Getter
@@ -44,7 +56,8 @@ public class Enrollment extends BaseEntity {
     private Integer absenteeismCount;
 
     @Column(name = "status", nullable = false, length = STATUS_MAX_LENGTH)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private EnrollmentStatus status;
 
     @Column(name = "enrollment_date", nullable = false)
     private LocalDateTime enrollmentDate;

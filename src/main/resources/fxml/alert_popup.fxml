@@ -8,11 +8,12 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       alignment="CENTER" spacing="18.0"
-      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 26px;"
+      stylesheets="@styles.css"
+      styleClass="dialog-card"
       prefWidth="400.0" prefHeight="240.0">
 
     <padding>
-        <Insets top="26.0" right="26.0" bottom="26.0" left="26.0"/>
+        <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
     </padding>
 
     <Label fx:id="iconLabel" text="✓"
@@ -23,29 +24,29 @@
     </Label>
 
     <Label fx:id="titleLabel" text="Başlık"
-           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+           styleClass="section-title">
         <font>
             <Font name="System Bold" size="20.0"/>
         </font>
     </Label>
 
     <Label fx:id="messageLabel" text="Mesaj"
-           style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"
+           styleClass="muted"
            textAlignment="CENTER" wrapText="true"
            maxWidth="340.0"/>
 
     <HBox fx:id="buttonsContainer" spacing="12.0" alignment="CENTER">
         <Button fx:id="cancelButton" text="İptal"
             onAction="#handleCancel"
-            style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 22px; -fx-cursor: hand; -fx-font-weight: bold;"
+            styleClass="btn-secondary"
             cancelButton="true"/>
         <Button fx:id="okButton" text="Tamam"
                 onAction="#handleOk"
-                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 26px; -fx-cursor: hand; -fx-font-weight: bold;"
+                styleClass="btn-primary-green"
                 defaultButton="true"/>
         <Button fx:id="confirmButton" text="Onayla"
                 onAction="#handleConfirm"
-                style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 22px; -fx-cursor: hand; -fx-font-weight: bold;"
+                styleClass="btn-primary-blue"
                 defaultButton="true"/>
     </HBox>
 

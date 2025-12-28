@@ -12,6 +12,12 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+/**
+ * Base type for all persistent entities in the application.
+ *
+ * <p>Provides a surrogate primary key as well as automatically managed audit timestamps.
+ * The timestamps are populated/updated by Hibernate when the entity is persisted.
+ */
 @MappedSuperclass
 @Getter
 @Setter

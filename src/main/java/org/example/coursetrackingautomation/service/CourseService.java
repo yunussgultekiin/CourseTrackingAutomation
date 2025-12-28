@@ -6,6 +6,7 @@ import org.example.coursetrackingautomation.dto.CreateCourseRequest;
 import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.dto.UpdateCourseRequest;
 import org.example.coursetrackingautomation.entity.Course;
+import org.example.coursetrackingautomation.entity.EnrollmentStatus;
 import org.example.coursetrackingautomation.entity.Role;
 import org.example.coursetrackingautomation.entity.User;
 import org.example.coursetrackingautomation.repository.CourseRepository;
@@ -21,6 +22,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * Manages {@link Course} lifecycle and course read models for the application.
+ *
+ * <p>This service encapsulates validation and business rules around course creation, updates,
+ * activation/deactivation, quota management, and conversion to {@link CourseDTO} for UI use.</p>
+ *
+ * <p>Validation failures are reported via {@link IllegalArgumentException} with user-friendly
+ * messages suitable for surfacing in the UI.</p>
+ */
 public class CourseService {
     
     private final CourseRepository courseRepository;
@@ -30,9 +40,24 @@ public class CourseService {
     private static final String DEFAULT_TERM = "N/A";
     private static final int DEFAULT_QUOTA = 30;
     
-    private static final List<String> ACTIVE_ENROLLMENT_STATUSES = List.of("ACTIVE", "ENROLLED", "REGISTERED");
+    private static final List<EnrollmentStatus> ACTIVE_ENROLLMENT_STATUSES = List.of(
+        EnrollmentStatus.ACTIVE,
+        EnrollmentStatus.ENROLLED,
+        EnrollmentStatus.REGISTERED
+    );
     
     @Transactional
+    /**
+     * Creates a new course (or persists updates if the supplied entity is new) and ensures a valid quota.
+     *
+     * <p>If {@code quota} is provided, it overrides the entity's quota. If neither is provided or the
+     * effective quota is invalid, a default quota is applied.</p>
+     *
+     * @param course the course entity to persist
+     * @param quota optional quota override; must be greater than 0 when provided
+     * @return the persisted course instance
+     * @throws IllegalArgumentException if {@code quota} is provided and not greater than 0
+     */
     public Course createCourse(Course course, Integer quota) {
         log.info("Creating course with code: {}", course.getCode());
         
@@ -57,11 +82,26 @@ public class CourseService {
     }
     
     @Transactional
+    /**
+     * Convenience overload of {@link #createCourse(Course, Integer)} without a quota override.
+     *
+     * @param course the course entity to persist
+     * @return the persisted course instance
+     */
     public Course createCourse(Course course) {
         return createCourse(course, null);
     }
 
     @Transactional
+    /**
+     * Creates a course from a request model, applying validation and instructor assignment rules.
+     *
+     * <p>If a course with the same code exists but is inactive, it is re-activated and updated.</p>
+     *
+     * @param request the request payload used to create the course
+     * @return the persisted course instance
+     * @throws IllegalArgumentException if validation fails, the instructor is invalid, or the code conflicts
+     */
     public Course createCourse(CreateCourseRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Ders oluşturma isteği boş olamaz");
@@ -148,6 +188,14 @@ public class CourseService {
     }
     
     @Transactional
+    /**
+     * Updates course quota, ensuring the quota remains greater than or equal to current enrollments.
+     *
+     * @param courseId the course identifier
+     * @param newQuota the new quota; must be greater than 0 and not lower than current enrollments
+     * @return the persisted course instance
+     * @throws IllegalArgumentException if inputs are invalid or the course cannot be found
+     */
     public Course updateQuota(Long courseId, Integer newQuota) {
         log.info("Updating quota for course ID: {} to {}", courseId, newQuota);
         
@@ -174,6 +222,18 @@ public class CourseService {
     }
 
     @Transactional
+    /**
+     * Updates mutable course attributes.
+     *
+     * <p>This method performs partial updates: only non-null (and non-blank where applicable) values
+     * from {@code request} are applied. If {@code active=false} is provided, the course is deactivated.
+     * When updating quota, the value must not be lower than current enrollments.</p>
+     *
+     * @param courseId the course identifier
+     * @param request the update request
+     * @return the updated course instance
+     * @throws IllegalArgumentException if validation fails or the course/instructor cannot be found
+     */
     public Course updateCourse(Long courseId, UpdateCourseRequest request) {
         if (courseId == null) {
             throw new IllegalArgumentException("Ders id boş olamaz");
@@ -257,6 +317,14 @@ public class CourseService {
     }
     
     @Transactional
+    /**
+     * Deactivates a course.
+     *
+     * <p>This operation is idempotent. If the course is already inactive, it returns without error.</p>
+     *
+     * @param courseId the course identifier
+     * @throws IllegalArgumentException if the course cannot be found
+     */
     public void deactivateCourse(Long courseId) {
         log.info("Deactivating course ID: {}", courseId);
         
@@ -275,24 +343,51 @@ public class CourseService {
     }
     
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a course by its identifier.
+     *
+     * @param courseId the course identifier
+     * @return the persisted course
+     * @throws IllegalArgumentException if the course cannot be found
+     */
     public Course getCourseById(Long courseId) {
         return courseRepository.findById(courseId)
             .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + courseId));
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a {@link CourseDTO} for a course id, enriched with current enrollment counts.
+     *
+     * @param courseId the course identifier
+     * @return the mapped course DTO
+     * @throws IllegalArgumentException if the course cannot be found
+     */
     public CourseDTO getCourseDTOById(Long courseId) {
         Course course = getCourseById(courseId);
         return toDTO(course, getCurrentEnrollmentCount(course));
     }
     
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a course by its code.
+     *
+     * @param code the course code
+     * @return the persisted course
+     * @throws IllegalArgumentException if the course cannot be found
+     */
     public Course getCourseByCode(String code) {
         return courseRepository.findByCode(code)
             .orElseThrow(() -> new IllegalArgumentException("Ders bulunamadı: " + code));
     }
     
     @Transactional(readOnly = true)
+    /**
+     * Computes the number of active enrollments for a given course entity.
+     *
+     * @param course the course entity; may be {@code null}
+     * @return active enrollment count, or 0 if {@code course} or its id is null
+     */
     public long getCurrentEnrollmentCount(Course course) {
         if (course == null || course.getId() == null) {
             return 0L;
@@ -301,12 +396,26 @@ public class CourseService {
     }
     
     @Transactional(readOnly = true)
+    /**
+     * Computes the number of active enrollments for a given course id.
+     *
+     * @param courseId the course identifier
+     * @return active enrollment count
+     * @throws IllegalArgumentException if the course cannot be found
+     */
     public long getCurrentEnrollmentCount(Long courseId) {
         Course course = getCourseById(courseId);
         return getCurrentEnrollmentCount(course);
     }
     
     @Transactional(readOnly = true)
+    /**
+     * Indicates whether the course quota has been reached or exceeded.
+     *
+     * @param courseId the course identifier
+     * @return {@code true} if current enrollments are greater than or equal to quota
+     * @throws IllegalArgumentException if the course cannot be found
+     */
     public boolean isQuotaFull(Long courseId) {
         Course course = getCourseById(courseId);
         long currentEnrollments = getCurrentEnrollmentCount(course);
@@ -368,6 +477,13 @@ public class CourseService {
         }
     }
     @Transactional(readOnly = true)
+    /**
+     * Retrieves a {@link CourseDTO} by course code, enriched with current enrollment counts.
+     *
+     * @param code the course code
+     * @return the mapped course DTO
+     * @throws IllegalArgumentException if the course cannot be found
+     */
     public CourseDTO getCourseDTOByCode(String code) {
         Course course = getCourseByCode(code);
         long currentEnrollments = getCurrentEnrollmentCount(course.getId());
@@ -375,6 +491,11 @@ public class CourseService {
     }
     
     @Transactional(readOnly = true)
+    /**
+     * Lists all active courses as DTOs.
+     *
+     * @return active course DTOs
+     */
     public List<CourseDTO> getAllActiveCourseDTOs() {
         List<Course> courses = courseRepository.findByActiveTrue();
         
@@ -387,6 +508,11 @@ public class CourseService {
     }
     
     @Transactional(readOnly = true)
+    /**
+     * Lists all courses (active and inactive) as DTOs.
+     *
+     * @return all course DTOs
+     */
     public List<CourseDTO> getAllCourseDTOs() {
         List<Course> courses = courseRepository.findAll();
         

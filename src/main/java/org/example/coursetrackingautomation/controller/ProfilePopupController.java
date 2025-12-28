@@ -11,8 +11,8 @@ import org.example.coursetrackingautomation.config.UserSession;
 import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.dto.SessionUser;
 import org.example.coursetrackingautomation.dto.UpdateUserRequest;
-import org.example.coursetrackingautomation.dto.UserDetailsDTO;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.example.coursetrackingautomation.util.AlertUtil;
@@ -20,6 +20,12 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the profile popup.
+ *
+ * <p>Allows the authenticated user to update profile fields. For student and instructor roles,
+ * the user can optionally change password by providing current/new/confirmation values.</p>
+ */
 public class ProfilePopupController {
 
     @FXML private Label lblUsername;
@@ -41,6 +47,9 @@ public class ProfilePopupController {
     private final AlertUtil alertUtil;
 
     @FXML
+    /**
+     * Initializes the profile popup with session data and configures which sections are visible.
+     */
     public void initialize() {
         try {
             var currentUser = userSession.getCurrentUser()
@@ -48,20 +57,29 @@ public class ProfilePopupController {
             lblUsername.setText(currentUser.username());
             txtFirstName.setText(currentUser.firstName());
             txtLastName.setText(currentUser.lastName());
-            UserDetailsDTO userDetails = userService.getUserDetailsById(currentUser.id());
-            txtEmail.setText(userDetails.email());
-            txtPhone.setText(userDetails.phone());
+
+            FxAsync.runAsync(
+                () -> userService.getUserDetailsById(currentUser.id()),
+                userDetails -> {
+                    txtEmail.setText(userDetails.email());
+                    txtPhone.setText(userDetails.phone());
+                },
+                uiExceptionHandler::handle
+            );
 
             boolean canChangePassword = currentUser.role() == RoleDTO.INSTRUCTOR || currentUser.role() == RoleDTO.STUDENT;
             if (!canChangePassword) {
                 setPasswordSectionVisible(false);
             }
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             uiExceptionHandler.handle(e);
         }
     }
 
     @FXML
+    /**
+     * Persists profile updates and optionally changes the password.
+     */
     public void handleSave() {
         try {
             var currentUser = userSession.getCurrentUser()
@@ -79,46 +97,55 @@ public class ProfilePopupController {
                 throw new IllegalArgumentException("Soyad boş bırakılamaz");
             }
 
-            userService.updateUser(currentUser.id(), new UpdateUserRequest(
-                firstName,
-                lastName,
-                email,
-                phone,
-                null
-            ));
-
-            userSession.setCurrentUser(new SessionUser(
-                currentUser.id(),
-                currentUser.username(),
-                firstName,
-                lastName,
-                currentUser.role()
-            ));
-
             boolean canChangePassword = currentUser.role() == RoleDTO.INSTRUCTOR || currentUser.role() == RoleDTO.STUDENT;
-            if (canChangePassword) {
-                String currentPassword = safe(txtCurrentPassword.getText());
-                String newPassword = safe(txtNewPassword.getText());
-                String confirmPassword = safe(txtConfirmPassword.getText());
+            String currentPassword = safe(txtCurrentPassword.getText());
+            String newPassword = safe(txtNewPassword.getText());
+            String confirmPassword = safe(txtConfirmPassword.getText());
 
-                boolean passwordSectionTouched = !currentPassword.isBlank() || !newPassword.isBlank() || !confirmPassword.isBlank();
-                if (passwordSectionTouched) {
-                    if (currentPassword.isBlank()) {
-                        throw new IllegalArgumentException("Mevcut şifre boş bırakılamaz");
-                    }
-                    if (newPassword.isBlank()) {
-                        throw new IllegalArgumentException("Yeni şifre boş bırakılamaz");
-                    }
-                    if (!newPassword.equals(confirmPassword)) {
-                        throw new IllegalArgumentException("Yeni şifre ve doğrulama şifresi eşleşmiyor");
-                    }
-                    userService.changePassword(currentUser.id(), currentPassword, newPassword);
+            boolean passwordSectionTouched = canChangePassword
+                && (!currentPassword.isBlank() || !newPassword.isBlank() || !confirmPassword.isBlank());
+            if (passwordSectionTouched) {
+                if (currentPassword.isBlank()) {
+                    throw new IllegalArgumentException("Mevcut şifre boş bırakılamaz");
+                }
+                if (newPassword.isBlank()) {
+                    throw new IllegalArgumentException("Yeni şifre boş bırakılamaz");
+                }
+                if (!newPassword.equals(confirmPassword)) {
+                    throw new IllegalArgumentException("Yeni şifre ve doğrulama şifresi eşleşmiyor");
                 }
             }
 
-            alertUtil.showSuccessAlert(UiConstants.ALERT_TITLE_SUCCESS, UiConstants.UI_MESSAGE_PROFILE_UPDATED);
-            close();
-        } catch (Exception e) {
+            FxAsync.runAsync(
+                () -> {
+                    userService.updateUser(currentUser.id(), new UpdateUserRequest(
+                        firstName,
+                        lastName,
+                        email,
+                        phone,
+                        null
+                    ));
+
+                    if (passwordSectionTouched) {
+                        userService.changePassword(currentUser.id(), currentPassword, newPassword);
+                    }
+
+                    return new SessionUser(
+                        currentUser.id(),
+                        currentUser.username(),
+                        firstName,
+                        lastName,
+                        currentUser.role()
+                    );
+                },
+                updatedSessionUser -> {
+                    userSession.setCurrentUser(updatedSessionUser);
+                    alertUtil.showSuccessAlert(UiConstants.ALERT_TITLE_SUCCESS, UiConstants.UI_MESSAGE_PROFILE_UPDATED);
+                    close();
+                },
+                uiExceptionHandler::handle
+            );
+        } catch (IllegalStateException | IllegalArgumentException e) {
             uiExceptionHandler.handle(e);
         }
     }
@@ -158,6 +185,9 @@ public class ProfilePopupController {
     }
 
     @FXML
+    /**
+     * Closes the popup.
+     */
     public void handleClose() {
         close();
     }

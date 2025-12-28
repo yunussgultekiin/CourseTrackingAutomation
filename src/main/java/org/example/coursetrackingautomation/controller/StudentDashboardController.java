@@ -2,9 +2,13 @@ package org.example.coursetrackingautomation.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -13,9 +17,12 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.config.UserSession;
+import org.example.coursetrackingautomation.controller.support.GradeDetailsMessageBuilder;
 import org.example.coursetrackingautomation.dto.GradeDTO;
 import org.example.coursetrackingautomation.service.AttendanceService;
 import org.example.coursetrackingautomation.service.TranscriptService;
+import org.example.coursetrackingautomation.ui.FxAsync;
+import org.example.coursetrackingautomation.ui.GradeStatusUiMapper;
 import org.example.coursetrackingautomation.ui.SceneNavigator;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
@@ -24,6 +31,12 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the student dashboard.
+ *
+ * <p>Displays transcript rows and GPA for the authenticated student, and provides navigation to
+ * profile and enrollment modals.</p>
+ */
 public class StudentDashboardController {
 
     private static final String PROPERTY_COURSE_CODE = "courseCode";
@@ -38,9 +51,6 @@ public class StudentDashboardController {
     private static final String PROPERTY_LETTER_GRADE = "letterGrade";
     private static final String PROPERTY_ATTENDANCE_COUNT = "attendanceCount";
     private static final String PROPERTY_STATUS = "status";
-
-    private static final String STYLE_CRITICAL_ATTENDANCE = "critical-attendance";
-    private static final String STYLE_WARNING_ATTENDANCE = "warning-attendance";
 
     @FXML private Label lblWelcome;
     @FXML private Label lblGpa;
@@ -67,6 +77,9 @@ public class StudentDashboardController {
     private final AlertUtil alertUtil;
 
     @FXML
+    /**
+     * Initializes the student dashboard and loads transcript data.
+     */
     public void initialize() {
         colCourseCode.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_COURSE_CODE));
         colCourseName.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_COURSE_NAME));
@@ -79,12 +92,71 @@ public class StudentDashboardController {
         colAverage.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_AVERAGE_SCORE));
         colLetter.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_LETTER_GRADE));
         colAttendance.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_ATTENDANCE_COUNT));
-        colStatus.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_STATUS));
-        setupRowColorFactory();
+        colAttendance.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Integer value, boolean empty) {
+                super.updateItem(value, empty);
+                if (empty) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                GradeDTO row = getTableRow() == null ? null : getTableRow().getItem();
+                Integer absentHours = row == null ? null : row.getAttendanceCount();
+                int hours = absentHours == null ? 0 : absentHours;
+
+                int totalCourseHours = attendanceService == null
+                    ? 0
+                    : attendanceService.getTotalCourseHoursForTerm(row == null ? null : row.getWeeklyTotalHours());
+                boolean critical = attendanceService != null && attendanceService.isAttendanceCritical(totalCourseHours, hours);
+                boolean warning = !critical && attendanceService != null && attendanceService.isAttendanceWarning(totalCourseHours, hours);
+
+                String badgeClass = critical ? "badge-danger" : (warning ? "badge-warning" : "badge-neutral");
+                Label badge = new Label(String.valueOf(hours));
+                badge.getStyleClass().addAll("badge", badgeClass);
+
+                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                setGraphic(badge);
+                setAlignment(Pos.CENTER);
+            }
+        });
+        colStatus.setCellValueFactory(cell -> {
+            GradeDTO row = cell.getValue();
+            String text = row == null || row.getStatus() == null ? "-" : GradeStatusUiMapper.toTurkish(row.getStatus());
+            return new SimpleStringProperty(text);
+        });
+        colStatus.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String value, boolean empty) {
+                super.updateItem(value, empty);
+                if (empty || value == null || value.isBlank() || "-".equals(value)) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                String badgeClass;
+                if (UiConstants.UI_STATUS_PASSED.equalsIgnoreCase(value)) {
+                    badgeClass = "badge-success";
+                } else if (UiConstants.UI_STATUS_FAILED.equalsIgnoreCase(value)) {
+                    badgeClass = "badge-danger";
+                } else {
+                    badgeClass = "badge-neutral";
+                }
+
+                Label badge = new Label(value);
+                badge.getStyleClass().addAll("badge", badgeClass);
+                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                setGraphic(badge);
+                setAlignment(Pos.CENTER);
+            }
+        });
+        setupRowFactory();
         refresh();
     }
 
-    private void setupRowColorFactory() {
+    private void setupRowFactory() {
         tableStudentCourses.setRowFactory(tv -> {
             TableRow<GradeDTO> row = new TableRow<>();
 
@@ -97,25 +169,6 @@ public class StudentDashboardController {
                 }
             });
 
-            row.itemProperty().addListener((obs, oldItem, newItem) -> {
-                row.getStyleClass().removeAll(STYLE_CRITICAL_ATTENDANCE, STYLE_WARNING_ATTENDANCE);
-
-                if (newItem == null) {
-                    return;
-                }
-
-                int absentHours = newItem.getAttendanceCount() == null ? 0 : newItem.getAttendanceCount();
-                int totalCourseHours = attendanceService.getTotalCourseHoursForTerm(newItem.getWeeklyTotalHours());
-                boolean critical = attendanceService.isAttendanceCritical(totalCourseHours, absentHours);
-                boolean warning = !critical && attendanceService.isAttendanceWarning(totalCourseHours, absentHours);
-
-                if (critical) {
-                    row.getStyleClass().add(STYLE_CRITICAL_ATTENDANCE);
-                } else if (warning) {
-                    row.getStyleClass().add(STYLE_WARNING_ATTENDANCE);
-                }
-            });
-
             return row;
         });
     }
@@ -125,42 +178,32 @@ public class StudentDashboardController {
             return;
         }
 
-        String midtermText = item.getMidtermScore() == null ? "-" : String.valueOf(item.getMidtermScore());
-        String finalText = item.getFinalScore() == null ? "-" : String.valueOf(item.getFinalScore());
-        String averageText = item.getAverageScore() == null ? "-" : String.valueOf(item.getAverageScore());
-        String letterText = item.getLetterGrade() == null ? "-" : item.getLetterGrade();
-        String statusText = item.getStatus() == null ? "-" : item.getStatus();
-
-        String weeklyTotal = item.getWeeklyTotalHours() == null ? "-" : item.getWeeklyTotalHours().toString();
-        String weeklyTheory = item.getWeeklyTheoryHours() == null ? "-" : item.getWeeklyTheoryHours().toString();
-        String weeklyPractice = item.getWeeklyPracticeHours() == null ? "-" : item.getWeeklyPracticeHours().toString();
-
-        String message = "Ders: " + item.getCourseCode() + " - " + item.getCourseName() + "\n"
-                + "Kredi: " + (item.getCredit() == null ? "-" : item.getCredit()) + "\n"
-                + "Saat (Haftalık): " + weeklyTotal + " (Teori " + weeklyTheory + ", Uygulama " + weeklyPractice + ")\n"
-                + "Vize: " + midtermText + "\n"
-                + "Final: " + finalText + "\n"
-                + "Ortalama: " + averageText + "\n"
-                + "Harf Notu: " + letterText + "\n"
-                + "Devamsızlık (Saat): " + (item.getAttendanceCount() == null ? 0 : item.getAttendanceCount()) + "\n"
-                + "Durum: " + statusText;
-
-        alertUtil.showInformationAlert("Ders Detayı", message);
+        alertUtil.showInformationAlert("Ders Detayı", GradeDetailsMessageBuilder.buildStudentDashboardMessage(item));
     }
 
     private void refresh() {
         try {
             var currentUser = userSession.getCurrentUser()
-                    .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION));
+                .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION));
 
-                lblWelcome.setText(UiConstants.UI_WELCOME_PREFIX + currentUser.fullName());
+            lblWelcome.setText(UiConstants.UI_WELCOME_PREFIX + currentUser.fullName());
 
-            ObservableList<GradeDTO> transcript = FXCollections.observableArrayList(
-                    transcriptService.getTranscriptGradesForStudent(currentUser.id())
+            FxAsync.runAsync(
+                () -> transcriptService.getTranscriptGradesForStudent(currentUser.id()),
+                transcriptRows -> {
+                    ObservableList<GradeDTO> transcript = FXCollections.observableArrayList(transcriptRows);
+                    tableStudentCourses.setItems(transcript);
+                    lblGpa.setText(transcriptService.calculateGpaText(transcript));
+                },
+                failure -> {
+                    uiExceptionHandler.handle(failure);
+                    if (lblWelcome.getScene() != null) {
+                        Stage stage = (Stage) lblWelcome.getScene().getWindow();
+                        sceneNavigator.showLogin(stage);
+                    }
+                }
             );
-            tableStudentCourses.setItems(transcript);
-            lblGpa.setText(transcriptService.calculateGpaText(transcript));
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             uiExceptionHandler.handle(e);
             if (lblWelcome.getScene() != null) {
                 Stage stage = (Stage) lblWelcome.getScene().getWindow();
@@ -170,12 +213,18 @@ public class StudentDashboardController {
     }
 
     @FXML
+    /**
+     * Logs out the current user and navigates back to the login view.
+     */
     public void handleLogout() {
         Stage stage = (Stage) btnLogOut.getScene().getWindow();
         sceneNavigator.performLogout(stage);
     }
 
     @FXML
+    /**
+     * Opens the profile modal and refreshes the dashboard after closing.
+     */
     public void handleProfile() {
         sceneNavigator.openModal(
                 UiConstants.FXML_PROFILE_POPUP,
@@ -186,6 +235,9 @@ public class StudentDashboardController {
     }
 
     @FXML
+    /**
+     * Opens the transcript modal.
+     */
     public void handleShowTranscript() {
         sceneNavigator.openModal(
                 UiConstants.FXML_TRANSCRIPT_POPUP,
@@ -195,6 +247,9 @@ public class StudentDashboardController {
     }
 
     @FXML
+    /**
+     * Opens the enroll-course modal and refreshes the dashboard after closing.
+     */
     public void handleEnrollCourse() {
         sceneNavigator.openModal(
                 UiConstants.FXML_ENROLL_COURSE_POPUP,

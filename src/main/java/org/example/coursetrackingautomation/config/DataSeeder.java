@@ -21,13 +21,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+/**
+ * Seeds demo/initial data on application startup.
+ *
+ * <p>This runner is intended to populate local environments with a default admin account,
+ * sample instructors/students, courses, enrollments, attendance records, and (optionally)
+ * partially/fully graded sample data.</p>
+ */
 public class DataSeeder implements CommandLineRunner {
 
     private static final String DEFAULT_PASSWORD = "123";
     private static final String CURRENT_TERM = "2025-2026 Güz";
     private static final String EMAIL_DOMAIN_STUDENT = "ogrenci.universite.local";
     private static final String EMAIL_DOMAIN_INSTRUCTOR = "universite.local";
-    private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final EnrollmentStatus STATUS_ACTIVE = EnrollmentStatus.ACTIVE;
     private static final String PREFIX_STUDENT = "ogrenci";
     private static final String PREFIX_INSTRUCTOR = "akademisyen";
     private static final List<String> FULLY_GRADED_COURSES = List.of("BLM101", "MAT101");
@@ -66,10 +73,20 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     @Transactional
+    /**
+     * Entry point invoked by Spring Boot during application startup.
+     *
+     * @param args command-line arguments
+     */
     public void run(String... args) {
         seedAll();
     }
 
+    /**
+     * Performs the full data seeding routine.
+     *
+     * <p>This method is protected to allow overriding in tests or specialized bootstrapping flows.</p>
+     */
     protected void seedAll() {
         log.info("Checking and Seeding Data...");
 

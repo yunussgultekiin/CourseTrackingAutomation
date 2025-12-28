@@ -4,29 +4,29 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
+<?import java.lang.String?>
 
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.coursetrackingautomation.controller.TranscriptPopupController"
       stylesheets="@styles.css"
-    spacing="14.0" styleClass="card" prefWidth="720.0" prefHeight="480.0">
+    spacing="18.0" styleClass="dialog-card" prefWidth="720.0" prefHeight="480.0">
 
     <padding>
-        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/>
+        <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
     </padding>
 
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label text="Transkript" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <Region HBox.hgrow="ALWAYS" />
-    </HBox>
+    <Label text="Transkript" styleClass="section-title" />
+
+    <Separator />
 
     <TableView fx:id="tableTranscript" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colCourseCode" text="Ders" prefWidth="120" />
+            <TableColumn fx:id="colCourseCode" text="Ders" prefWidth="260" />
             <TableColumn fx:id="colMidterm" text="Vize" prefWidth="90" />
             <TableColumn fx:id="colFinal" text="Final" prefWidth="90" />
             <TableColumn fx:id="colAverage" text="Ortalama" prefWidth="100" />
             <TableColumn fx:id="colLetter" text="Harf" prefWidth="90" />
-            <TableColumn fx:id="colAttendance" text="Devamsızlık (Saat)" prefWidth="120" />
+            <TableColumn fx:id="colAttendance" text="Devamsızlık (Saat)" prefWidth="150" />
             <TableColumn fx:id="colStatus" text="Durum" prefWidth="100" />
         </columns>
         <columnResizePolicy>
@@ -35,8 +35,12 @@
     </TableView>
 
     <HBox alignment="CENTER_RIGHT" spacing="10.0">
-        <Label text="GNO:" style="-fx-text-fill: #2c3e50; -fx-font-weight: bold;" />
-        <Label fx:id="lblGpa" text="0.00" style="-fx-text-fill: #2980b9; -fx-font-weight: bold;">
+        <Label text="GNO:" styleClass="sidebar-title" />
+        <Label fx:id="lblGpa" text="0.00">
+            <styleClass>
+                <String fx:value="badge" />
+                <String fx:value="badge-info" />
+            </styleClass>
             <font>
                 <Font name="System Bold" size="16.0" />
             </font>

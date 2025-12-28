@@ -27,6 +27,13 @@ import lombok.ToString;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+/**
+ * Represents a course in the academic catalog.
+ *
+ * <p>A course is uniquely identified by its {@link #code}. Courses can be activated/deactivated,
+ * have an assigned instructor, and support quota and weekly hour breakdowns used by the UI and
+ * enrollment workflows.</p>
+ */
 public class Course extends BaseEntity {
     public static final int MAX_CODE_LENGTH = 50;
     public static final int MAX_NAME_LENGTH = 200;

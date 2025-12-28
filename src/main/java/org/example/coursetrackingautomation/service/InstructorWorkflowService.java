@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.dto.GradeDTO;
+import org.example.coursetrackingautomation.dto.GradeStatus;
 import org.example.coursetrackingautomation.dto.InstructorCourseRosterDTO;
 import org.example.coursetrackingautomation.entity.AttendanceRecord;
 import org.example.coursetrackingautomation.entity.Course;
@@ -25,6 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * Implements instructor-facing workflows.
+ *
+ * <p>This service assembles course rosters, computes derived grade/attendance indicators for the UI,
+ * and persists instructor edits (attendance and grading) back to the database.</p>
+ */
 public class InstructorWorkflowService {
 
     private static final int FIRST_WEEK_NUMBER = 1;
@@ -38,6 +45,13 @@ public class InstructorWorkflowService {
     private final AttendanceService attendanceService;
 
     @Transactional(readOnly = true)
+    /**
+     * Lists codes of active courses taught by the given instructor.
+     *
+     * @param instructorId instructor identifier
+     * @return list of active course codes
+     * @throws IllegalArgumentException if {@code instructorId} is null
+     */
     public List<String> getActiveCourseCodesForInstructor(Long instructorId) {
         if (instructorId == null) {
             throw new IllegalArgumentException("Akademisyen id boş olamaz");
@@ -49,6 +63,13 @@ public class InstructorWorkflowService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Builds the roster for a course, including student grade rows and enrollment id mapping.
+     *
+     * @param courseCode course code
+     * @return roster DTO containing course details and per-student rows
+     * @throws IllegalArgumentException if the input is invalid or the course cannot be found
+     */
     public InstructorCourseRosterDTO getCourseRoster(String courseCode) {
         if (courseCode == null || courseCode.isBlank()) {
             throw new IllegalArgumentException("Ders kodu boş bırakılamaz");
@@ -91,13 +112,11 @@ public class InstructorWorkflowService {
                 int absentHoursUi = attendanceService.toAbsentHours(course, enrollment.getAbsenteeismCount());
                 boolean critical = attendanceService.isAttendanceCritical(course, enrollment.getAbsenteeismCount());
 
-                String status;
+                GradeStatus status;
                 if (!graded) {
-                    status = org.example.coursetrackingautomation.ui.UiConstants.UI_STATUS_NOT_GRADED;
+                    status = GradeStatus.NOT_GRADED;
                 } else {
-                    status = passed
-                        ? org.example.coursetrackingautomation.ui.UiConstants.UI_STATUS_PASSED
-                        : org.example.coursetrackingautomation.ui.UiConstants.UI_STATUS_FAILED;
+                    status = passed ? GradeStatus.PASSED : GradeStatus.FAILED;
                 }
 
                 Long studentId = enrollment.getStudent() == null ? null : enrollment.getStudent().getId();
@@ -132,6 +151,12 @@ public class InstructorWorkflowService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Determines the next week number for attendance entry.
+     *
+     * @param courseId course identifier
+     * @return next week number, clamped to the default term week count
+     */
     public int getNextWeekNumber(Long courseId) {
         if (courseId == null) {
             return FIRST_WEEK_NUMBER;
@@ -144,6 +169,13 @@ public class InstructorWorkflowService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Returns attendance presence values for a set of enrollments in a specific week.
+     *
+     * @param enrollmentIds enrollment identifiers
+     * @param weekNumber week number
+     * @return map of enrollment id to present flag
+     */
     public Map<Long, Boolean> getPresentByEnrollmentIdsAndWeekNumber(Collection<Long> enrollmentIds, Integer weekNumber) {
         if (enrollmentIds == null || enrollmentIds.isEmpty() || weekNumber == null) {
             return Map.of();
@@ -159,6 +191,18 @@ public class InstructorWorkflowService {
     }
 
     @Transactional
+    /**
+     * Persists instructor updates for a course.
+     *
+     * <p>Updates can include grade fields (midterm/final), attendance count (derived from hours),
+     * and per-week presence. When week-level presence is provided and no manual hours override is
+     * applied, absenteeism count is incremented/decremented accordingly.</p>
+     *
+     * @param courseCode course code
+     * @param weekNumber optional week number (1..term weeks); when provided, presence updates are saved
+     * @param updates grade/attendance row updates
+     * @throws IllegalArgumentException if the course cannot be found or the week number is invalid
+     */
     public void saveCourseStudentUpdates(String courseCode, Integer weekNumber, Iterable<GradeDTO> updates) {
         if (courseCode == null || courseCode.isBlank()) {
             throw new IllegalArgumentException("Ders kodu boş bırakılamaz");
@@ -275,9 +319,9 @@ public class InstructorWorkflowService {
             row.setAverageScore(average);
             row.setLetterGrade(letter);
             if (average == null) {
-                row.setStatus("Notlar girilmedi");
+                row.setStatus(GradeStatus.NOT_GRADED);
             } else {
-                row.setStatus(passed ? "Geçti" : "Kaldı");
+                row.setStatus(passed ? GradeStatus.PASSED : GradeStatus.FAILED);
             }
             row.setAttendanceCount(attendanceService.toAbsentHours(course, updatedAbsentCount));
 

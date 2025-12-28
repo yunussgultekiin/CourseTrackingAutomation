@@ -7,16 +7,15 @@
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.coursetrackingautomation.controller.ProfilePopupController"
       stylesheets="@styles.css"
-    spacing="14.0" styleClass="card" prefWidth="520.0" prefHeight="420.0">
+    spacing="18.0" styleClass="dialog-card" prefWidth="520.0" prefHeight="420.0">
 
     <padding>
-        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/>
+        <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
     </padding>
 
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label text="Profilim" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <Region HBox.hgrow="ALWAYS" />
-    </HBox>
+    <Label text="Profilim" styleClass="section-title" />
+
+    <Separator />
 
     <GridPane hgap="10.0" vgap="10.0">
         <columnConstraints>
@@ -24,37 +23,37 @@
             <ColumnConstraints hgrow="ALWAYS" />
         </columnConstraints>
 
-        <Label text="Kullanıcı adı:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-        <Label fx:id="lblUsername" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+        <Label text="Kullanıcı adı:" styleClass="sidebar-title" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <Label fx:id="lblUsername" text="-" styleClass="muted" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 
-        <Label text="Ad:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-        <TextField fx:id="txtFirstName" promptText="Ad" styleClass="input-compact"
+        <Label text="Ad:" styleClass="sidebar-title" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <TextField fx:id="txtFirstName" promptText="Ad" styleClass="input"
                    GridPane.rowIndex="1" GridPane.columnIndex="1" />
 
-        <Label text="Soyad:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-        <TextField fx:id="txtLastName" promptText="Soyad" styleClass="input-compact"
+        <Label text="Soyad:" styleClass="sidebar-title" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <TextField fx:id="txtLastName" promptText="Soyad" styleClass="input"
                    GridPane.rowIndex="2" GridPane.columnIndex="1" />
 
-        <Label text="E-posta:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-        <TextField fx:id="txtEmail" promptText="E-posta" styleClass="input-compact"
+        <Label text="E-posta:" styleClass="sidebar-title" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <TextField fx:id="txtEmail" promptText="E-posta" styleClass="input"
                    GridPane.rowIndex="3" GridPane.columnIndex="1" />
 
-        <Label text="Telefon:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
-        <TextField fx:id="txtPhone" promptText="Telefon" styleClass="input-compact"
+        <Label text="Telefon:" styleClass="sidebar-title" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+        <TextField fx:id="txtPhone" promptText="Telefon" styleClass="input"
                    GridPane.rowIndex="4" GridPane.columnIndex="1" />
 
         <Separator fx:id="sepPassword" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
 
-        <Label fx:id="lblCurrentPassword" text="Mevcut şifre:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
-        <PasswordField fx:id="txtCurrentPassword" promptText="Mevcut şifre" styleClass="input-compact"
+        <Label fx:id="lblCurrentPassword" text="Mevcut şifre:" styleClass="sidebar-title" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+        <PasswordField fx:id="txtCurrentPassword" promptText="Mevcut şifre" styleClass="input"
                        GridPane.rowIndex="6" GridPane.columnIndex="1" />
 
-        <Label fx:id="lblNewPassword" text="Yeni şifre:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
-        <PasswordField fx:id="txtNewPassword" promptText="Yeni şifre" styleClass="input-compact"
+        <Label fx:id="lblNewPassword" text="Yeni şifre:" styleClass="sidebar-title" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+        <PasswordField fx:id="txtNewPassword" promptText="Yeni şifre" styleClass="input"
                        GridPane.rowIndex="7" GridPane.columnIndex="1" />
 
-        <Label fx:id="lblConfirmPassword" text="Yeni şifre (tekrar):" GridPane.rowIndex="8" GridPane.columnIndex="0" />
-        <PasswordField fx:id="txtConfirmPassword" promptText="Yeni şifre (tekrar)" styleClass="input-compact"
+        <Label fx:id="lblConfirmPassword" text="Yeni şifre (tekrar):" styleClass="sidebar-title" GridPane.rowIndex="8" GridPane.columnIndex="0" />
+        <PasswordField fx:id="txtConfirmPassword" promptText="Yeni şifre (tekrar)" styleClass="input"
                        GridPane.rowIndex="8" GridPane.columnIndex="1" />
     </GridPane>
 

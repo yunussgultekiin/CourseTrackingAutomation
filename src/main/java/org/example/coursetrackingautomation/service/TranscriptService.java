@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.GradeDTO;
+import org.example.coursetrackingautomation.dto.GradeStatus;
 import org.example.coursetrackingautomation.entity.Enrollment;
 import org.example.coursetrackingautomation.entity.Grade;
 import org.example.coursetrackingautomation.repository.EnrollmentRepository;
@@ -14,6 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Provides transcript and GPA computations for students.
+ *
+ * <p>This service returns a list of transcript rows derived from enrollments and computes a
+ * GPA string representation by mapping letter grades to grade points.</p>
+ */
 public class TranscriptService {
 
     private static final int GPA_SCALE = 2;
@@ -23,6 +30,15 @@ public class TranscriptService {
     private final AttendanceService attendanceService;
 
     @Transactional(readOnly = true)
+    /**
+     * Returns transcript grade rows for a student.
+     *
+     * <p>Rows include derived average/letter grade where available, as well as attendance indicators.</p>
+     *
+     * @param studentId student identifier
+     * @return transcript grade rows
+     * @throws IllegalArgumentException if {@code studentId} is null
+     */
     public List<GradeDTO> getTranscriptGradesForStudent(Long studentId) {
         if (studentId == null) {
             throw new IllegalArgumentException("Öğrenci id boş olamaz");
@@ -42,12 +58,12 @@ public class TranscriptService {
             Double average = gradeService.calculateAverage(midterm, finalScore);
             String letter = gradeService.determineLetterGrade(average);
 
-            String status;
+            GradeStatus status;
             if (!graded) {
                 letter = null;
-                status = "Notlar girilmedi";
+                status = GradeStatus.NOT_GRADED;
             } else {
-                status = gradeService.isPassed(letter) ? "Geçti" : "Kaldı";
+                status = gradeService.isPassed(letter) ? GradeStatus.PASSED : GradeStatus.FAILED;
             }
 
             int absentHoursUi = attendanceService.toAbsentHours(enrollment.getCourse(), enrollment.getAbsenteeismCount());
@@ -77,6 +93,14 @@ public class TranscriptService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * Calculates GPA as a formatted text value.
+     *
+     * <p>Only graded rows with a supported letter grade and positive credit are included.</p>
+     *
+     * @param grades transcript grade rows
+     * @return GPA string (scale {@value #GPA_SCALE} decimal places)
+     */
     public String calculateGpaText(List<GradeDTO> grades) {
         if (grades == null || grades.isEmpty()) {
             return "0.00";

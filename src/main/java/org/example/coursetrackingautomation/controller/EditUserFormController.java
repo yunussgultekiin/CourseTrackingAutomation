@@ -6,13 +6,19 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.UpdateUserRequest;
-import org.example.coursetrackingautomation.dto.UserDetailsDTO;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the "Edit User" form.
+ *
+ * <p>Loads user details by id, allows editing of profile fields, and persists updates via
+ * {@link UserService}.</p>
+ */
 public class EditUserFormController {
 
     @FXML private Label lblUsername;
@@ -26,54 +32,75 @@ public class EditUserFormController {
 
     private Long userId;
 
+    /**
+     * Sets the user id to edit and loads the current values into the form.
+     *
+     * @param userId user identifier
+     */
     public void setUserId(Long userId) {
         this.userId = userId;
         refresh();
     }
 
     private void refresh() {
-        try {
-            if (userId == null) {
-                return;
-            }
-
-            UserDetailsDTO user = userService.getUserDetailsById(userId);
-            lblUsername.setText(user.username() == null ? "-" : user.username());
-            txtFirstName.setText(user.firstName());
-            txtLastName.setText(user.lastName());
-            txtEmail.setText(user.email());
-            txtPhone.setText(user.phone());
-        } catch (Exception e) {
-            uiExceptionHandler.handle(e);
+        if (userId == null) {
+            return;
         }
+
+        FxAsync.runAsync(
+            () -> userService.getUserDetailsById(userId),
+            user -> {
+                lblUsername.setText(user.username() == null ? "-" : user.username());
+                txtFirstName.setText(user.firstName());
+                txtLastName.setText(user.lastName());
+                txtEmail.setText(user.email());
+                txtPhone.setText(user.phone());
+            },
+            uiExceptionHandler::handle
+        );
     }
 
     @FXML
+    /**
+     * Validates input and persists user updates.
+     */
     public void handleSave() {
+        final UpdateUserRequest request;
+        final Long id = userId;
         try {
-            if (userId == null) {
+            if (id == null) {
                 throw new IllegalArgumentException("Kullanıcı ID boş olamaz");
             }
 
             String firstName = requireNotBlank(safeTrim(txtFirstName.getText()), "Ad");
             String lastName = requireNotBlank(safeTrim(txtLastName.getText()), "Soyad");
 
-            UpdateUserRequest request = new UpdateUserRequest(
+            request = new UpdateUserRequest(
                 firstName,
                 lastName,
                 safeTrimToNull(txtEmail.getText()),
                 safeTrimToNull(txtPhone.getText()),
                 null
             );
-
-            userService.updateUser(userId, request);
-            close();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             uiExceptionHandler.handle(e);
+            return;
         }
+
+        FxAsync.runAsync(
+            () -> {
+                userService.updateUser(id, request);
+                return Boolean.TRUE;
+            },
+            ignored -> close(),
+            uiExceptionHandler::handle
+        );
     }
 
     @FXML
+    /**
+     * Closes the window without saving.
+     */
     public void handleClose() {
         close();
     }

@@ -7,13 +7,21 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.GradeDTO;
+import org.example.coursetrackingautomation.dto.GradeStatus;
 import org.example.coursetrackingautomation.service.GradeService;
+import org.example.coursetrackingautomation.ui.GradeStatusUiMapper;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.util.AlertUtil;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the grade editing popup.
+ *
+ * <p>Allows editing midterm/final scores for a {@link GradeDTO}, previews derived average/letter
+ * grade, and notifies a caller-provided callback when the user saves.</p>
+ */
 public class EditGradePopupController {
 
     @FXML private Label lblStudent;
@@ -29,6 +37,12 @@ public class EditGradePopupController {
     private GradeDTO row;
     private Consumer<GradeDTO> onSave;
 
+    /**
+     * Sets the editing context for this popup.
+     *
+     * @param row the row to edit
+     * @param onSave callback invoked after successful save; may be {@code null}
+     */
     public void setContext(GradeDTO row, Consumer<GradeDTO> onSave) {
         this.row = row;
         this.onSave = onSave;
@@ -37,6 +51,9 @@ public class EditGradePopupController {
     }
 
     @FXML
+    /**
+     * Validates input, updates the row, and invokes the save callback.
+     */
     public void handleSave() {
         if (row == null) {
             handleClose();
@@ -62,9 +79,9 @@ public class EditGradePopupController {
         row.setAverageScore(average);
         row.setLetterGrade(letter);
         if (!graded) {
-            row.setStatus(UiConstants.UI_STATUS_NOT_GRADED);
+            row.setStatus(GradeStatus.NOT_GRADED);
         } else {
-            row.setStatus(passed ? UiConstants.UI_STATUS_PASSED : UiConstants.UI_STATUS_FAILED);
+            row.setStatus(passed ? GradeStatus.PASSED : GradeStatus.FAILED);
         }
 
         refreshPreview();
@@ -77,6 +94,9 @@ public class EditGradePopupController {
     }
 
     @FXML
+    /**
+     * Closes the popup.
+     */
     public void handleClose() {
         Stage stage = (Stage) (lblStudent != null && lblStudent.getScene() != null ? lblStudent.getScene().getWindow() : null);
         if (stage != null) {
@@ -114,7 +134,7 @@ public class EditGradePopupController {
             lblLetter.setText(row.getLetterGrade() == null ? "-" : row.getLetterGrade());
         }
         if (lblStatus != null) {
-            lblStatus.setText(row.getStatus() == null ? "-" : row.getStatus());
+            lblStatus.setText(row.getStatus() == null ? "-" : GradeStatusUiMapper.toTurkish(row.getStatus()));
         }
     }
 

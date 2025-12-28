@@ -10,6 +10,7 @@ import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.dto.SelectOptionDTO;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import javafx.collections.FXCollections;
@@ -17,6 +18,11 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the "Add Course" form.
+ *
+ * <p>Collects course input, performs basic validation, and delegates persistence to {@link CourseService}.</p>
+ */
 public class AddCourseFormController {
 
     @FXML private TextField courseCodeField;
@@ -34,16 +40,23 @@ public class AddCourseFormController {
     private final UiExceptionHandler uiExceptionHandler;
 
     @FXML
+    /**
+     * Initializes the form controls (e.g., instructor selection).
+     */
     public void initialize() {
-        try {
-            instructorComboBox.setItems(FXCollections.observableArrayList(userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR)));
-        } catch (Exception e) {
-            uiExceptionHandler.handle(e);
-        }
+        FxAsync.runAsync(
+            () -> userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR),
+            instructors -> instructorComboBox.setItems(FXCollections.observableArrayList(instructors)),
+            uiExceptionHandler::handle
+        );
     }
 
     @FXML
+    /**
+     * Validates the form and creates the course.
+     */
     public void handleSave() {
+        final CreateCourseRequest request;
         try {
             String code = requireNotBlank(safeTrim(courseCodeField.getText()), "Ders kodu");
             String name = requireNotBlank(safeTrim(courseNameField.getText()), "Ders adı");
@@ -64,7 +77,7 @@ public class AddCourseFormController {
             }
             Long instructorId = instructorComboBox.getValue().id();
 
-            CreateCourseRequest request = new CreateCourseRequest(
+            request = new CreateCourseRequest(
                 code,
                 name,
                 credit,
@@ -75,15 +88,22 @@ public class AddCourseFormController {
                 weeklyTheoryHours,
                 weeklyPracticeHours
             );
-
-            courseService.createCourse(request);
-            close();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             uiExceptionHandler.handle(e);
+            return;
         }
+
+        FxAsync.runAsync(
+            () -> courseService.createCourse(request),
+            created -> close(),
+            uiExceptionHandler::handle
+        );
     }
 
     @FXML
+    /**
+     * Cancels the operation and closes the modal window.
+     */
     public void handleCancel() {
         close();
     }

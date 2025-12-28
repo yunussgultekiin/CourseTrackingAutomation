@@ -2,6 +2,10 @@ package org.example.coursetrackingautomation.ui;
 
 public final class UiConstants {
 
+    /**
+     * Central place for UI labels, message keys, FXML resource paths, and common window configuration.
+     */
+
     public static final String ERROR_KEY_NO_ACTIVE_SESSION = "No active session";
     public static final String ERROR_KEY_COURSE_NOT_FOUND = "Course not found";
     public static final String ERROR_KEY_ENROLLMENT_NOT_FOUND = "Enrollment not found";
@@ -62,6 +66,5 @@ public final class UiConstants {
     public static final String WINDOW_TITLE_ADMIN_ENROLL_STUDENT = "Kayıt Ekle";
     public static final String WINDOW_TITLE_EDIT_GRADE = "Not Düzenle";
 
-    private UiConstants() {
-    }
+    private UiConstants() {}
 }

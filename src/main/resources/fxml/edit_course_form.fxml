@@ -7,16 +7,15 @@
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.coursetrackingautomation.controller.EditCourseFormController"
       stylesheets="@styles.css"
-    spacing="14.0" styleClass="card" prefWidth="560.0" prefHeight="520.0">
+    spacing="18.0" styleClass="dialog-card" prefWidth="560.0" prefHeight="520.0">
 
     <padding>
-        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/>
+        <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
     </padding>
 
-    <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label text="Ders Düzenle" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <Region HBox.hgrow="ALWAYS" />
-    </HBox>
+    <Label text="Ders Düzenle" styleClass="section-title" />
+
+    <Separator />
 
     <GridPane hgap="10.0" vgap="10.0">
         <columnConstraints>
@@ -24,42 +23,42 @@
             <ColumnConstraints hgrow="ALWAYS" />
         </columnConstraints>
 
-        <Label text="Ders Kodu:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-        <Label fx:id="courseCodeLabel" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+        <Label text="Ders Kodu:" styleClass="sidebar-title" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <Label fx:id="courseCodeLabel" text="-" styleClass="muted" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 
-        <Label text="Ders Adı:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-        <TextField fx:id="nameField" promptText="Ders adı" styleClass="input-compact"
+        <Label text="Ders Adı:" styleClass="sidebar-title" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <TextField fx:id="nameField" promptText="Ders adı" styleClass="input"
                    GridPane.rowIndex="1" GridPane.columnIndex="1" />
 
-        <Label text="Kredi:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-        <TextField fx:id="creditField" promptText="örn: 4" styleClass="input-compact"
+        <Label text="Kredi:" styleClass="sidebar-title" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <TextField fx:id="creditField" promptText="örn: 4" styleClass="input"
                    GridPane.rowIndex="2" GridPane.columnIndex="1" />
 
-        <Label text="Kota:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-        <TextField fx:id="quotaField" promptText="örn: 30" styleClass="input-compact"
+        <Label text="Kota:" styleClass="sidebar-title" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <TextField fx:id="quotaField" promptText="örn: 30" styleClass="input"
                    GridPane.rowIndex="3" GridPane.columnIndex="1" />
 
-        <Label text="Dönem:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
-        <TextField fx:id="termField" promptText="örn: 2025" styleClass="input-compact"
+        <Label text="Dönem:" styleClass="sidebar-title" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+        <TextField fx:id="termField" promptText="örn: 2025" styleClass="input"
                    GridPane.rowIndex="4" GridPane.columnIndex="1" />
 
-        <Label text="Haftalık Toplam Saat:" GridPane.rowIndex="5" GridPane.columnIndex="0" />
-        <TextField fx:id="weeklyTotalHoursField" promptText="örn: 3" styleClass="input-compact"
+        <Label text="Haftalık Toplam Saat:" styleClass="sidebar-title" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+        <TextField fx:id="weeklyTotalHoursField" promptText="örn: 3" styleClass="input"
                    GridPane.rowIndex="5" GridPane.columnIndex="1" />
 
-        <Label text="Haftalık Teori Saati:" GridPane.rowIndex="6" GridPane.columnIndex="0" />
-        <TextField fx:id="weeklyTheoryHoursField" promptText="örn: 2" styleClass="input-compact"
+        <Label text="Haftalık Teori Saati:" styleClass="sidebar-title" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+        <TextField fx:id="weeklyTheoryHoursField" promptText="örn: 2" styleClass="input"
                    GridPane.rowIndex="6" GridPane.columnIndex="1" />
 
-        <Label text="Haftalık Uygulama Saati:" GridPane.rowIndex="7" GridPane.columnIndex="0" />
-        <TextField fx:id="weeklyPracticeHoursField" promptText="örn: 1" styleClass="input-compact"
+        <Label text="Haftalık Uygulama Saati:" styleClass="sidebar-title" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+        <TextField fx:id="weeklyPracticeHoursField" promptText="örn: 1" styleClass="input"
                    GridPane.rowIndex="7" GridPane.columnIndex="1" />
 
-        <Label text="Akademisyen:" GridPane.rowIndex="8" GridPane.columnIndex="0" />
-        <ComboBox fx:id="instructorComboBox" promptText="Akademisyen seçin" styleClass="input-compact"
+        <Label text="Akademisyen:" styleClass="sidebar-title" GridPane.rowIndex="8" GridPane.columnIndex="0" />
+        <ComboBox fx:id="instructorComboBox" promptText="Akademisyen seçin" styleClass="input"
                   GridPane.rowIndex="8" GridPane.columnIndex="1" />
 
-        <Label text="Durum:" GridPane.rowIndex="9" GridPane.columnIndex="0" />
+        <Label text="Durum:" styleClass="sidebar-title" GridPane.rowIndex="9" GridPane.columnIndex="0" />
         <HBox spacing="12.0" GridPane.rowIndex="9" GridPane.columnIndex="1">
             <RadioButton fx:id="activeRadio" text="Aktif" />
             <RadioButton fx:id="passiveRadio" text="Pasif" />

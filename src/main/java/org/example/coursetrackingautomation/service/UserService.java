@@ -19,6 +19,13 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * Provides user management operations.
+ *
+ * <p>This service handles creation and updates of {@link User} entities, password changes, and
+ * convenience lookups used by the UI. Passwords are always stored encoded via Spring Security's
+ * {@link PasswordEncoder}.</p>
+ */
 public class UserService {
 
 	private static final String DEFAULT_ADMIN_USERNAME = "admin";
@@ -28,6 +35,13 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 
 	@Transactional
+	/**
+	 * Creates a new user from the provided request.
+	 *
+	 * @param request user creation payload
+	 * @return the persisted {@link User}
+	 * @throws IllegalArgumentException if validation fails or username is already taken
+	 */
 	public User createUser(CreateUserRequest request) {
 		if (request == null) {
 			throw new IllegalArgumentException("Kullanıcı oluşturma isteği boş olamaz");
@@ -74,6 +88,17 @@ public class UserService {
 	}
 
 	@Transactional
+	/**
+	 * Updates mutable attributes of an existing user.
+	 *
+	 * <p>This method applies partial updates for name fields and password (when provided). Email and
+	 * phone are replaced with the values supplied in {@code request}.</p>
+	 *
+	 * @param userId the user identifier
+	 * @param request update payload
+	 * @return the persisted {@link User}
+	 * @throws IllegalArgumentException if the user does not exist or input is invalid
+	 */
 	public User updateUser(Long userId, UpdateUserRequest request) {
 		if (userId == null) {
 			throw new IllegalArgumentException("Kullanıcı id boş olamaz");
@@ -106,6 +131,12 @@ public class UserService {
 	}
 
 	@Transactional
+	/**
+	 * Ensures the default administrator account exists.
+	 *
+	 * <p>If the account does not exist, it is created with configured default credentials.
+	 * Intended for local/demo setups and initial bootstrap flows.</p>
+	 */
 	public void ensureDefaultAdminUserExists() {
 		userRepository.findByUsername(DEFAULT_ADMIN_USERNAME).ifPresentOrElse(
 			u -> log.info("Default admin user already exists: username={}", DEFAULT_ADMIN_USERNAME),
@@ -128,6 +159,14 @@ public class UserService {
 	}
 
 	@Transactional
+	/**
+	 * Changes the password for the given user.
+	 *
+	 * @param userId the user identifier
+	 * @param currentPassword the current raw password used for verification
+	 * @param newPassword the new raw password to persist (will be encoded)
+	 * @throws IllegalArgumentException if validation fails, user is missing, or current password is incorrect
+	 */
 	public void changePassword(Long userId, String currentPassword, String newPassword) {
 		if (userId == null) {
 			throw new IllegalArgumentException("Kullanıcı id boş olamaz");
@@ -152,6 +191,13 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
+	/**
+	 * Retrieves a user by id.
+	 *
+	 * @param userId the user identifier
+	 * @return the persisted {@link User}
+	 * @throws IllegalArgumentException if {@code userId} is null or the user cannot be found
+	 */
 	public User getUserById(Long userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("Kullanıcı id boş olamaz");
@@ -161,6 +207,13 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
+	/**
+	 * Retrieves all active users for the specified role.
+	 *
+	 * @param role the role to filter by
+	 * @return active users having the provided role
+	 * @throws IllegalArgumentException if {@code role} is null
+	 */
 	public List<User> getActiveUsersByRole(Role role) {
 		if (role == null) {
 			throw new IllegalArgumentException("Rol boş olamaz");
@@ -169,6 +222,13 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
+	/**
+	 * Retrieves all active users for the specified role.
+	 *
+	 * @param role the role DTO to filter by
+	 * @return active users having the provided role
+	 * @throws IllegalArgumentException if {@code role} is null
+	 */
 	public List<User> getActiveUsersByRole(RoleDTO role) {
 		if (role == null) {
 			throw new IllegalArgumentException("Rol boş olamaz");
@@ -177,6 +237,12 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
+	/**
+	 * Returns UI-friendly selection options for active users of the specified role.
+	 *
+	 * @param role the role to filter by
+	 * @return option list containing user ids and display labels
+	 */
 	public List<SelectOptionDTO> getActiveUserOptionsByRole(Role role) {
 		return getActiveUsersByRole(role).stream()
 			.map(user -> {
@@ -193,6 +259,12 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
+	/**
+	 * Returns UI-friendly selection options for active users of the specified role.
+	 *
+	 * @param role the role DTO to filter by
+	 * @return option list containing user ids and display labels
+	 */
 	public List<SelectOptionDTO> getActiveUserOptionsByRole(RoleDTO role) {
 		return getActiveUsersByRole(role).stream()
 			.map(user -> {
@@ -209,6 +281,13 @@ public class UserService {
 	}
 
 	@Transactional(readOnly = true)
+	/**
+	 * Retrieves a lightweight user details projection.
+	 *
+	 * @param userId the user identifier
+	 * @return user details DTO
+	 * @throws IllegalArgumentException if the user cannot be found
+	 */
 	public UserDetailsDTO getUserDetailsById(Long userId) {
 		User user = getUserById(userId);
 		return new UserDetailsDTO(

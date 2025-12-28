@@ -5,6 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Course representation used by the UI and service layer.
+ *
+ * <p>Includes instructor display data and derived quota-related fields used by dashboards and
+ * enrollment screens.
+ */
 @Data
 @Builder
 @NoArgsConstructor

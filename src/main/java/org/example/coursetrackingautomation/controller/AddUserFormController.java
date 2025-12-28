@@ -11,12 +11,18 @@ import lombok.RequiredArgsConstructor;
 import org.example.coursetrackingautomation.dto.CreateUserRequest;
 import org.example.coursetrackingautomation.dto.RoleDTO;
 import org.example.coursetrackingautomation.service.UserService;
+import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the "Add User" form.
+ *
+ * <p>Collects user input, performs basic validation, and delegates persistence to {@link UserService}.</p>
+ */
 public class AddUserFormController {
 
     @FXML private TextField firstNameField;
@@ -31,6 +37,9 @@ public class AddUserFormController {
     private final UiExceptionHandler uiExceptionHandler;
 
     @FXML
+    /**
+     * Initializes the form controls (e.g., role combo box).
+     */
     public void initialize() {
         roleComboBox.setItems(FXCollections.observableArrayList(RoleDTO.values()));
 
@@ -51,7 +60,11 @@ public class AddUserFormController {
     }
 
     @FXML
+    /**
+     * Validates the form and creates the user.
+     */
     public void handleSave() {
+        final CreateUserRequest request;
         try {
             String username = requireNotBlank(safeTrim(usernameField.getText()), "Kullanıcı adı");
             String password = requireNotBlank(safe(passwordField.getText()), "Şifre");
@@ -64,7 +77,7 @@ public class AddUserFormController {
                 throw new IllegalArgumentException(UiConstants.ERROR_KEY_ROLE_SELECTION_REQUIRED);
             }
 
-            CreateUserRequest request = new CreateUserRequest(
+            request = new CreateUserRequest(
                 username,
                 password,
                 firstName,
@@ -75,15 +88,22 @@ public class AddUserFormController {
                 safeTrimToNull(phoneField.getText()),
                 true
             );
-
-            userService.createUser(request);
-            close();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             uiExceptionHandler.handle(e);
+            return;
         }
+
+        FxAsync.runAsync(
+            () -> userService.createUser(request),
+            created -> close(),
+            uiExceptionHandler::handle
+        );
     }
 
     @FXML
+    /**
+     * Cancels the operation and closes the modal window.
+     */
     public void handleCancel() {
         close();
     }

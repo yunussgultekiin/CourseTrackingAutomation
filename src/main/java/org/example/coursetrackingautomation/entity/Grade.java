@@ -15,6 +15,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Stores grading information for an {@link Enrollment}.
+ *
+ * <p>Scores are stored using {@link java.math.BigDecimal} to preserve precision. The average score,
+ * letter grade, and pass/fail flag are derived values computed by the grading workflow.
+ *
+ * <p>There is a one-to-one relationship with {@link Enrollment} and the foreign key is unique,
+ * ensuring that each enrollment has at most one grade record.
+ */
 @Entity
 @Table(name = "grades")
 @Getter

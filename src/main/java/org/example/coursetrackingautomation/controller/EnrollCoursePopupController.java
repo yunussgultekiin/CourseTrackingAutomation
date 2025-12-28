@@ -15,12 +15,19 @@ import org.example.coursetrackingautomation.config.UserSession;
 import org.example.coursetrackingautomation.dto.CourseDTO;
 import org.example.coursetrackingautomation.service.CourseService;
 import org.example.coursetrackingautomation.service.EnrollmentService;
+import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
+/**
+ * JavaFX controller for the student course enrollment popup.
+ *
+ * <p>Shows a list of active courses with available quota and allows the authenticated student
+ * to enroll via {@link EnrollmentService}.</p>
+ */
 public class EnrollCoursePopupController {
 
     private static final String PROPERTY_CODE = "code";
@@ -55,6 +62,9 @@ public class EnrollCoursePopupController {
     private final UiExceptionHandler uiExceptionHandler;
 
     @FXML
+    /**
+     * Initializes the table view and loads courses.
+     */
     public void initialize() {
         colCode.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_CODE));
         colName.setCellValueFactory(new PropertyValueFactory<>(PROPERTY_NAME));
@@ -79,6 +89,9 @@ public class EnrollCoursePopupController {
     }
 
     @FXML
+    /**
+     * Enrolls the current student into the selected course.
+     */
     public void handleEnroll() {
         try {
             CourseDTO selected = tableCourses.getSelectionModel().getSelectedItem();
@@ -90,20 +103,30 @@ public class EnrollCoursePopupController {
                 .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION))
                 .id();
 
-            enrollmentService.enrollStudent(studentId, selected.getId());
-            close();
-        } catch (Exception e) {
+            FxAsync.runAsync(
+                () -> enrollmentService.enrollStudent(studentId, selected.getId()),
+                savedEnrollment -> close(),
+                uiExceptionHandler::handle
+            );
+        } catch (IllegalStateException | IllegalArgumentException e) {
             uiExceptionHandler.handle(e);
         }
     }
 
     @FXML
+    /**
+     * Closes the popup without enrolling.
+     */
     public void handleClose() {
         close();
     }
 
     private void refreshCourses() {
-        tableCourses.setItems(FXCollections.observableArrayList(courseService.getAllActiveCourseDTOs()));
+        FxAsync.runAsync(
+            courseService::getAllActiveCourseDTOs,
+            courses -> tableCourses.setItems(FXCollections.observableArrayList(courses)),
+            uiExceptionHandler::handle
+        );
     }
 
     private void close() {

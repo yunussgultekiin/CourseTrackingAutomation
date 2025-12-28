@@ -7,104 +7,69 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-    fx:controller="org.example.coursetrackingautomation.controller.AddUserFormController"
+            fx:controller="org.example.coursetrackingautomation.controller.AddUserFormController"
+            stylesheets="@styles.css"
       spacing="18.0"
-    style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 28px;"
-    prefWidth="520.0" prefHeight="600.0">
+        styleClass="dialog-card"
+        prefWidth="720.0" prefHeight="420.0">
 
     <padding>
         <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
     </padding>
 
-    <Label text="Kullanıcı Ekle"
-           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-        <font>
-            <Font name="System Bold" size="24.0"/>
-        </font>
-    </Label>
+    <Label text="Kullanıcı Ekle" styleClass="section-title" />
 
     <Separator/>
 
-    <VBox spacing="5.0">
-        <Label text="Ad *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="firstNameField" promptText="Ad"
-                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
+    <GridPane hgap="16.0" vgap="12.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="50" />
+        </columnConstraints>
 
-    <VBox spacing="5.0">
-        <Label text="Soyad *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="lastNameField" promptText="Soyad"
-                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
+        <VBox spacing="5.0" GridPane.rowIndex="0" GridPane.columnIndex="0">
+            <Label text="Ad *" styleClass="sidebar-title" />
+            <TextField fx:id="firstNameField" promptText="Ad" styleClass="input" />
+        </VBox>
+        <VBox spacing="5.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+            <Label text="Soyad *" styleClass="sidebar-title" />
+            <TextField fx:id="lastNameField" promptText="Soyad" styleClass="input" />
+        </VBox>
 
-    <VBox spacing="5.0">
-        <Label text="E-posta *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="emailField" promptText="ornek@email.com"
-                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
+        <VBox spacing="5.0" GridPane.rowIndex="1" GridPane.columnIndex="0">
+            <Label text="E-posta *" styleClass="sidebar-title" />
+            <TextField fx:id="emailField" promptText="ornek@email.com" styleClass="input" />
+        </VBox>
+        <VBox spacing="5.0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label text="Telefon" styleClass="sidebar-title" />
+            <TextField fx:id="phoneField" promptText="Örn: 555-123-4567" styleClass="input" />
+        </VBox>
 
-    <VBox spacing="5.0">
-        <Label text="Kullanıcı Adı *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="usernameField" promptText="Kullanıcı adı"
-                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
+        <VBox spacing="5.0" GridPane.rowIndex="2" GridPane.columnIndex="0">
+            <Label text="Kullanıcı Adı *" styleClass="sidebar-title" />
+            <TextField fx:id="usernameField" promptText="Kullanıcı adı" styleClass="input" />
+        </VBox>
+        <VBox spacing="5.0" GridPane.rowIndex="2" GridPane.columnIndex="1">
+            <Label text="Şifre *" styleClass="sidebar-title" />
+            <PasswordField fx:id="passwordField" promptText="Şifre" styleClass="input" />
+        </VBox>
 
-    <VBox spacing="5.0">
-        <Label text="Şifre *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <PasswordField fx:id="passwordField" promptText="Şifre"
-                       style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
-
-    <VBox spacing="5.0">
-        <Label text="Rol *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-            <ComboBox fx:id="roleComboBox" prefWidth="220.0"
-                    promptText="Rol seçin"/>
-    </VBox>
-
-    <VBox spacing="5.0">
-        <Label text="Telefon" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="14.0"/>
-            </font>
-        </Label>
-        <TextField fx:id="phoneField" promptText="Örn: 555-123-4567"
-                   style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10px; -fx-font-size: 14px;"/>
-    </VBox>
+        <VBox spacing="5.0" GridPane.rowIndex="3" GridPane.columnIndex="0">
+            <Label text="Rol *" styleClass="sidebar-title" />
+            <ComboBox fx:id="roleComboBox" promptText="Rol seçin" styleClass="input" />
+        </VBox>
+    </GridPane>
 
     <Region VBox.vgrow="ALWAYS"/>
 
     <HBox spacing="15.0" alignment="CENTER_RIGHT">
         <Button fx:id="cancelButton" text="İptal"
                 onAction="#handleCancel"
-                style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 22px; -fx-cursor: hand; -fx-font-weight: bold;"
+            styleClass="btn-secondary"
                 cancelButton="true"/>
         <Button fx:id="saveButton" text="Kaydet"
                 onAction="#handleSave"
-                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10px 24px; -fx-cursor: hand; -fx-font-weight: bold;"
+            styleClass="btn-primary-green"
                 defaultButton="true"/>
     </HBox>
 

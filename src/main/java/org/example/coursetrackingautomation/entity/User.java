@@ -18,6 +18,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Represents an application user account.
+ *
+ * <p>A {@code User} can act as an {@link Role#ADMIN administrator}, {@link Role#INSTRUCTOR instructor},
+ * or {@link Role#STUDENT student}. Depending on the role, the user may instruct courses and/or be
+ * enrolled as a student.
+ *
+ * <p>Credentials are stored as an encoded password (see security configuration). The {@code active}
+ * flag is used to prevent authentication and participation for deactivated accounts.
+ */
 @Entity
 @Table(name = "users")
 @Getter

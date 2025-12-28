@@ -19,12 +19,12 @@
             </padding>
 
             <VBox alignment="CENTER" spacing="10.0">
-                <Label text="Ders Takip Otomasyonu" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                <Label text="Ders Takip Otomasyonu" styleClass="brand-title">
                     <font>
                         <Font name="System Bold" size="30.0"/>
                     </font>
                 </Label>
-                <Label text="Tekrar Hoşgeldiniz" style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;">
+                <Label text="Tekrar Hoşgeldiniz" styleClass="brand-subtitle">
                     <font>
                         <Font name="System" size="16.0"/>
                     </font>
@@ -33,7 +33,7 @@
 
             <VBox spacing="18.0" prefWidth="340.0">
                 <VBox spacing="5.0">
-                    <Label text="Kullanıcı Adı" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-font-weight: bold;">
+                    <Label text="Kullanıcı Adı" styleClass="sidebar-title">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
@@ -42,7 +42,7 @@
                 </VBox>
 
                 <VBox spacing="5.0">
-                    <Label text="Şifre" style="-fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-font-weight: bold;">
+                    <Label text="Şifre" styleClass="sidebar-title">
                         <font>
                             <Font name="System Bold" size="14.0"/>
                         </font>
@@ -50,7 +50,7 @@
                     <PasswordField fx:id="passwordField" promptText="Şifrenizi girin" styleClass="input"/>
                 </VBox>
 
-                <Label fx:id="errorLabel" text="" style="-fx-text-fill: #e74c3c; -fx-font-size: 12px;" visible="false"/>
+                <Label fx:id="errorLabel" text="" styleClass="error-text" visible="false"/>
 
                 <Button fx:id="loginButton" text="Giriş Yap"
                         onAction="#handleLogin"
@@ -63,7 +63,7 @@
             </VBox>
 
             <Label text="© 2026 Ders Takip Otomasyonu Sistemi"
-                   style="-fx-font-size: 12px; -fx-text-fill: #95a5a6;"/>
+                   styleClass="muted"/>
         </VBox>
     </center>
 

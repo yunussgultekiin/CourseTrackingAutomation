@@ -16,6 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * Provides authentication operations for the desktop application.
+ *
+ * <p>This service validates credentials, enforces user activation rules, and publishes the
+ * authenticated principal into the {@link UserSession}. It is intentionally state-free aside
+ * from writing to the session component.</p>
+ */
 public class AuthService {
 
 	private final UserRepository userRepository;
@@ -23,6 +30,18 @@ public class AuthService {
 	private final UserSession userSession;
 
 	@Transactional(readOnly = true)
+	/**
+	 * Authenticates a user and stores the authenticated principal in the current session.
+	 *
+	 * <p>Usernames are trimmed; null inputs are treated as blank. Authentication fails for
+	 * unknown users, inactive users, or password mismatches.</p>
+	 *
+	 * @param username the username provided by the user
+	 * @param rawPassword the raw (unencoded) password provided by the user
+	 * @return the authenticated session user representation
+	 * @throws InvalidCredentialsException if the credentials are missing, unknown, or invalid
+	 * @throws InactiveUserException if the user exists but is not active
+	 */
 	public SessionUser login(String username, String rawPassword) {
 		String safeUsername = username == null ? "" : username.trim();
 		String safePassword = rawPassword == null ? "" : rawPassword;
@@ -55,6 +74,11 @@ public class AuthService {
 		return sessionUser;
 	}
 
+	/**
+	 * Clears the current authentication session.
+	 *
+	 * <p>This operation is idempotent; calling it without an active user has no adverse effect.</p>
+	 */
 	public void logout() {
 		userSession.getCurrentUser().ifPresent(u -> log.info("User logged out: id={}, username={}", u.id(), u.username()));
 		userSession.cleanUserSession();

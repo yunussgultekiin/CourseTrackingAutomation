@@ -3,6 +3,12 @@ package org.example.coursetrackingautomation.service;
 import org.springframework.stereotype.Service;
 
 @Service
+/**
+ * Provides grade calculation utilities.
+ *
+ * <p>Implements a simple weighted average calculation (midterm/final) and converts the resulting
+ * score into a letter grade based on configured thresholds.</p>
+ */
 public class GradeService {
 
     private static final double MIDTERM_WEIGHT = 0.40;
@@ -17,6 +23,13 @@ public class GradeService {
     private static final double THRESHOLD_DD = 50.0;
     private static final double THRESHOLD_FD = 40.0;
 
+    /**
+     * Calculates a weighted average score.
+     *
+     * @param midterm midterm score
+     * @param finalScore final exam score
+     * @return weighted average, or {@code null} if any input is {@code null}
+     */
     public Double calculateAverage(Double midterm, Double finalScore) {
         if (midterm == null || finalScore == null) {
             return null;
@@ -25,6 +38,12 @@ public class GradeService {
         return (midterm * MIDTERM_WEIGHT) + (finalScore * FINAL_WEIGHT);
     }
 
+    /**
+     * Determines the letter grade for a given average score.
+     *
+     * @param average weighted average score
+     * @return letter grade (e.g., "AA", "BA"), or {@code null} if {@code average} is {@code null}
+     */
     public String determineLetterGrade(Double average) {
         if (average == null) {
             return null;
@@ -57,6 +76,12 @@ public class GradeService {
         return "FF";
     }
 
+    /**
+     * Indicates whether a given letter grade is considered passing.
+     *
+     * @param letterGrade the grade to evaluate
+     * @return {@code true} if passing; otherwise {@code false}
+     */
     public boolean isPassed(String letterGrade) {
         if (letterGrade == null || letterGrade.isBlank()) {
             return false;

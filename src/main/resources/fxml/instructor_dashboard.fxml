@@ -11,12 +11,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="600.0" prefWidth="900.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.coursetrackingautomation.controller.InstructorDashboardController">
+<BorderPane prefHeight="600.0" prefWidth="900.0" stylesheets="@styles.css" styleClass="app-background" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.coursetrackingautomation.controller.InstructorDashboardController">
 
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="topbar">
             
-            <Label text="Akademisyen Paneli" textFill="WHITE">
+            <Label text="Akademisyen Paneli" styleClass="topbar-title">
                 <font>
                     <Font name="System Bold" size="20.0" />
                 </font>
@@ -24,21 +24,21 @@
 
             <HBox minWidth="30.0" />
 
-            <Label text="Aktif Ders:" textFill="#ecf0f1">
+            <Label text="Aktif Ders:" styleClass="topbar-subtitle">
                 <font>
                     <Font size="14.0" />
                 </font>
             </Label>
-            <ComboBox fx:id="comboCourses" prefWidth="250.0" promptText="Lütfen Ders Seçiniz..." style="-fx-font-size: 13px;" />
+            <ComboBox fx:id="comboCourses" prefWidth="250.0" promptText="Lütfen Ders Seçiniz..." styleClass="input-compact" />
 
-            <Label text="Hafta:" textFill="#ecf0f1">
+            <Label text="Hafta:" styleClass="topbar-subtitle">
                 <font>
                     <Font size="14.0" />
                 </font>
             </Label>
-            <ComboBox fx:id="comboWeeks" prefWidth="140.0" promptText="Hafta Seçiniz..." style="-fx-font-size: 13px;" />
+            <ComboBox fx:id="comboWeeks" prefWidth="140.0" promptText="Hafta Seçiniz..." styleClass="input-compact" />
 
-            <Label fx:id="lblCourseHours" textFill="#ecf0f1" wrapText="true">
+            <Label fx:id="lblCourseHours" styleClass="topbar-subtitle" wrapText="true">
                 <font>
                     <Font size="12.0" />
                 </font>
@@ -52,7 +52,7 @@
     </top>
 
     <center>
-        <VBox spacing="10.0" style="-fx-padding: 20; -fx-background-color: #ecf0f1;">
+        <VBox spacing="10.0" styleClass="content-area">
             <HBox alignment="CENTER_LEFT">
                 <Label text="Öğrenci Listesi ve Not Girişi" textFill="#2c3e50">
                     <font>
@@ -60,13 +60,13 @@
                     </font>
                 </Label>
                 <HBox HBox.hgrow="ALWAYS" />
-                <Label text="* Not girmek/düzenlemek için satıra çift tıklayın." textFill="#7f8c8d" />
+                <Label text="* Not girmek/düzenlemek için satıra çift tıklayın." styleClass="muted" />
             </HBox>
 
             <TableView fx:id="tableStudents" editable="true" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="colStudentNumber" prefWidth="120.0" text="Öğrenci No" />
-                    <TableColumn fx:id="colFullName" prefWidth="200.0" text="Ad Soyad" />
+                    <TableColumn fx:id="colFullName" prefWidth="280.0" text="Ad Soyad" />
                     
                     <TableColumn fx:id="colMidterm" prefWidth="80.0" text="Vize" />
                     <TableColumn fx:id="colFinal" prefWidth="80.0" text="Final" />
@@ -87,8 +87,8 @@
     </center>
 
     <bottom>
-        <HBox alignment="CENTER" style="-fx-background-color: #bdc3c7; -fx-padding: 15;">
-            <Button fx:id="btnSave" onAction="#handleSave" prefHeight="35.0" prefWidth="180.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" text="Değişiklikleri Kaydet">
+        <HBox alignment="CENTER" styleClass="footerbar">
+            <Button fx:id="btnSave" onAction="#handleSave" prefHeight="35.0" prefWidth="180.0" styleClass="btn-primary-green" text="Değişiklikleri Kaydet">
                 <font>
                     <Font size="14.0" />
                 </font>
