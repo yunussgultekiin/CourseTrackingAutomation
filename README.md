@@ -72,7 +72,7 @@ The system supports three distinct roles, each with a tailored dashboard:
 ### Steps
 1.  **Clone the Repository**:
     ```bash
-    git clone https://github.com/your-username/CourseTrackingAutomation.git
+    git clone https://github.com/yunussgultekiin/CourseTrackingAutomation.git
     ```
 2.  **Configure Database**:
     *   Create a PostgreSQL database (e.g., `course_automation`).
