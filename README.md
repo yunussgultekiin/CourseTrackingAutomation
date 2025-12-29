@@ -9,7 +9,7 @@ A robust, monolithic desktop application built with **Spring Boot** and **JavaFX
 
 ---
 
-## 🏗 Architecture & Design Principles
+## Architecture & Design Principles
 
 The project adheres to strict software engineering principles to ensure maintainability, scalability, and readability:
 
@@ -21,7 +21,7 @@ The project adheres to strict software engineering principles to ensure maintain
 *   **DRY (Don't Repeat Yourself)**: Common utilities (e.g., `AlertUtil`) prevent code duplication.
 *   **DTO Pattern**: Entity objects are never exposed to the UI; Data Transfer Objects are used for safety and decoupling.
 
-## 🚀 Key Features
+## Key Features
 
 ### 1. Role-Based Access Control
 The system supports three distinct roles, each with a tailored dashboard:
@@ -62,7 +62,7 @@ The system supports three distinct roles, each with a tailored dashboard:
 *   **Build Tool**: Maven
 *   **Tools**: Lombok, SLF4J (Logging)
 
-## 💻 Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 *   JDK 21 or higher
