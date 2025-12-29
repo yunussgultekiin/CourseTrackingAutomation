@@ -101,20 +101,19 @@
     -fx-background-radius: 5px;
     -fx-padding: 8px 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
     -fx-font-size: 13px;
 }
 
-.button-primary { -fx-background-color: #2980b9; } 
+.button-primary { -fx-background-color: #2980b9; -fx-text-fill: white; } 
 .button-primary:hover { -fx-background-color: #1f618d; }
 
-.button-success { -fx-background-color: #27ae60; } 
+.button-success { -fx-background-color: #27ae60; -fx-text-fill: white; } 
 .button-success:hover { -fx-background-color: #219150; }
 
-.button-danger { -fx-background-color: #e74c3c; } 
+.button-danger { -fx-background-color: #e74c3c; -fx-text-fill: white; } 
 .button-danger:hover { -fx-background-color: #c0392b; }
 
-.button-secondary { -fx-background-color: #95a5a6; } 
+.button-secondary { -fx-background-color: #95a5a6; -fx-text-fill: white; } 
 .button-secondary:hover { -fx-background-color: #7f8c8d; }
 
 .table-view {
@@ -130,12 +129,6 @@
     -fx-font-weight: bold;
     -fx-alignment: CENTER_LEFT;
 }
-.table-row-cell:selected {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
-}
-
-
 .icon-button {
     -fx-background-color: transparent;
     -fx-padding: 6px;
@@ -187,6 +180,11 @@
 
 .table-row-cell:filled:selected {
     -fx-background-color: #e8f1fb;
+}
+
+/* Keep selected row text readable on light selection background */
+.table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: #2c3e50;
 }
 
 .table-cell {

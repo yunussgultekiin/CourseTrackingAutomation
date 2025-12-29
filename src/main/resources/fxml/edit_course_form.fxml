@@ -17,7 +17,7 @@
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
 
-    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Ders Duzenle" />
+    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Ders Düzenle" />
     <Separator />
 
     <VBox spacing="5.0">
@@ -26,23 +26,23 @@
     </VBox>
 
     <VBox spacing="5.0">
-        <Label styleClass="form-label" text="Ders Adi" />
-        <TextField fx:id="nameField" promptText="Ders adi" />
+        <Label styleClass="form-label" text="Ders Adı" />
+        <TextField fx:id="nameField" promptText="Ders adı" />
     </VBox>
 
     <VBox spacing="5.0">
-        <Label styleClass="form-label" text="Donem" />
-        <TextField fx:id="termField" promptText="Orn: 2025" />
+        <Label styleClass="form-label" text="Dönem" />
+        <TextField fx:id="termField" promptText="Örn: 2025" />
     </VBox>
 
     <HBox spacing="15.0">
         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
             <Label styleClass="form-label" text="Kredi" />
-            <TextField fx:id="creditField" promptText="Orn: 4" />
+            <TextField fx:id="creditField" promptText="Örn: 4" />
         </VBox>
         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
             <Label styleClass="form-label" text="Kota" />
-            <TextField fx:id="quotaField" promptText="Orn: 30" />
+            <TextField fx:id="quotaField" promptText="Örn: 30" />
         </VBox>
     </HBox>
 
@@ -63,7 +63,7 @@
 
     <VBox spacing="5.0">
         <Label styleClass="form-label" text="Akademisyen" />
-        <ComboBox fx:id="instructorComboBox" maxWidth="Infinity" promptText="Akademisyen secin" />
+        <ComboBox fx:id="instructorComboBox" maxWidth="Infinity" promptText="Akademisyen seçin" />
     </VBox>
 
     <VBox spacing="5.0">
@@ -77,8 +77,8 @@
     <Region VBox.vgrow="ALWAYS" />
 
     <HBox alignment="CENTER_RIGHT" spacing="15.0">
-        <Button cancelButton="true" onAction="#handleClose" styleClass="button, button-secondary" text="Iptal" />
-        <Button defaultButton="true" onAction="#handleSave" styleClass="button, button-success" text="Kaydet" />
+        <Button cancelButton="true" onAction="#handleClose" styleClass="button, button-secondary" text="İptal" />
+        <Button defaultButton="true" onAction="#handleSave" styleClass="button, button-primary" text="Kaydet" />
     </HBox>
 
 </VBox>

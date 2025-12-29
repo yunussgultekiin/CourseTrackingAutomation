@@ -15,27 +15,27 @@
         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
 
-    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Kayit Ekle" />
+    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Kayıt Ekle" />
     <Separator />
 
     <VBox spacing="15.0">
         
         <VBox spacing="5.0">
-            <Label styleClass="form-label" text="Ogrenci *" />
-            <ComboBox fx:id="comboStudent" maxWidth="Infinity" promptText="Ogrenci secin" />
+            <Label styleClass="form-label" text="Öğrenci *" />
+            <ComboBox fx:id="comboStudent" maxWidth="Infinity" promptText="Öğrenci seçin" />
         </VBox>
 
         <VBox spacing="5.0">
             <Label styleClass="form-label" text="Ders *" />
-            <ComboBox fx:id="comboCourse" maxWidth="Infinity" promptText="Ders secin" />
+            <ComboBox fx:id="comboCourse" maxWidth="Infinity" promptText="Ders seçin" />
         </VBox>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS" />
 
     <HBox alignment="CENTER_RIGHT" spacing="15.0">
-        <Button cancelButton="true" onAction="#handleClose" styleClass="button, button-secondary" text="Iptal" />
-        <Button defaultButton="true" onAction="#handleEnroll" styleClass="button, button-success" text="Kaydet" />
+        <Button cancelButton="true" onAction="#handleClose" styleClass="button, button-secondary" text="İptal" />
+        <Button defaultButton="true" onAction="#handleEnroll" styleClass="button, button-primary" text="Kaydet" />
     </HBox>
 
 </VBox>

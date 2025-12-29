@@ -17,30 +17,29 @@
             </padding>
             
             <VBox alignment="CENTER" spacing="5.0">
-                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #667eea;" text="Course Tracking" />
-                <Label style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;" text="Otomasyon Sistemi" />
+                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #667eea;" text="Ders Takip Otomasyonu" />
             </VBox>
 
             <VBox spacing="15.0">
                 <VBox spacing="5.0">
-                    <Label styleClass="form-label" text="Kullanici Adi" />
-                    <TextField fx:id="usernameField" promptText="Kullanici adinizi giriniz" />
+                    <Label styleClass="form-label" text="Kullanıcı Adı" />
+                    <TextField fx:id="usernameField" promptText="Kullanıcı adınızı giriniz" />
                 </VBox>
 
                 <VBox spacing="5.0">
-                    <Label styleClass="form-label" text="Sifre" />
-                    <PasswordField fx:id="passwordField" promptText="Sifrenizi giriniz" />
+                    <Label styleClass="form-label" text="Şifre" />
+                    <PasswordField fx:id="passwordField" promptText="Şifrenizi giriniz" />
                 </VBox>
 
                 <Label fx:id="errorLabel" style="-fx-text-fill: #e74c3c; -fx-font-size: 12px;" text="" visible="false" />
 
-                <Button fx:id="loginButton" maxWidth="1.7976931348623157E308" onAction="#handleLogin" style="-fx-background-color: #667eea;" styleClass="button" text="Giris Yap">
+                     <Button fx:id="loginButton" maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="button, button-primary" text="Giriş Yap">
                <font>
                   <Font size="14.0" />
                </font></Button>
             </VBox>
 
-            <Label style="-fx-font-size: 11px; -fx-text-fill: #bdc3c7;" text="© 2025 Course Tracking Automation" />
+            <Label style="-fx-font-size: 11px; -fx-text-fill: #bdc3c7;" text="© 2025 Ders Takip Otomasyonu" />
         </VBox>
     </center>
 </BorderPane>

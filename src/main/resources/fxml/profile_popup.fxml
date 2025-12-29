@@ -20,7 +20,7 @@
     <Separator />
 
     <VBox spacing="5.0">
-        <Label styleClass="form-label" text="Kullanici Adi" />
+        <Label styleClass="form-label" text="Kullanıcı Adı" />
         <Label fx:id="lblUsername" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #7f8c8d;" text="-" />
     </VBox>
 
@@ -46,29 +46,29 @@
     </VBox>
 
     <Separator fx:id="sepPassword" />
-    <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Sifre Degistir (Opsiyonel)" />
+    <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Şifre Değiştir (Opsiyonel)" />
 
     <VBox spacing="5.0">
-        <Label fx:id="lblCurrentPassword" styleClass="form-label" text="Mevcut Sifre" />
-        <PasswordField fx:id="txtCurrentPassword" promptText="Mevcut sifre" />
+        <Label fx:id="lblCurrentPassword" styleClass="form-label" text="Mevcut Şifre" />
+        <PasswordField fx:id="txtCurrentPassword" promptText="Mevcut şifre" />
     </VBox>
 
     <HBox spacing="15.0">
         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label fx:id="lblNewPassword" styleClass="form-label" text="Yeni Sifre" />
-            <PasswordField fx:id="txtNewPassword" promptText="Yeni sifre" />
+            <Label fx:id="lblNewPassword" styleClass="form-label" text="Yeni Şifre" />
+            <PasswordField fx:id="txtNewPassword" promptText="Yeni şifre" />
         </VBox>
         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-            <Label fx:id="lblConfirmPassword" styleClass="form-label" text="Yeni Sifre (Tekrar)" />
-            <PasswordField fx:id="txtConfirmPassword" promptText="Yeni sifre (tekrar)" />
+            <Label fx:id="lblConfirmPassword" styleClass="form-label" text="Yeni Şifre (Tekrar)" />
+            <PasswordField fx:id="txtConfirmPassword" promptText="Yeni şifre (tekrar)" />
         </VBox>
     </HBox>
 
     <Region VBox.vgrow="ALWAYS" />
 
     <HBox alignment="CENTER_RIGHT" spacing="15.0">
-        <Button cancelButton="true" onAction="#handleClose" styleClass="button, button-secondary" text="Iptal" />
-        <Button defaultButton="true" onAction="#handleSave" styleClass="button, button-success" text="Kaydet" />
+        <Button cancelButton="true" onAction="#handleClose" styleClass="button, button-secondary" text="İptal" />
+        <Button defaultButton="true" onAction="#handleSave" styleClass="button, button-primary" text="Kaydet" />
     </HBox>
 
 </VBox>

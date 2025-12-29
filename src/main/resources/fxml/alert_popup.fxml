@@ -13,13 +13,13 @@
 
     <Label fx:id="iconLabel" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #27ae60;" text="✓" />
 
-    <Label fx:id="titleLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Baslik" />
+    <Label fx:id="titleLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Başlık" />
 
-    <Label fx:id="messageLabel" maxWidth="350.0" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Mesaj icerigi buraya gelecek." textAlignment="CENTER" wrapText="true" />
+    <Label fx:id="messageLabel" maxWidth="350.0" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Mesaj içeriği buraya gelecek." textAlignment="CENTER" wrapText="true" />
 
     <HBox fx:id="buttonsContainer" alignment="CENTER" spacing="15.0">
         <Button fx:id="okButton" defaultButton="true" onAction="#handleOk" styleClass="button, button-primary" text="Tamam" />
-        <Button fx:id="cancelButton" cancelButton="true" onAction="#handleCancel" styleClass="button, button-secondary" text="Iptal" />
-        <Button fx:id="confirmButton" defaultButton="true" onAction="#handleConfirm" styleClass="button, button-warning" text="Onayla" />
+        <Button fx:id="cancelButton" cancelButton="true" onAction="#handleCancel" styleClass="button, button-secondary" text="İptal" />
+        <Button fx:id="confirmButton" defaultButton="true" onAction="#handleConfirm" styleClass="button, button-primary" text="Onayla" />
     </HBox>
 </VBox>

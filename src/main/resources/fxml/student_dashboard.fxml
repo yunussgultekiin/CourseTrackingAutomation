@@ -12,10 +12,13 @@
 
     <top>
         <HBox spacing="20.0" styleClass="header-panel">
-            <Label styleClass="header-title" text="Ogrenci Paneli" />
+            <Label styleClass="header-title" text="Öğrenci Paneli" />
             <HBox HBox.hgrow="ALWAYS" />
-            <Label fx:id="lblWelcome" styleClass="header-user-info" text="Hosgeldin, Ogrenci" />
-            <Button fx:id="btnLogOut" styleClass="button, button-danger" text="Cikis Yap" />
+            <Label fx:id="lblWelcome" styleClass="header-user-info" text="Hoş geldiniz" />
+            <Button onAction="#handleShowTranscript" styleClass="button, button-secondary" text="Transkript" />
+            <Button onAction="#handleEnrollCourse" styleClass="button, button-primary" text="Derse Kaydol" />
+            <Button onAction="#handleProfile" styleClass="button, button-primary" text="Profilim" />
+            <Button fx:id="btnLogOut" onAction="#handleLogout" styleClass="button, button-danger" text="Çıkış Yap" />
         </HBox>
     </top>
 
@@ -27,13 +30,16 @@
                 <TableView fx:id="tableStudentCourses" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colCourseCode" prefWidth="100.0" text="Kod" />
-                        <TableColumn fx:id="colCourseName" prefWidth="250.0" text="Ders Adi" />
+                        <TableColumn fx:id="colCourseName" prefWidth="250.0" text="Ders Adı" />
                         <TableColumn fx:id="colCredit" prefWidth="60.0" text="Kredi" />
+                        <TableColumn fx:id="colWeeklyTotalHours" prefWidth="80.0" text="Toplam" />
+                        <TableColumn fx:id="colWeeklyTheoryHours" prefWidth="70.0" text="Teori" />
+                        <TableColumn fx:id="colWeeklyPracticeHours" prefWidth="80.0" text="Uyg." />
                         <TableColumn fx:id="colMidterm" prefWidth="80.0" text="Vize" />
                         <TableColumn fx:id="colFinal" prefWidth="80.0" text="Final" />
                         <TableColumn fx:id="colAverage" prefWidth="80.0" text="Ort." />
                         <TableColumn fx:id="colLetter" prefWidth="80.0" text="Harf" />
-                        <TableColumn fx:id="colAttendance" prefWidth="100.0" text="Devamsizlik" />
+                        <TableColumn fx:id="colAttendance" prefWidth="100.0" text="Devamsızlık" />
                         <TableColumn fx:id="colStatus" prefWidth="100.0" text="Durum" />
                     </columns>
                     <columnResizePolicy>

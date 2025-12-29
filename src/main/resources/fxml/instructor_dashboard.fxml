@@ -17,11 +17,15 @@
             
             <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 0 0 30;">
                  <Label style="-fx-font-weight: bold; -fx-text-fill: #ecf0f1;" text="Aktif Ders:" />
-                 <ComboBox fx:id="comboCourses" prefWidth="250.0" promptText="Lutfen Ders Seciniz..." />
+                  <ComboBox fx:id="comboCourses" prefWidth="250.0" promptText="Lütfen Ders Seçiniz..." />
+                 <Label style="-fx-font-weight: bold; -fx-text-fill: #ecf0f1;" text="Hafta:" />
+                 <ComboBox fx:id="comboWeeks" prefWidth="120.0" promptText="Seçin" />
+                 <Label fx:id="lblCourseHours" style="-fx-text-fill: #bdc3c7;" text="" />
             </HBox>
 
             <HBox HBox.hgrow="ALWAYS" />
-            <Button fx:id="btnLogOut" styleClass="button, button-danger" text="Cikis Yap" />
+            <Button fx:id="btnProfile" onAction="#handleProfile" styleClass="button, button-primary" text="Profilim" />
+            <Button fx:id="btnLogOut" onAction="#handleLogout" styleClass="button, button-danger" text="Çıkış Yap" />
         </HBox>
     </top>
 
@@ -29,19 +33,21 @@
         <VBox styleClass="content-pane">
             <VBox spacing="10" styleClass="card-pane" VBox.vgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT">
-                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Ogrenci Listesi ve Not Girisi" />
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Öğrenci Listesi ve Not Girişi" />
                     <HBox HBox.hgrow="ALWAYS" />
-                    <Label style="-fx-font-style: italic; -fx-text-fill: #7f8c8d;" text="* Notlari duzenlemek icin hucreye cift tiklayin." />
+                    <Label style="-fx-font-style: italic; -fx-text-fill: #7f8c8d;" text="* Notları düzenlemek için hücreye çift tıklayın." />
                 </HBox>
 
                 <TableView fx:id="tableStudents" editable="true" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colStudentNumber" prefWidth="120.0" text="Ogrenci No" />
+                        <TableColumn fx:id="colStudentNumber" prefWidth="120.0" text="Öğrenci No" />
                         <TableColumn fx:id="colFullName" prefWidth="200.0" text="Ad Soyad" />
                         <TableColumn fx:id="colMidterm" prefWidth="80.0" text="Vize" />
                         <TableColumn fx:id="colFinal" prefWidth="80.0" text="Final" />
-                        <TableColumn fx:id="colAttendance" prefWidth="120.0" text="Devamsizlik" />
+                        <TableColumn fx:id="colAttendance" prefWidth="120.0" text="Devamsızlık" />
+                        <TableColumn fx:id="colPresent" prefWidth="90.0" text="Var" />
                         <TableColumn fx:id="colAverage" prefWidth="80.0" text="Ort." />
+                        <TableColumn fx:id="colLetterGrade" prefWidth="80.0" text="Harf" />
                         <TableColumn fx:id="colStatus" prefWidth="100.0" text="Durum" />
                     </columns>
                     <columnResizePolicy>
@@ -54,7 +60,7 @@
 
     <bottom>
         <HBox alignment="CENTER" style="-fx-padding: 15; -fx-background-color: #bdc3c7;">
-            <Button fx:id="btnSave" prefWidth="200" styleClass="button, button-success" text="DEGISIKLIKLERI KAYDET" />
+            <Button fx:id="btnSave" onAction="#handleSave" prefWidth="200" styleClass="button, button-primary" text="Değişiklikleri Kaydet" />
         </HBox>
     </bottom>
 </BorderPane>
