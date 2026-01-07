@@ -88,7 +88,7 @@ The system supports three distinct roles, each with a tailored dashboard:
     ```
 4.  **Run the Application**:
     ```bash
-    mvn javafx:run
+    mvn clean package
     ```
     *Alternatively, run the `CourseTrackingLauncher` class from your IDE.*
 
