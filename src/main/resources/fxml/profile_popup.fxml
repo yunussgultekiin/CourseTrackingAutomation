@@ -37,12 +37,12 @@
 
     <VBox spacing="5.0">
         <Label styleClass="form-label" text="E-posta" />
-        <TextField fx:id="txtEmail" promptText="E-posta" />
+        <TextField fx:id="txtEmail" promptText="Örn: ornek@domain.com" />
     </VBox>
 
     <VBox spacing="5.0">
         <Label styleClass="form-label" text="Telefon" />
-        <TextField fx:id="txtPhone" promptText="Telefon" />
+        <TextField fx:id="txtPhone" promptText="Örn: +90 555 123 4567" />
     </VBox>
 
     <Separator fx:id="sepPassword" />

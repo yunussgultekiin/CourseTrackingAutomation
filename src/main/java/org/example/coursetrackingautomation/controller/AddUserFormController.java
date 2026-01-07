@@ -14,6 +14,7 @@ import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
+import org.example.coursetrackingautomation.util.FormValidation;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -41,6 +42,12 @@ public class AddUserFormController {
      * Initializes the form controls (e.g., role combo box).
      */
     public void initialize() {
+        FormValidation.applyNameFilter(firstNameField);
+        FormValidation.applyNameFilter(lastNameField);
+        FormValidation.applyEmailFilter(emailField);
+        FormValidation.applyUsernameFilter(usernameField);
+        FormValidation.applyPhoneFilter(phoneField);
+
         roleComboBox.setItems(FXCollections.observableArrayList(RoleDTO.values()));
 
         roleComboBox.setCellFactory(cb -> new ListCell<>() {
@@ -66,11 +73,12 @@ public class AddUserFormController {
     public void handleSave() {
         final CreateUserRequest request;
         try {
-            String username = requireNotBlank(safeTrim(usernameField.getText()), "Kullanıcı adı");
+            String username = FormValidation.validateUsernameRequired(usernameField == null ? null : usernameField.getText());
             String password = requireNotBlank(safe(passwordField.getText()), "Şifre");
-            String firstName = requireNotBlank(safeTrim(firstNameField.getText()), "Ad");
-            String lastName = requireNotBlank(safeTrim(lastNameField.getText()), "Soyad");
-            String email = requireNotBlank(safeTrim(emailField.getText()), "E-posta");
+            String firstName = FormValidation.validatePersonNameRequired(firstNameField == null ? null : firstNameField.getText(), "Ad");
+            String lastName = FormValidation.validatePersonNameRequired(lastNameField == null ? null : lastNameField.getText(), "Soyad");
+            String email = FormValidation.validateEmailRequired(emailField == null ? null : emailField.getText());
+            String phone = FormValidation.validatePhoneOptional(phoneField == null ? null : phoneField.getText());
 
             RoleDTO role = roleComboBox.getValue();
             if (role == null) {
@@ -85,7 +93,7 @@ public class AddUserFormController {
                 role,
                 null,
                 email,
-                safeTrimToNull(phoneField.getText()),
+                phone,
                 true
             );
         } catch (IllegalArgumentException e) {

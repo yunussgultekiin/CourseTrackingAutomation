@@ -14,6 +14,7 @@ import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import javafx.collections.FXCollections;
+import org.example.coursetrackingautomation.util.FormValidation;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -44,6 +45,12 @@ public class AddCourseFormController {
      * Initializes the form controls (e.g., instructor selection).
      */
     public void initialize() {
+        FormValidation.applyDigitsOnly(creditsField, 4);
+        FormValidation.applyDigitsOnly(capacityField, 5);
+        FormValidation.applyDigitsOnly(weeklyTotalHoursField, 3);
+        FormValidation.applyDigitsOnly(weeklyTheoryHoursField, 3);
+        FormValidation.applyDigitsOnly(weeklyPracticeHoursField, 3);
+
         FxAsync.runAsync(
             () -> userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR),
             instructors -> instructorComboBox.setItems(FXCollections.observableArrayList(instructors)),

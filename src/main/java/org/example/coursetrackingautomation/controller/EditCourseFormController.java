@@ -16,6 +16,7 @@ import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.example.coursetrackingautomation.util.AlertUtil;
+import org.example.coursetrackingautomation.util.FormValidation;
 import org.springframework.stereotype.Controller;
 
 import javafx.collections.FXCollections;
@@ -58,6 +59,12 @@ public class EditCourseFormController {
     public void initialize() {
         activeRadio.setToggleGroup(statusGroup);
         passiveRadio.setToggleGroup(statusGroup);
+
+        FormValidation.applyDigitsOnly(creditField, 4);
+        FormValidation.applyDigitsOnly(quotaField, 5);
+        FormValidation.applyDigitsOnly(weeklyTotalHoursField, 3);
+        FormValidation.applyDigitsOnly(weeklyTheoryHoursField, 3);
+        FormValidation.applyDigitsOnly(weeklyPracticeHoursField, 3);
 
         FxAsync.runAsync(
             () -> userService.getActiveUserOptionsByRole(RoleDTO.INSTRUCTOR),

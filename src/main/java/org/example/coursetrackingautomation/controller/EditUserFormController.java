@@ -9,6 +9,7 @@ import org.example.coursetrackingautomation.dto.UpdateUserRequest;
 import org.example.coursetrackingautomation.service.UserService;
 import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
+import org.example.coursetrackingautomation.util.FormValidation;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -31,6 +32,14 @@ public class EditUserFormController {
     private final UiExceptionHandler uiExceptionHandler;
 
     private Long userId;
+
+    @FXML
+    public void initialize() {
+        FormValidation.applyNameFilter(txtFirstName);
+        FormValidation.applyNameFilter(txtLastName);
+        FormValidation.applyEmailFilter(txtEmail);
+        FormValidation.applyPhoneFilter(txtPhone);
+    }
 
     /**
      * Sets the user id to edit and loads the current values into the form.
@@ -72,14 +81,16 @@ public class EditUserFormController {
                 throw new IllegalArgumentException("Kullanıcı ID boş olamaz");
             }
 
-            String firstName = requireNotBlank(safeTrim(txtFirstName.getText()), "Ad");
-            String lastName = requireNotBlank(safeTrim(txtLastName.getText()), "Soyad");
+            String firstName = FormValidation.validatePersonNameRequired(txtFirstName == null ? null : txtFirstName.getText(), "Ad");
+            String lastName = FormValidation.validatePersonNameRequired(txtLastName == null ? null : txtLastName.getText(), "Soyad");
+            String email = FormValidation.validateEmailOptional(txtEmail == null ? null : txtEmail.getText());
+            String phone = FormValidation.validatePhoneOptional(txtPhone == null ? null : txtPhone.getText());
 
             request = new UpdateUserRequest(
                 firstName,
                 lastName,
-                safeTrimToNull(txtEmail.getText()),
-                safeTrimToNull(txtPhone.getText()),
+                email,
+                phone,
                 null
             );
         } catch (IllegalArgumentException e) {
@@ -112,17 +123,5 @@ public class EditUserFormController {
 
     private static String safeTrim(String value) {
         return value == null ? "" : value.trim();
-    }
-
-    private static String safeTrimToNull(String value) {
-        String trimmed = value == null ? "" : value.trim();
-        return trimmed.isBlank() ? null : trimmed;
-    }
-
-    private static String requireNotBlank(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + " boş bırakılamaz");
-        }
-        return value;
     }
 }

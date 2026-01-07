@@ -16,6 +16,7 @@ import org.example.coursetrackingautomation.ui.FxAsync;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.ui.UiExceptionHandler;
 import org.example.coursetrackingautomation.util.AlertUtil;
+import org.example.coursetrackingautomation.util.FormValidation;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -51,6 +52,11 @@ public class ProfilePopupController {
      * Initializes the profile popup with session data and configures which sections are visible.
      */
     public void initialize() {
+        FormValidation.applyNameFilter(txtFirstName);
+        FormValidation.applyNameFilter(txtLastName);
+        FormValidation.applyEmailFilter(txtEmail);
+        FormValidation.applyPhoneFilter(txtPhone);
+
         try {
             var currentUser = userSession.getCurrentUser()
                 .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION));
@@ -87,17 +93,10 @@ public class ProfilePopupController {
             var currentUser = userSession.getCurrentUser()
                 .orElseThrow(() -> new IllegalStateException(UiConstants.ERROR_KEY_NO_ACTIVE_SESSION));
 
-            String firstName = safeTrim(txtFirstName.getText());
-            String lastName = safeTrim(txtLastName.getText());
-            String email = safeTrimOrNull(txtEmail.getText());
-            String phone = safeTrimOrNull(txtPhone.getText());
-
-            if (firstName.isBlank()) {
-                throw new IllegalArgumentException("Ad boş bırakılamaz");
-            }
-            if (lastName.isBlank()) {
-                throw new IllegalArgumentException("Soyad boş bırakılamaz");
-            }
+            String firstName = FormValidation.validatePersonNameRequired(txtFirstName == null ? null : txtFirstName.getText(), "Ad");
+            String lastName = FormValidation.validatePersonNameRequired(txtLastName == null ? null : txtLastName.getText(), "Soyad");
+            String email = FormValidation.validateEmailOptional(txtEmail == null ? null : txtEmail.getText());
+            String phone = FormValidation.validatePhoneOptional(txtPhone == null ? null : txtPhone.getText());
 
             boolean canChangePassword = currentUser.role() == RoleDTO.ADMIN
                 || currentUser.role() == RoleDTO.INSTRUCTOR
@@ -207,10 +206,5 @@ public class ProfilePopupController {
 
     private static String safeTrim(String value) {
         return value == null ? "" : value.trim();
-    }
-
-    private static String safeTrimOrNull(String value) {
-        String trimmed = safeTrim(value);
-        return trimmed.isBlank() ? null : trimmed;
     }
 }

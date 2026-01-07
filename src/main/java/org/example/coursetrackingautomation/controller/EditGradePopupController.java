@@ -12,6 +12,7 @@ import org.example.coursetrackingautomation.service.GradeService;
 import org.example.coursetrackingautomation.ui.GradeStatusUiMapper;
 import org.example.coursetrackingautomation.ui.UiConstants;
 import org.example.coursetrackingautomation.util.AlertUtil;
+import org.example.coursetrackingautomation.util.FormValidation;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -37,6 +38,12 @@ public class EditGradePopupController {
     private GradeDTO row;
     private Consumer<GradeDTO> onSave;
 
+    @FXML
+    public void initialize() {
+        FormValidation.applyScoreFilter(txtMidterm);
+        FormValidation.applyScoreFilter(txtFinal);
+    }
+
     /**
      * Sets the editing context for this popup.
      *
@@ -60,8 +67,15 @@ public class EditGradePopupController {
             return;
         }
 
-        Double midterm = parseScoreOrNull(txtMidterm == null ? null : txtMidterm.getText());
-        Double fin = parseScoreOrNull(txtFinal == null ? null : txtFinal.getText());
+        final Double midterm;
+        final Double fin;
+        try {
+            midterm = parseScoreOrNull(txtMidterm == null ? null : txtMidterm.getText());
+            fin = parseScoreOrNull(txtFinal == null ? null : txtFinal.getText());
+        } catch (IllegalArgumentException e) {
+            alertUtil.showErrorAlert(UiConstants.ALERT_TITLE_VALIDATION_ERROR, e.getMessage());
+            return;
+        }
 
         if (!isValidScore(midterm) || !isValidScore(fin)) {
             alertUtil.showErrorAlert(UiConstants.ALERT_TITLE_VALIDATION_ERROR, "Not 0 ile 100 arasında olmalıdır.");
@@ -154,7 +168,12 @@ public class EditGradePopupController {
             return null;
         }
         normalized = normalized.replace(',', '.');
-        return Double.parseDouble(normalized);
+
+        try {
+            return Double.parseDouble(normalized);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Not alanı sayısal olmalıdır (örn: 75 veya 75,5)");
+        }
     }
 
     private String stripTrailingZeros(Double value) {

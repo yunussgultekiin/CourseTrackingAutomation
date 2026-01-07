@@ -31,7 +31,7 @@
 
     <VBox spacing="5.0">
         <Label styleClass="form-label" text="E-posta *" />
-        <TextField fx:id="emailField" promptText="ornek@email.com" />
+        <TextField fx:id="emailField" promptText="Örn: ornek@domain.com" />
     </VBox>
 
     <VBox spacing="5.0">
@@ -51,7 +51,7 @@
 
     <VBox spacing="5.0">
         <Label styleClass="form-label" text="Telefon" />
-        <TextField fx:id="phoneField" promptText="Örn: 555-123-4567" />
+        <TextField fx:id="phoneField" promptText="Örn: +90 555 123 4567" />
     </VBox>
 
     <Region VBox.vgrow="ALWAYS" />
