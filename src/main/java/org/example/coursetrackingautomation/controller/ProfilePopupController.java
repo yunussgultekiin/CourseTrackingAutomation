@@ -67,7 +67,9 @@ public class ProfilePopupController {
                 uiExceptionHandler::handle
             );
 
-            boolean canChangePassword = currentUser.role() == RoleDTO.INSTRUCTOR || currentUser.role() == RoleDTO.STUDENT;
+            boolean canChangePassword = currentUser.role() == RoleDTO.ADMIN
+                || currentUser.role() == RoleDTO.INSTRUCTOR
+                || currentUser.role() == RoleDTO.STUDENT;
             if (!canChangePassword) {
                 setPasswordSectionVisible(false);
             }
@@ -97,7 +99,9 @@ public class ProfilePopupController {
                 throw new IllegalArgumentException("Soyad boş bırakılamaz");
             }
 
-            boolean canChangePassword = currentUser.role() == RoleDTO.INSTRUCTOR || currentUser.role() == RoleDTO.STUDENT;
+            boolean canChangePassword = currentUser.role() == RoleDTO.ADMIN
+                || currentUser.role() == RoleDTO.INSTRUCTOR
+                || currentUser.role() == RoleDTO.STUDENT;
             String currentPassword = safe(txtCurrentPassword.getText());
             String newPassword = safe(txtNewPassword.getText());
             String confirmPassword = safe(txtConfirmPassword.getText());
